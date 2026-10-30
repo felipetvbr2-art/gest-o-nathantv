@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#10231f">
+<title>Gestão Nathan TV</title>
+<style>
+:root{--bg:#080d0b;--card:#111a16;--ink:#effff5;--muted:#9bb4a5;--line:#263b30;--green:#39e58c;--red:#ff6b6b;--amber:#ffd166}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#10251b 0,#080d0b 48%);color:var(--ink);font:15px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:#07120c;color:#fff;padding:20px 16px 16px;border-bottom:1px solid #1c5838;box-shadow:0 5px 24px #00ff7730}header h1{font-size:22px;margin:0 0 5px}header p{margin:0;color:#c6d8d1;font-size:13px}
+main{max-width:850px;margin:auto;padding:14px 12px 88px}.tabs{display:flex;gap:7px;overflow:auto;padding:0 0 12px}.tabs button{white-space:nowrap;border:1px solid var(--line);background:#101b14;border-radius:999px;padding:10px 13px;color:var(--ink)}.tabs button.active{background:var(--green);border-color:var(--green);color:#041109;box-shadow:0 0 15px #39e58c55}
+.card{background:var(--card);border:1px solid #244532;border-radius:15px;padding:15px;margin:0 0 12px;box-shadow:0 4px 18px #0008}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.metric{padding:13px;border:1px solid #28563c;border-radius:12px;background:#0d1711}.metric small{display:block;color:var(--muted);margin-bottom:7px}.metric strong{font-size:21px;overflow-wrap:anywhere}.muted{color:var(--muted);font-size:13px}h2{font-size:18px;margin:0 0 12px}h3{font-size:15px;margin:0 0 8px}
+label{display:block;font-size:13px;font-weight:650;margin:10px 0 5px}input,select,textarea{width:100%;font:inherit;padding:11px 12px;border:1px solid #31513e;border-radius:10px;background:#0b1510;color:var(--ink)}input:focus,select:focus,textarea:focus{outline:2px solid #39e58c55;border-color:var(--green)}button{font:inherit;cursor:pointer}.btn{border:0;background:var(--green);color:#041109;border-radius:10px;padding:11px 14px;font-weight:750}.btn.secondary{background:#14251a;color:#b8ffd1;border:1px solid #326b48}.btn.danger{background:#2a1112;color:var(--red);border:1px solid #733638}.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.btnrow .btn{flex:1}.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin:9px 0;background:#0c1510}.itemtop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.item strong{overflow-wrap:anywhere}.pill{display:inline-block;font-size:11px;border-radius:999px;padding:4px 8px;background:#edf1ef;color:#3b5148;margin-top:5px}.pill.red{background:#fff0ef;color:var(--red)}.pill.green{background:#e8f5ee;color:#176b52}.pill.amber{background:#fff4d6;color:#805b00}.hidden{display:none!important}.notice{border-radius:10px;padding:11px 12px;background:#fff4d6;color:#714f00;font-size:13px;margin-bottom:12px}.success{background:#e8f5ee;color:#176b52}.dangertext{color:var(--red)}.search{margin-bottom:10px}.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.hr{height:1px;background:var(--line);margin:13px 0}.foot{font-size:12px;color:var(--muted);text-align:center;padding:10px}.auth{max-width:420px;margin:8vh auto;padding:20px}.auth h1{margin:0 0 8px}.auth p{color:var(--muted);line-height:1.45}.smallbtn{border:0;background:transparent;color:var(--green);padding:5px;font-weight:650}
+@media(min-width:600px){main{padding:20px 18px 100px}.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.metric strong{font-size:24px}}
+</style>
+</head>
+<body>
+<section id="auth" class="auth card">
+<h1>📺 Gestão Nathan TV</h1><p>Entre com a conta administrativa para acessar seus clientes e sincronizar os dados na nuvem.</p>
+<div id="loginFields"><label>E-mail administrativo</label><input id="loginEmail" type="email" autocomplete="username" placeholder="seuemail@exemplo.com"><label>Senha</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Senha do Firebase"><button class="btn" style="width:100%;margin-top:14px" id="loginBtn">Entrar no Gestão Nathan TV</button></div>
+<div id="authMsg" class="muted" style="margin-top:12px" role="status"></div>
+</section>
+<div id="app" class="hidden">
+<header><h1>📺 Gestão Nathan TV</h1><p>Clientes, mensalidades e financeiro sincronizados na nuvem</p><p id="syncStatus" style="margin-top:8px;color:#8dffb7">● Conectando...</p></header>
+<main>
+<div class="notice">☁️ Seus dados são salvos no Firebase e ficam disponíveis ao entrar com sua conta administrativa. Não compartilhe sua senha de acesso.</div>
+<nav class="tabs" aria-label="Seções">
+<button class="active" data-tab="resumo">Resumo</button><button data-tab="clientes">Clientes</button><button data-tab="pagamentos">Pagamentos</button><button data-tab="custos">Créditos</button><button data-tab="backup">Backup e segurança</button>
+</nav>
+<section id="tab-resumo">
+<div class="grid">
+<div class="metric"><small>Clientes ativos</small><strong id="mClients">0</strong></div>
+<div class="metric"><small>Previsto no mês</small><strong id="mExpected">R$ 0,00</strong></div>
+<div class="metric"><small>Recebido no mês</small><strong id="mReceived">R$ 0,00</strong></div>
+<div class="metric"><small>Em aberto / vencido</small><strong id="mPending">R$ 0,00</strong></div>
+</div>
+<div class="card" style="margin-top:12px"><h2>Vencimentos</h2><div id="dueSummary" class="muted">Nenhum cliente cadastrado.</div></div>
+<div class="card"><h2>Resultado estimado do mês</h2><div class="grid"><div class="metric"><small>Recebido</small><strong id="mProfitIn">R$ 0,00</strong></div><div class="metric"><small>Créditos comprados</small><strong id="mCreditCost">R$ 0,00</strong></div><div class="metric"><small>Saldo estimado</small><strong id="mProfit">R$ 0,00</strong></div></div><p class="muted">Cálculo simples: pagamentos recebidos no mês menos custos de créditos registrados no mês.</p></div>
+</section>
+<section id="tab-clientes" class="hidden">
+<div class="card"><h2 id="clientFormTitle">Cadastrar cliente</h2><form id="clientForm">
+<input type="hidden" id="clientId">
+<label>Nome do cliente *</label><input id="cName" required maxlength="100" placeholder="Nome completo">
+<div class="row2"><div><label>WhatsApp</label><input id="cPhone" inputmode="tel" placeholder="DDD + número"></div><div><label>Mensalidade (R$) *</label><input id="cPrice" type="number" min="0" step="0.01" required placeholder="25,00"></div></div>
+<div class="row2"><div><label>Dia de vencimento</label><input id="cDue" type="number" min="1" max="31" value="10"></div><div><label>Plano / aparelho</label><input id="cPlan" placeholder="Plano, TV, celular..."></div></div>
+<label>Usuário (opcional)</label><input id="cUser" autocomplete="off" placeholder="Usuário do serviço">
+
+<label>Observações</label><textarea id="cNotes" rows="2" placeholder="Informações adicionais"></textarea>
+<div class="btnrow"><button class="btn" type="submit">Salvar cliente</button><button class="btn secondary" type="button" id="clearClient">Limpar</button></div>
+</form></div>
+<input id="clientSearch" class="search" placeholder="Buscar cliente por nome ou telefone">
+<div id="clientList"></div>
+</section>
+<section id="tab-pagamentos" class="hidden">
+<div class="card"><h2>Registrar pagamento</h2><form id="paymentForm">
+<label>Cliente *</label><select id="pClient" required><option value="">Selecione um cliente</option></select>
+<div class="row2"><div><label>Valor recebido (R$) *</label><input id="pAmount" type="number" min="0.01" step="0.01" required placeholder="25,00"></div><div><label>Data *</label><input id="pDate" type="date" required></div></div>
+<div class="row2"><div><label>Forma de pagamento</label><select id="pMethod"><option>Pix</option><option>Dinheiro</option><option>Transferência</option><option>Outro</option></select></div><div><label>Referência</label><input id="pRef" placeholder="Ex.: mensalidade outubro"></div></div>
+<label>Observação do comprovante</label><input id="pProof" placeholder="Ex.: print salvo na galeria / nome do arquivo">
+<div class="btnrow"><button class="btn" type="submit">Registrar pagamento</button></div>
+</form></div>
+<div id="paymentList"></div>
+</section>
+<section id="tab-custos" class="hidden">
+<div class="card"><h2>Registrar compra de créditos</h2><form id="costForm">
+<div class="row2"><div><label>Valor gasto (R$) *</label><input id="costAmount" type="number" min="0.01" step="0.01" required placeholder="100,00"></div><div><label>Data *</label><input id="costDate" type="date" required></div></div>
+<label>Quantidade / descrição</label><input id="costDesc" placeholder="Ex.: créditos para 20 clientes">
+<label>Fornecedor ou referência (opcional)</label><input id="costVendor" placeholder="Fornecedor, lote ou observação">
+<div class="btnrow"><button class="btn" type="submit">Salvar custo</button></div>
+</form></div><div id="costList"></div>
+</section>
+<section id="tab-backup" class="hidden">
+<div class="card"><h2>Backup dos dados</h2><p class="muted">O arquivo de backup contém os dados dos clientes e pagamentos. Guarde-o em local privado e não envie a terceiros.</p><button id="exportBtn" class="btn" style="width:100%">Exportar backup JSON</button>
+<div class="hr"></div><label>Restaurar backup (.json)</label><input id="importFile" type="file" accept=".json,application/json"><button id="importBtn" class="btn secondary" style="width:100%;margin-top:10px">Restaurar backup</button><p id="backupMsg" class="muted" role="status"></p></div>
+<div class="card"><h2>Segurança</h2><p class="muted">O acesso aos dados é controlado pelas regras do Firestore para sua conta administrativa.</p><button id="lockBtn" class="btn secondary" style="width:100%">Sair da conta</button></div>
+</section>
+<p class="foot">Gestão Nathan TV • sincronização Firebase</p>
+</main></div>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
+
+(()=> {
+const $=id=>document.getElementById(id);
+const firebaseConfig={
+  apiKey:"AIzaSyBX4w6AdZg4oG-IcDJQVK8Hy0erlMYKpWk",
+  authDomain:"gestaotv-61635.firebaseapp.com",
+  projectId:"gestaotv-61635",
+  storageBucket:"gestaotv-61635.firebasestorage.app",
+  messagingSenderId:"493101764038",
+  appId:"1:493101764038:web:7f72b8869e4dbe213a36c7",
+  measurementId:"G-8S1VE6SQKY"
+};
+const firebaseApp=initializeApp(firebaseConfig);
+const auth=getAuth(firebaseApp);
+const store=getFirestore(firebaseApp);
+let db={clients:[],payments:[],costs:[]}, currentUser=null, cloudRef=null, unsubscribeCloud=null, saving=false;
+const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+$('pDate').value=today();$('costDate').value=today();
+const money=n=>Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const monthKey=d=>(d||'').slice(0,7);
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+function setStatus(message,isError=false){const el=$('syncStatus');if(el){el.textContent=(isError?'● ':'● ')+message;el.style.color=isError?'#ff8585':'#8dffb7'}}
+async function persist(){if(!currentUser||!cloudRef)throw new Error('Faça login para salvar os dados.');saving=true;setStatus('Salvando na nuvem...');try{await setDoc(cloudRef,{clients:db.clients,payments:db.payments,costs:db.costs,updatedAt:serverTimestamp()});setStatus('Sincronizado com a nuvem')}catch(e){setStatus('Falha ao sincronizar. Verifique sua conexão e as regras do Firestore.',true);throw e}finally{saving=false}}
+function showAuth(msg=''){ $('auth').classList.remove('hidden');$('app').classList.add('hidden');$('authMsg').textContent=msg; }
+function enter(){ $('auth').classList.add('hidden');$('app').classList.remove('hidden');renderAll(); }
+async function login(){const email=$('loginEmail').value.trim(),password=$('loginPassword').value;if(!email||!password){$('authMsg').textContent='Informe seu e-mail e sua senha.';return} $('loginBtn').disabled=true;$('authMsg').textContent='Entrando...';try{await signInWithEmailAndPassword(auth,email,password)}catch(e){$('authMsg').textContent=e.code==='auth/invalid-credential'?'E-mail ou senha incorretos.':e.code==='auth/too-many-requests'?'Muitas tentativas. Aguarde um pouco e tente novamente.':'Não foi possível entrar. Confira a conexão e os dados de acesso.'}finally{$('loginBtn').disabled=false}}
+$('loginBtn').onclick=login;
+$('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
+onAuthStateChanged(auth,async user=>{if(unsubscribeCloud){unsubscribeCloud();unsubscribeCloud=null}currentUser=user;if(!user){cloudRef=null;db={clients:[],payments:[],costs:[]};showAuth();return}cloudRef=doc(store,'usuarios',user.uid,'dados','principal');setStatus('Carregando seus dados...');try{const snap=await getDoc(cloudRef);if(!snap.exists()){await setDoc(cloudRef,{clients:[],payments:[],costs:[],createdAt:serverTimestamp()})}unsubscribeCloud=onSnapshot(cloudRef,s=>{if(!s.exists())return;const data=s.data();db={clients:Array.isArray(data.clients)?data.clients:[],payments:Array.isArray(data.payments)?data.payments:[],costs:Array.isArray(data.costs)?data.costs:[]};enter();setStatus('Sincronizado com a nuvem')},err=>setStatus('Erro ao receber atualizações do Firestore.',true));}catch(e){setStatus('Não foi possível abrir o banco. Confira as regras do Firestore.',true);showAuth('Não foi possível carregar os dados. Confira as regras do Firestore e tente entrar novamente.')}});
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));['resumo','clientes','pagamentos','custos','backup'].forEach(t=>$('tab-'+t).classList.toggle('hidden',t!==b.dataset.tab));renderAll()});
+function renderAll(){renderSummary();renderClients();renderPayments();renderCosts();fillClientSelect()}
+function renderSummary(){const mk=today().slice(0,7);const active=db.clients.length;const expected=db.clients.reduce((s,c)=>s+Number(c.price||0),0);const received=db.payments.filter(p=>monthKey(p.date)===mk).reduce((s,p)=>s+Number(p.amount||0),0);const costs=db.costs.filter(c=>monthKey(c.date)===mk).reduce((s,c)=>s+Number(c.amount||0),0);const paidByClient={};db.payments.filter(p=>monthKey(p.date)===mk).forEach(p=>paidByClient[p.clientId]=(paidByClient[p.clientId]||0)+Number(p.amount||0));const pending=db.clients.reduce((s,c)=>s+Math.max(0,Number(c.price||0)-(paidByClient[c.id]||0)),0);$('mClients').textContent=active;$('mExpected').textContent=money(expected);$('mReceived').textContent=money(received);$('mPending').textContent=money(pending);$('mProfitIn').textContent=money(received);$('mCreditCost').textContent=money(costs);$('mProfit').textContent=money(received-costs);
+const d=new Date();const day=d.getDate();const overdue=db.clients.filter(c=>Number(c.due||1)<day&&!(paidByClient[c.id]>=Number(c.price||0)));const todayDue=db.clients.filter(c=>Number(c.due||1)===day&&!(paidByClient[c.id]>=Number(c.price||0)));$('dueSummary').innerHTML=`<p><span class="pill red">${overdue.length} vencido(s)</span> &nbsp; <span class="pill amber">${todayDue.length} vence(m) hoje</span></p>`+(overdue.length?'<strong>Em atraso</strong>'+overdue.map(c=>`<div>${esc(c.name)} — dia ${c.due||'—'}</div>`).join(''):'')+(todayDue.length?'<p><strong>Vencem hoje</strong></p>'+todayDue.map(c=>`<div>${esc(c.name)}</div>`).join(''):'')+(!overdue.length&&!todayDue.length?'<p>Nenhum vencimento em atraso ou para hoje, conforme o dia do mês atual.</p>':'')}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderClients(){const term=$('clientSearch').value.toLowerCase();const arr=db.clients.filter(c=>(c.name+' '+c.phone).toLowerCase().includes(term));$('clientList').innerHTML=arr.length?arr.map(c=>`<div class="item"><div class="itemtop"><div><strong>${esc(c.name)}</strong><div class="muted">${esc(c.phone||'Sem telefone')} · ${esc(c.plan||'Sem plano')}</div><div class="muted">Vencimento: dia ${esc(c.due||'—')} · Mensalidade: ${money(c.price)}</div>${c.user?`<div class="muted">Usuário: ${esc(c.user)}</div>`:''}</div><span class="pill">${money(c.price)}/mês</span></div>${c.notes?`<p class="muted">${esc(c.notes)}</p>`:''}<div class="btnrow"><button class="btn secondary" onclick="editClient('${c.id}')">Editar</button><button class="btn secondary" onclick="chargeMsg('${c.id}')">Cobrar no WhatsApp</button><button class="btn danger" onclick="deleteClient('${c.id}')">Excluir</button></div></div>`).join(''):'<div class="card muted">Nenhum cliente encontrado.</div>'}
+function fillClientSelect(){const old=$('pClient').value;$('pClient').innerHTML='<option value="">Selecione um cliente</option>'+db.clients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');if(db.clients.some(c=>c.id===old))$('pClient').value=old}
+$('clientSearch').addEventListener('input',renderClients);
+$('clientForm').onsubmit=async e=>{e.preventDefault();const id=$('clientId').value;const c={id:id||uid(),name:$('cName').value.trim(),phone:$('cPhone').value.trim(),price:Number($('cPrice').value),due:Number($('cDue').value||1),plan:$('cPlan').value.trim(),user:$('cUser').value.trim(),notes:$('cNotes').value.trim()};if(!c.name)return;if(id)db.clients=db.clients.map(x=>x.id===id?c:x);else db.clients.push(c);await persist();$('clientForm').reset();$('clientId').value='';$('cDue').value=10;$('clientFormTitle').textContent='Cadastrar cliente';renderAll()};
+$('clearClient').onclick=()=>{$('clientForm').reset();$('clientId').value='';$('cDue').value=10;$('clientFormTitle').textContent='Cadastrar cliente'};
+window.editClient=id=>{const c=db.clients.find(x=>x.id===id);if(!c)return;$('clientId').value=c.id;$('cName').value=c.name;$('cPhone').value=c.phone;$('cPrice').value=c.price;$('cDue').value=c.due;$('cPlan').value=c.plan;$('cUser').value=c.user;$('cNotes').value=c.notes;$('clientFormTitle').textContent='Editar cliente';document.querySelector('[data-tab="clientes"]').click();window.scrollTo({top:0,behavior:'smooth'})};
+window.deleteClient=async id=>{const c=db.clients.find(x=>x.id===id);if(!c||!confirm('Excluir '+c.name+'? Os pagamentos já registrados serão mantidos no histórico.'))return;db.clients=db.clients.filter(x=>x.id!==id);await persist();renderAll()};
+window.chargeMsg=id=>{const c=db.clients.find(x=>x.id===id);if(!c)return;const phone=(c.phone||'').replace(/\D/g,'');const msg=`Olá, ${c.name}! Tudo bem? Passando para lembrar da mensalidade do seu serviço, no valor de ${money(c.price)}, com vencimento no dia ${c.due||'combinado'}. Se já realizou o pagamento, pode desconsiderar. Obrigado!`;const url='https://wa.me/'+(phone.startsWith('55')?phone:'55'+phone)+'?text='+encodeURIComponent(msg);window.open(url,'_blank','noopener')};
+$('paymentForm').onsubmit=async e=>{e.preventDefault();const c=db.clients.find(x=>x.id===$('pClient').value);if(!c)return;db.payments.unshift({id:uid(),clientId:c.id,clientName:c.name,amount:Number($('pAmount').value),date:$('pDate').value,method:$('pMethod').value,ref:$('pRef').value.trim(),proof:$('pProof').value.trim()});await persist();$('paymentForm').reset();$('pDate').value=today();renderAll()};
+function renderPayments(){$('paymentList').innerHTML='<h2>Histórico de pagamentos</h2>'+(db.payments.length?db.payments.map(p=>`<div class="item"><div class="itemtop"><div><strong>${esc(p.clientName||db.clients.find(c=>c.id===p.clientId)?.name||'Cliente excluído')}</strong><div class="muted">${esc(p.date)} · ${esc(p.method||'')}</div>${p.ref?`<div class="muted">${esc(p.ref)}</div>`:''}${p.proof?`<div class="muted">Comprovante: ${esc(p.proof)}</div>`:''}</div><strong>${money(p.amount)}</strong></div><div class="btnrow"><button class="btn danger" onclick="deletePayment('${p.id}')">Excluir registro</button></div></div>`).join(''):'<div class="card muted">Nenhum pagamento registrado.</div>')}
+window.deletePayment=async id=>{if(!confirm('Excluir este registro de pagamento?'))return;db.payments=db.payments.filter(p=>p.id!==id);await persist();renderAll()};
+$('costForm').onsubmit=async e=>{e.preventDefault();db.costs.unshift({id:uid(),amount:Number($('costAmount').value),date:$('costDate').value,desc:$('costDesc').value.trim(),vendor:$('costVendor').value.trim()});await persist();$('costForm').reset();$('costDate').value=today();renderAll()};
+function renderCosts(){$('costList').innerHTML='<h2>Histórico de custos com créditos</h2>'+(db.costs.length?db.costs.map(c=>`<div class="item"><div class="itemtop"><div><strong>${esc(c.desc||'Compra de créditos')}</strong><div class="muted">${esc(c.date)} ${c.vendor?'· '+esc(c.vendor):''}</div></div><strong>${money(c.amount)}</strong></div><div class="btnrow"><button class="btn danger" onclick="deleteCost('${c.id}')">Excluir custo</button></div></div>`).join(''):'<div class="card muted">Nenhum custo registrado.</div>')}
+window.deleteCost=async id=>{if(!confirm('Excluir este custo?'))return;db.costs=db.costs.filter(c=>c.id!==id);await persist();renderAll()};
+$('exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify({app:'Gestao Nathan TV',backupVersion:1,exportedAt:new Date().toISOString(),data:db},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='backup-gestao-nathan-tv-'+today()+'.json';a.click();URL.revokeObjectURL(a.href);$('backupMsg').textContent='Backup exportado. Mantenha o arquivo em local privado.'};
+$('importBtn').onclick=async()=>{const f=$('importFile').files[0];if(!f){$('backupMsg').textContent='Selecione um arquivo de backup primeiro.';return}try{const obj=JSON.parse(await f.text());const data=obj.data;if(obj.app!=='Gestao Nathan TV'||!Array.isArray(data?.clients)||!Array.isArray(data?.payments)||!Array.isArray(data?.costs))throw Error('Arquivo inválido');if(!confirm('Restaurar este backup substituirá os dados atuais na nuvem. Deseja continuar?'))return;db={clients:data.clients,payments:data.payments,costs:data.costs};await persist();renderAll();$('backupMsg').textContent='Backup restaurado e sincronizado com a nuvem.'}catch(e){$('backupMsg').textContent='Não foi possível restaurar o backup. Verifique o arquivo e sua conexão.'}};
+$('lockBtn').onclick=async()=>{if(unsubscribeCloud){unsubscribeCloud();unsubscribeCloud=null}await signOut(auth)};
+})();
+</script>
+</body>
+</html>
