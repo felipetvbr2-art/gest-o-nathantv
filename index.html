@@ -24,9 +24,8 @@ label{display:block;font-size:13px;font-weight:650;margin:10px 0 5px}input,selec
 <div id="authMsg" class="muted" style="margin-top:12px" role="status"></div>
 </section>
 <div id="app" class="hidden">
-<header><button class="headbtn hamb" id="menuToggle" aria-label="Abrir menu">☰</button><div class="headcopy"><h1>📺 Gestão Nathan TV</h1><p>Gestão de clientes, mensalidades e financeiro</p><p id="syncStatus" style="margin-top:5px;color:#16845b">● Conectando...</p></div><button class="headbtn" id="themeToggle" aria-label="Alternar tema">🌙</button></header>
+<header><button class="headbtn hamb" id="menuToggle" aria-label="Abrir menu">☰</button><div class="headcopy"><h1>📺 Gestão Nathan TV</h1><p id="syncStatus" style="margin-top:5px;color:#16845b">● Conectando...</p></div><button class="headbtn" id="themeToggle" aria-label="Alternar tema">🌙</button></header>
 <main>
-<div class="notice">☁️ Seus dados são salvos no Firebase e ficam disponíveis ao entrar com sua conta administrativa. Não compartilhe sua senha de acesso.</div>
 <div class="layout"><nav id="tabs" class="tabs" aria-label="Seções">
 <div class="navlabel">Menu principal</div><button class="active" data-tab="resumo">⌂ &nbsp; Início</button><button data-tab="clientes">♙ &nbsp; Clientes</button><button data-tab="pagamentos">▤ &nbsp; Financeiro</button><button data-tab="custos">▣ &nbsp; Créditos</button><button data-tab="vencimentos">◷ &nbsp; Vencimentos</button><div class="navlabel">Conta e segurança</div><button data-tab="usuarios">♧ &nbsp; Usuários</button><button data-tab="backup">⛨ &nbsp; Backup e segurança</button><button id="navLogout">↪ &nbsp; Sair</button>
 </nav><div class="content">
@@ -41,14 +40,15 @@ label{display:block;font-size:13px;font-weight:650;margin:10px 0 5px}input,selec
 <div class="card"><h2>Resultado estimado do mês</h2><div class="grid"><div class="metric"><small>Recebido</small><strong id="mProfitIn">R$ 0,00</strong></div><div class="metric"><small>Créditos comprados</small><strong id="mCreditCost">R$ 0,00</strong></div><div class="metric"><small>Saldo estimado</small><strong id="mProfit">R$ 0,00</strong></div></div><p class="muted">Cálculo simples: pagamentos recebidos no mês menos custos de créditos registrados no mês.</p></div>
 </section>
 <section id="tab-clientes" class="hidden">
-<div class="card"><h2 id="clientFormTitle">Cadastrar cliente</h2><form id="clientForm">
+<div class="btnrow" style="margin:0 0 12px"><button class="btn" type="button" id="newClientBtn">＋ Novo cliente</button></div>
+<div class="card hidden" id="clientFormPanel"><h2 id="clientFormTitle">Cadastrar cliente</h2><form id="clientForm">
 <input type="hidden" id="clientId">
 <label>Nome do cliente *</label><input id="cName" required maxlength="100" placeholder="Nome completo">
 <div class="row2"><div><label>WhatsApp</label><input id="cPhone" inputmode="tel" placeholder="DDD + número"></div><div><label>Mensalidade (R$) *</label><input id="cPrice" type="number" min="0" step="0.01" required placeholder="25,00"></div></div>
 <label>Data de vencimento *</label><input id="cDueDate" type="date" required>
 
 <label>Observações</label><textarea id="cNotes" rows="2" placeholder="Informações adicionais"></textarea>
-<div class="btnrow"><button class="btn" type="submit">Salvar cliente</button><button class="btn secondary" type="button" id="clearClient">Limpar</button></div>
+<div class="btnrow"><button class="btn" type="submit">Salvar cliente</button><button class="btn secondary" type="button" id="clearClient">Cancelar</button></div>
 </form></div>
 <input id="clientSearch" class="search" placeholder="Buscar cliente por nome ou telefone">
 <div id="clientList"></div>
@@ -133,9 +133,12 @@ function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&l
 function renderClients(){const term=$('clientSearch').value.toLowerCase();const arr=db.clients.filter(c=>(c.name+' '+c.phone).toLowerCase().includes(term));$('clientList').innerHTML=arr.length?arr.map(c=>`<div class="item client-card"><div class="itemtop"><div><strong style="font-size:17px">${esc(c.name)}</strong><div class="muted">${esc(c.phone||'Sem telefone')}</div><div class="muted">Vencimento: ${dateBR(c.dueDate||'')} · Mensalidade: ${money(c.price)}</div>${c.lastRenewal?`<div class="muted">Última renovação: ${dateBR(c.lastRenewal)}</div>`:''}</div><span class="pill">${money(c.price)}/mês</span></div>${c.notes?`<p class="muted">${esc(c.notes)}</p>`:''}<div class="client-actions"><button class="btn secondary" onclick="editClient('${c.id}')">✎ Editar</button><button class="btn" onclick="renewClient('${c.id}')">↻ Renovar</button><button class="btn secondary" onclick="chargeMsg('${c.id}')">WhatsApp</button><button class="btn danger" onclick="deleteClient('${c.id}')">Excluir</button></div></div>`).join(''):'<div class="card muted">Nenhum cliente encontrado.</div>'}
 function fillClientSelect(){const old=$('pClient').value;$('pClient').innerHTML='<option value="">Selecione um cliente</option>'+db.clients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');if(db.clients.some(c=>c.id===old))$('pClient').value=old}
 $('clientSearch').addEventListener('input',renderClients);
-$('clientForm').onsubmit=async e=>{e.preventDefault();const id=$('clientId').value;const c={id:id||uid(),name:$('cName').value.trim(),phone:$('cPhone').value.trim(),price:Number($('cPrice').value),dueDate:$('cDueDate').value,notes:$('cNotes').value.trim(),lastRenewal:id?(db.clients.find(x=>x.id===id)?.lastRenewal||''):''};if(!c.name)return;if(id)db.clients=db.clients.map(x=>x.id===id?c:x);else db.clients.push(c);await persist();$('clientForm').reset();$('clientId').value='';$('cDueDate').value=today();$('clientFormTitle').textContent='Cadastrar cliente';renderAll()};
-$('clearClient').onclick=()=>{$('clientForm').reset();$('clientId').value='';$('cDueDate').value=today();$('clientFormTitle').textContent='Cadastrar cliente'};
-window.editClient=id=>{const c=db.clients.find(x=>x.id===id);if(!c)return;$('clientId').value=c.id;$('cName').value=c.name;$('cPhone').value=c.phone;$('cPrice').value=c.price;$('cDueDate').value=c.dueDate||today();$('cNotes').value=c.notes||'';$('clientFormTitle').textContent='Editar cliente';document.querySelector('[data-tab="clientes"]').click();window.scrollTo({top:0,behavior:'smooth'})};
+function openClientForm(title='Cadastrar cliente'){ $('clientFormTitle').textContent=title; $('clientFormPanel').classList.remove('hidden'); window.scrollTo({top:0,behavior:'smooth'}); }
+function closeClientForm(){ $('clientForm').reset(); $('clientId').value=''; $('cDueDate').value=today(); $('clientFormTitle').textContent='Cadastrar cliente'; $('clientFormPanel').classList.add('hidden'); }
+$('newClientBtn').onclick=()=>{closeClientForm();openClientForm('Cadastrar cliente')};
+$('clientForm').onsubmit=async e=>{e.preventDefault();const id=$('clientId').value;const c={id:id||uid(),name:$('cName').value.trim(),phone:$('cPhone').value.trim(),price:Number($('cPrice').value),dueDate:$('cDueDate').value,notes:$('cNotes').value.trim(),lastRenewal:id?(db.clients.find(x=>x.id===id)?.lastRenewal||''):''};if(!c.name)return;if(id)db.clients=db.clients.map(x=>x.id===id?c:x);else db.clients.push(c);await persist();closeClientForm();renderAll()};
+$('clearClient').onclick=closeClientForm;
+window.editClient=id=>{const c=db.clients.find(x=>x.id===id);if(!c)return;$('clientId').value=c.id;$('cName').value=c.name;$('cPhone').value=c.phone;$('cPrice').value=c.price;$('cDueDate').value=c.dueDate||today();$('cNotes').value=c.notes||'';document.querySelector('[data-tab="clientes"]').click();openClientForm('Editar cliente')};
 window.toggleMenu=id=>{document.querySelectorAll('.menu').forEach(m=>{if(m.id!=='menu-'+id)m.classList.add('hidden')});$('menu-'+id)?.classList.toggle('hidden')};
 function creditQty(c){if(c.quantity!==undefined&&c.quantity!==null)return Number(c.quantity);const match=String(c.desc||'').match(/(\d+)\s*cr[eé]dit/i);return match?Number(match[1]):0}
 function availableCredits(){const bought=db.costs.filter(c=>c.kind!=='renewal').reduce((n,c)=>n+creditQty(c),0);const used=db.costs.filter(c=>c.kind==='renewal').reduce((n,c)=>n+Math.abs(Number(c.quantity||1)),0);return bought-used}
