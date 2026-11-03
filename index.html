@@ -29,6 +29,18 @@ label{display:block;font-size:13px;font-weight:650;margin:10px 0 5px}input,selec
 .wa-send{width:100%;background:#20a65a;color:white;border:0;border-radius:11px;padding:13px;font-weight:800;font-size:15px;margin-top:12px}
 .wa-panel textarea{min-height:130px;resize:vertical}
 @media(min-width:701px){.wa-overlay{align-items:center}}
+.bottom-nav{display:none}
+@media(max-width:700px){
+body{padding-bottom:calc(68px + env(safe-area-inset-bottom))}
+main{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
+.bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:1fr 1fr 1.15fr 1fr 1fr;align-items:end;gap:2px;padding:7px 8px calc(7px + env(safe-area-inset-bottom));background:var(--card);border-top:1px solid var(--line);box-shadow:0 -5px 18px #18202b12}
+.bottom-nav button{border:0;background:transparent;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:48px;padding:3px 2px;font-size:10px;font-weight:650}
+.bottom-nav button .navicon{font-size:21px;line-height:1.1}
+.bottom-nav button.active{color:var(--gold);font-weight:850}
+.bottom-nav .add-client{width:52px;height:52px;min-height:52px;margin:0 auto 2px;border-radius:50%;background:#1769d2;color:#fff;box-shadow:0 3px 9px #1769d255;font-size:10px}
+.bottom-nav .add-client .navicon{font-size:25px}
+}
+@media(min-width:701px){.bottom-nav{display:none}}
 @media(max-width:700px){header{padding:12px}.hamb{display:block}.layout{grid-template-columns:1fr}.tabs{position:fixed;z-index:20;top:0;bottom:0;left:0;width:265px;min-height:0;border-radius:0 16px 16px 0;transform:translateX(-110%);transition:transform .2s;box-shadow:8px 0 30px #0005}.tabs.open{transform:translateX(0)}.tabs button{text-align:left;padding:13px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.client-actions{grid-template-columns:repeat(2,minmax(0,1fr))}main{padding:12px 10px 80px}}
 @media(min-width:900px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.metric strong{font-size:24px}}
 </style>
@@ -89,7 +101,14 @@ label{display:block;font-size:13px;font-weight:650;margin:10px 0 5px}input,selec
 <section id="tab-usuarios" class="hidden"><div class="card"><h2>Gerenciar usuários</h2><p>Esta área será ativada depois da configuração segura do Firebase.</p><p class="muted">A criação, bloqueio e exclusão de contas precisa de uma função protegida no servidor. Não vamos colocar senhas administrativas nem permissões especiais dentro deste arquivo público.</p><span class="pill amber">Configuração de segurança pendente</span></div></section>
 </div></div>
 <p class="foot">Gestão Nathan TV • sincronização Firebase • sincronização Firebase</p>
-</main></div>
+</main>
+<nav class="bottom-nav" id="bottomNav" aria-label="Navegação inferior">
+<button type="button" data-tab="resumo" class="active"><span class="navicon">⌂</span><span>Início</span></button>
+<button type="button" data-tab="clientes"><span class="navicon">♙</span><span>Clientes</span></button>
+<button type="button" class="add-client" id="bottomNewClient"><span class="navicon">＋</span><span>Novo</span></button>
+<button type="button" data-tab="pagamentos"><span class="navicon">▤</span><span>Financeiro</span></button>
+<button type="button" id="bottomMore"><span class="navicon">⋮</span><span>Mais</span></button>
+</nav></div>
 <div id="whatsAppModal" class="wa-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="waTitle" onclick="if(event.target===this)closeWhatsAppModal()">
 <div class="wa-panel">
 <div class="wa-head"><h2 id="waTitle" style="margin:0">Enviar mensagem pelo WhatsApp</h2><button class="wa-close" type="button" onclick="closeWhatsAppModal()" aria-label="Fechar">×</button></div>
@@ -135,8 +154,11 @@ $('loginBtn').onclick=login;
 $('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
 onAuthStateChanged(auth,async user=>{if(unsubscribeCloud){unsubscribeCloud();unsubscribeCloud=null}currentUser=user;if(!user){cloudRef=null;db={clients:[],payments:[],costs:[]};showAuth();return}cloudRef=doc(store,'usuarios',user.uid,'dados','principal');setStatus('Carregando seus dados...');try{const snap=await getDoc(cloudRef);if(!snap.exists()){await setDoc(cloudRef,{clients:[],payments:[],costs:[],createdAt:serverTimestamp()})}unsubscribeCloud=onSnapshot(cloudRef,s=>{if(!s.exists())return;const data=s.data();db={clients:Array.isArray(data.clients)?data.clients:[],payments:Array.isArray(data.payments)?data.payments:[],costs:Array.isArray(data.costs)?data.costs:[]};db.clients=db.clients.map(c=>({...c,dueDate:c.dueDate||(c.due?`${today().slice(0,7)}-${String(Math.min(Number(c.due),new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate())).padStart(2,'0')}`:today())}));enter();setStatus('Sincronizado com a nuvem')},err=>setStatus('Erro ao receber atualizações do Firestore.',true));}catch(e){setStatus('Não foi possível abrir o banco. Confira as regras do Firestore.',true);showAuth('Não foi possível carregar os dados. Confira as regras do Firestore e tente entrar novamente.')}});
 const tabNames=['resumo','clientes','pagamentos','vencimentos','usuarios','backup'];
-document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));tabNames.forEach(t=>$('tab-'+t).classList.toggle('hidden',t!==b.dataset.tab));$('tabs').classList.remove('open');renderAll()});
-$('menuToggle').onclick=()=>$('tabs').classList.toggle('open');$('navLogout').onclick=()=>$('lockBtn').click();
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x.dataset.tab===b.dataset.tab));tabNames.forEach(t=>$('tab-'+t).classList.toggle('hidden',t!==b.dataset.tab));$('tabs').classList.remove('open');renderAll()});
+$('menuToggle').onclick=()=>$('tabs').classList.toggle('open');
+$('bottomMore').onclick=()=>$('tabs').classList.toggle('open');
+$('bottomNewClient').onclick=()=>{document.querySelector('[data-tab="clientes"]').click();closeClientForm();openClientForm('Cadastrar cliente')};
+$('navLogout').onclick=()=>$('lockBtn').click();
 $('themeToggle').addEventListener('click',()=>{const dark=!document.body.classList.contains('dark');document.body.classList.toggle('dark',dark);$('themeToggle').textContent=dark?'☀️':'🌙';if(currentUser){try{localStorage.setItem('nathan-theme-'+currentUser.uid,dark?'dark':'light')}catch(e){}}});
 function loadTheme(){let dark=false;try{dark=!!currentUser&&localStorage.getItem('nathan-theme-'+currentUser.uid)==='dark'}catch(e){}document.body.classList.toggle('dark',dark);$('themeToggle').textContent=dark?'☀️':'🌙'}
 function renderAll(){renderSummary();renderClients();renderPayments();renderCosts();fillClientSelect()}
