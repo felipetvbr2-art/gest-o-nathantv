@@ -1,4 +1,4 @@
-const CACHE_NAME = "gestao-nathan-tv-v1";
+const CACHE_NAME = "gestao-nathan-tv-v2";
 
 const FILES_TO_CACHE = [
   "./",
