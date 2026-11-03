@@ -28,6 +28,17 @@ label{display:block;font-size:13px;font-weight:650;margin:10px 0 5px}input,selec
 .dark .wa-types button.active{background:#153526;color:#75e0a3;border-color:#287a4b}
 .wa-send{width:100%;background:#20a65a;color:white;border:0;border-radius:11px;padding:13px;font-weight:800;font-size:15px;margin-top:12px}
 .wa-panel textarea{min-height:130px;resize:vertical}
+.client-form-overlay{position:fixed!important;inset:0;z-index:90;display:flex;align-items:flex-end;justify-content:center;overflow:auto;background:#0009;padding:12px}
+.client-form-overlay>.client-form-card{width:min(100%,560px);max-height:94dvh;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 15px 50px #0005}
+.client-form-overlay h2{font-size:20px}
+.package-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:8px 0}
+.package-option{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg);color:var(--ink);text-align:left}
+.package-option.active{border:2px solid var(--gold);background:#fff7df;color:#38290a}
+.dark .package-option.active{background:#332a18;color:#f7dfaa}
+.package-option strong,.package-option span{display:block}
+.package-option span{font-size:13px;margin-top:4px}
+.package-option small{display:block;color:var(--muted);margin-top:5px}
+@media(min-width:701px){.client-form-overlay{align-items:center}}
 @media(min-width:701px){.wa-overlay{align-items:center}}
 .bottom-nav{display:none}
 @media(max-width:700px){
@@ -69,15 +80,23 @@ main{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
 </section>
 <section id="tab-clientes" class="hidden">
 <div class="btnrow" style="margin:0 0 12px"><button class="btn" type="button" id="newClientBtn">＋ Novo cliente</button></div>
-<div class="card hidden" id="clientFormPanel"><h2 id="clientFormTitle">Cadastrar cliente</h2><form id="clientForm">
+<div class="card hidden" id="clientFormPanel"><div class="client-form-card"><div class="itemtop"><h2 id="clientFormTitle">Cadastrar cliente</h2><button class="headbtn" type="button" id="closeClientX">×</button></div><form id="clientForm">
 <input type="hidden" id="clientId">
 <label>Nome do cliente *</label><input id="cName" required maxlength="100" placeholder="Nome completo">
-<div class="row2"><div><label>WhatsApp</label><input id="cPhone" inputmode="tel" placeholder="DDD + número"></div><div><label>Mensalidade (R$) *</label><input id="cPrice" type="number" min="0" step="0.01" required placeholder="30,00"></div></div>
-<label>Data de vencimento *</label><input id="cDueDate" type="date" required>
-
+<label>WhatsApp</label><input id="cPhone" inputmode="tel" placeholder="DDD + número">
+<div class="row2"><div><label>Tipo de serviço</label><select id="cServiceType"><option>IPTV</option><option>P2P</option><option>Hybrid</option></select></div><div><label>Usuário do serviço</label><input id="cServiceUser" placeholder="Usuário"></div></div>
+<label>Senha do serviço</label><input id="cServicePass" type="text" autocomplete="off" placeholder="Senha do serviço">
+<div id="packageChooser"><label>Selecione o pacote</label><div class="package-grid">
+<button type="button" class="package-option active" data-package="1"><strong>1 mês</strong><span>R$ 30,00</span><small>Custo R$ 6 · Lucro R$ 24</small></button>
+<button type="button" class="package-option" data-package="3"><strong>3 meses</strong><span>R$ 70,00</span><small>Custo R$ 18 · Lucro R$ 52</small></button>
+<button type="button" class="package-option" data-package="6"><strong>6 meses</strong><span>R$ 125,00</span><small>Custo R$ 30 · Lucro R$ 95</small></button>
+<button type="button" class="package-option" data-package="12"><strong>12 meses</strong><span>R$ 220,00</span><small>Custo R$ 60 · Lucro R$ 160</small></button>
+</div></div>
+<div class="row2"><div><label>Data de vencimento *</label><input id="cDueDate" type="date" required></div><div><label>Mensalidade de referência</label><input id="cPrice" type="number" min="0" step="0.01" value="30" required></div></div>
 <label>Observações</label><textarea id="cNotes" rows="2" placeholder="Informações adicionais"></textarea>
-<div class="btnrow"><button class="btn" type="submit">Salvar cliente</button><button class="btn secondary" type="button" id="clearClient">Cancelar</button></div>
-</form></div>
+<div id="packageSummary" class="notice">Pacote de 1 mês · Recebe R$ 30,00 · Custo R$ 6,00 · Lucro R$ 24,00</div>
+<div class="btnrow"><button class="btn" type="submit">Salvar cliente e registrar pagamento</button><button class="btn secondary" type="button" id="clearClient">Cancelar</button></div>
+</form></div></div>
 <input id="clientSearch" class="search" placeholder="Buscar cliente por nome ou telefone">
 <div id="clientList"></div>
 </section>
@@ -174,12 +193,18 @@ function renderClients(){const term=$('clientSearch').value.toLowerCase();const 
 window.toggleClientHistory=id=>{const c=db.clients.find(x=>x.id===id);const panel=$('client-history-'+id);if(!c||!panel)return;if(!panel.classList.contains('hidden')){panel.classList.add('hidden');return}const payments=db.payments.filter(p=>p.clientId===id).sort((a,b)=>(b.date||'').localeCompare(a.date||''));const renewals=db.costs.filter(x=>x.clientId===id&&x.kind==='renewal').sort((a,b)=>(b.date||'').localeCompare(a.date||''));const received=payments.reduce((sum,p)=>sum+Number(p.amount||0),0);const costs=renewals.reduce((sum,x)=>sum+Number(x.amount||0),0);const events=[...payments.map(p=>({date:p.date||'',kind:'payment',amount:Number(p.amount||0),label:'Pagamento recebido',detail:[p.method,p.ref].filter(Boolean).join(' · ')})),...renewals.map(x=>({date:x.date||'',kind:'cost',amount:Number(x.amount||0),label:'Custo de renovação',detail:x.desc||'Renovação mensal'}))].sort((a,b)=>b.date.localeCompare(a.date));panel.innerHTML='<div class="hr"></div><h3>Histórico de '+esc(c.name)+'</h3><div class="grid"><div class="metric"><small>Total recebido</small><strong>'+money(received)+'</strong></div><div class="metric"><small>Custos de renovação</small><strong>'+money(costs)+'</strong></div><div class="metric"><small>Saldo após renovações</small><strong>'+money(received-costs)+'</strong></div><div class="metric"><small>Renovações registradas</small><strong>'+renewals.length+'</strong></div></div><div class="hr"></div><h3>Movimentações</h3>'+(events.length?events.map(e=>'<div class="item"><div class="itemtop"><div><strong>'+esc(e.label)+'</strong><div class="muted">'+dateBR(e.date)+' · '+esc(e.detail)+'</div></div><strong class="'+(e.kind==='payment'?'':'dangertext')+'">'+(e.kind==='payment'?'+ ':'− ')+money(e.amount)+'</strong></div></div>').join(''):'<p class="muted">Ainda não há pagamentos ou custos de renovação vinculados a este cliente.</p>');panel.classList.remove('hidden')};
 function fillClientSelect(){const old=$('pClient').value;$('pClient').innerHTML='<option value="">Selecione um cliente</option>'+db.clients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');if(db.clients.some(c=>c.id===old))$('pClient').value=old}
 $('clientSearch').addEventListener('input',renderClients);
-function openClientForm(title='Cadastrar cliente'){ $('clientFormTitle').textContent=title; $('clientFormPanel').classList.remove('hidden'); window.scrollTo({top:0,behavior:'smooth'}); }
-function closeClientForm(){ $('clientForm').reset(); $('clientId').value=''; $('cDueDate').value=today(); $('clientFormTitle').textContent='Cadastrar cliente'; $('clientFormPanel').classList.add('hidden'); }
+const packagePlans={1:{months:1,price:30,cost:6},3:{months:3,price:70,cost:18},6:{months:6,price:125,cost:30},12:{months:12,price:220,cost:60}};
+let selectedPackage='1';
+function updatePackageSummary(){const p=packagePlans[selectedPackage];$('packageSummary').textContent='Pacote de '+p.months+' mês(es) · Recebe '+money(p.price)+' · Custo '+money(p.cost)+' · Lucro '+money(p.price-p.cost);document.querySelectorAll('[data-package]').forEach(b=>b.classList.toggle('active',b.dataset.package===selectedPackage))}
+document.querySelectorAll('[data-package]').forEach(b=>b.onclick=()=>{selectedPackage=b.dataset.package;updatePackageSummary();if(!$('clientId').value){const base=$('cDueDate').value||today();$('cDueDate').value=addMonths(base,packagePlans[selectedPackage].months)}});
+function addMonths(dateStr,count){let [y,m,d]=dateStr.split('-').map(Number);const index=m-1+count;const ny=y+Math.floor(index/12),nm=index%12+1;const last=new Date(ny,nm,0).getDate();return ny+'-'+String(nm).padStart(2,'0')+'-'+String(Math.min(d,last)).padStart(2,'0')}
+function openClientForm(title='Cadastrar cliente'){ $('clientFormTitle').textContent=title;$('clientFormPanel').classList.add('client-form-overlay');$('clientFormPanel').classList.remove('hidden');$('packageChooser').classList.toggle('hidden',!!$('clientId').value);$('packageSummary').classList.toggle('hidden',!!$('clientId').value);$('cPrice').readOnly=true;updatePackageSummary(); }
+function closeClientForm(){ $('clientForm').reset(); $('clientId').value=''; $('cDueDate').value=today();$('cPrice').value='30';$('cServiceType').value='IPTV';$('packageChooser').classList.remove('hidden');$('packageSummary').classList.remove('hidden');$('cPrice').readOnly=true;selectedPackage='1';updatePackageSummary();$('clientFormTitle').textContent='Cadastrar cliente';$('clientFormPanel').classList.add('hidden');$('clientFormPanel').classList.remove('client-form-overlay'); }
 $('newClientBtn').onclick=()=>{closeClientForm();openClientForm('Cadastrar cliente')};
-$('clientForm').onsubmit=async e=>{e.preventDefault();const id=$('clientId').value;const c={id:id||uid(),name:$('cName').value.trim(),phone:$('cPhone').value.trim(),price:Number($('cPrice').value),dueDate:$('cDueDate').value,notes:$('cNotes').value.trim(),lastRenewal:id?(db.clients.find(x=>x.id===id)?.lastRenewal||''):''};if(!c.name)return;if(id)db.clients=db.clients.map(x=>x.id===id?c:x);else db.clients.push(c);await persist();closeClientForm();renderAll()};
+$('closeClientX').onclick=closeClientForm;
+$('clientForm').onsubmit=async e=>{e.preventDefault();const id=$('clientId').value;const isNew=!id;const plan=packagePlans[selectedPackage];const now=today();const due=$('cDueDate').value;if(!due){alert('Informe a data de vencimento.');return}const c={id:id||uid(),name:$('cName').value.trim(),phone:$('cPhone').value.trim(),price:Number($('cPrice').value)||30,dueDate:due,notes:$('cNotes').value.trim(),serviceType:$('cServiceType').value,serviceUser:$('cServiceUser').value.trim(),servicePass:$('cServicePass').value,lastRenewal:isNew?now:(db.clients.find(x=>x.id===id)?.lastRenewal||'')};if(!c.name)return;const oldClients=db.clients.slice(),oldPayments=db.payments.slice(),oldCosts=db.costs.slice();if(isNew){db.clients.push(c);db.payments.unshift({id:uid(),clientId:c.id,clientName:c.name,amount:plan.price,date:now,method:'Pendente de confirmação',ref:'Pacote de '+plan.months+' mês(es)',proof:'Cadastro automático'});db.costs.unshift({id:uid(),amount:plan.cost,date:now,desc:'Custo do pacote de '+plan.months+' mês(es) — '+c.name,vendor:'Custo automático do pacote',kind:'renewal',clientId:c.id});}else{db.clients=db.clients.map(x=>x.id===id?c:x)}try{await persist();closeClientForm();renderAll();if(isNew)alert('Cliente cadastrado! Pacote de '+plan.months+' mês(es) registrado no Financeiro. Confirme o recebimento do pagamento.')}catch(error){db.clients=oldClients;db.payments=oldPayments;db.costs=oldCosts;renderAll();alert('Não foi possível salvar na nuvem. Nenhuma alteração foi mantida. Verifique a conexão.')}};
 $('clearClient').onclick=closeClientForm;
-window.editClient=id=>{const c=db.clients.find(x=>x.id===id);if(!c)return;$('clientId').value=c.id;$('cName').value=c.name;$('cPhone').value=c.phone;$('cPrice').value=c.price;$('cDueDate').value=c.dueDate||today();$('cNotes').value=c.notes||'';document.querySelector('[data-tab="clientes"]').click();openClientForm('Editar cliente')};
+window.editClient=id=>{const c=db.clients.find(x=>x.id===id);if(!c)return;$('clientId').value=c.id;$('cName').value=c.name;$('cPhone').value=c.phone;$('cPrice').value=c.price;$('cDueDate').value=c.dueDate||today();$('cNotes').value=c.notes||'';$('cServiceType').value=c.serviceType||'IPTV';$('cServiceUser').value=c.serviceUser||'';$('cServicePass').value=c.servicePass||'';document.querySelector('[data-tab="clientes"]').click();openClientForm('Editar cliente')};
 window.toggleMenu=id=>{document.querySelectorAll('.menu').forEach(m=>{if(m.id!=='menu-'+id)m.classList.add('hidden')});$('menu-'+id)?.classList.toggle('hidden')};
 window.renewClient=async id=>{const c=db.clients.find(x=>x.id===id);if(!c)return;const base=c.dueDate&&c.dueDate>=today()?c.dueDate:today();const next=addMonth(base);if(!confirm(`Renovar ${c.name} por 1 mês?\nNovo vencimento: ${dateBR(next)}\nSerá registrado R$ 6,00 de custo de renovação.`))return;const oldDue=c.dueDate,oldRenewal=c.lastRenewal,oldCosts=db.costs.slice();c.dueDate=next;c.lastRenewal=today();db.costs.unshift({id:uid(),amount:6,date:today(),desc:`Renovação de 1 mês — ${c.name}`,vendor:'Renovação automática',kind:'renewal',clientId:c.id});try{await persist();renderAll();alert(`Renovação concluída! Novo vencimento: ${dateBR(next)}.`)}catch(e){c.dueDate=oldDue;c.lastRenewal=oldRenewal;db.costs=oldCosts;renderAll();alert('Não foi possível salvar a renovação. Confira a conexão.')}};
 window.deleteClient=async id=>{const c=db.clients.find(x=>x.id===id);if(!c||!confirm('Excluir '+c.name+'? Os pagamentos já registrados serão mantidos no histórico.'))return;db.clients=db.clients.filter(x=>x.id!==id);await persist();renderAll()};
