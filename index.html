@@ -178,7 +178,8 @@ onAuthStateChanged(auth,async user=>{clearTimeout(authFallback);if(user)$('appLo
 const tabNames=['resumo','clientes','pagamentos','vencimentos','meuPlano','usuarios','backup'];
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x.dataset.tab===b.dataset.tab));tabNames.forEach(t=>$('tab-'+t).classList.toggle('hidden',t!==b.dataset.tab));$('tabs').classList.remove('open');renderAll()});
 $('menuToggle').onclick=()=>$('tabs').classList.toggle('open');
-$('bottomMore').onclick=()=>$('tabs').classList.toggle('open');\n$('premiumInfoBtn').onclick=()=>showAppDialog('O Premium por R$ 9,90 por mês está planejado, sem período grátis. A assinatura pela Google Play ainda está em preparação e não há cobrança disponível neste momento.',{title:'Premium em breve',okText:'Entendi'});
+$('bottomMore').onclick=()=>$('tabs').classList.toggle('open');
+$('premiumInfoBtn').onclick=()=>showAppDialog('O Premium por R$ 9,90 por mês está planejado, sem período grátis. A assinatura pela Google Play ainda está em preparação e não há cobrança disponível neste momento.',{title:'Premium em breve',okText:'Entendi'});
 $('bottomNewClient').onclick=()=>{document.querySelector('[data-tab="clientes"]').click();closeClientForm();openClientForm('Cadastrar cliente')};
 $('navLogout').onclick=()=>$('lockBtn').click();
 $('themeToggle').addEventListener('click',()=>{const dark=!document.body.classList.contains('dark');document.body.classList.toggle('dark',dark);$('themeToggle').textContent=dark?'☀️':'🌙';if(currentUser){try{localStorage.setItem('nathan-theme-'+currentUser.uid,dark?'dark':'light')}catch(e){}}});
