@@ -1,6 +1,6 @@
 {
-  "name": "Gestão Nathan TV",
-  "short_name": "Nathan TV",
+  "name": "Gestão de Clientes",
+  "short_name": "Gestão Clientes",
   "description": "Gestão de clientes, mensalidades e financeiro",
   "start_url": "./",
   "scope": "./",
