@@ -238,7 +238,31 @@ window.deletePayment=async id=>{const payment=db.payments.find(p=>p.id===id);if(
 function renderCosts(){$('costList').innerHTML=db.costs.length?db.costs.map(c=>`<div class="item"><div class="itemtop"><div><strong>${esc(c.desc||(c.kind==='renewal'?'Renovação':'Despesa registrada'))}</strong><div class="muted">${dateBR(c.date)} ${c.vendor?'· '+esc(c.vendor):''}</div></div><strong>${money(c.amount)}</strong></div><div class="muted">${c.kind==='renewal'?'Custo de renovação mensal':'Despesa registrada anteriormente'}</div><div class="btnrow"><button class="btn danger" onclick="deleteCost('${c.id}')">Excluir despesa</button></div></div>`).join(''):'<p class="muted">Nenhuma despesa registrada.</p>'}
 window.deleteCost=async id=>{if(!confirm('Excluir este custo?'))return;db.costs=db.costs.filter(c=>c.id!==id);await persist();renderAll()};
 $('exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify({app:'Gestao de Clientes',backupVersion:1,exportedAt:new Date().toISOString(),data:db},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='backup-gestao-de-clientes-'+today()+'.json';a.click();URL.revokeObjectURL(a.href);$('backupMsg').textContent='Backup exportado. Mantenha o arquivo em local privado.'};
-$('importBtn').onclick=async()=>{const f=$('importFile').files[0];if(!f){$('backupMsg').textContent='Selecione um arquivo de backup primeiro.';return}try{const obj=JSON.parse(await f.text());const data=obj.data;if(obj.app!=='Gestao de Clientes'||!Array.isArray(data?.clients)||!Array.isArray(data?.payments)||!Array.isArray(data?.costs))throw Error('Arquivo inválido');if(!confirm('Restaurar este backup substituirá os dados atuais na nuvem. Deseja continuar?'))return;db={clients:data.clients,payments:data.payments,costs:data.costs};await persist();renderAll();$('backupMsg').textContent='Backup restaurado e sincronizado com a nuvem.'}catch(e){$('backupMsg').textContent='Não foi possível restaurar o backup. Verifique o arquivo e sua conexão.'}};
+function validateBackup(obj){
+  const data=obj&&obj.data;
+  if(obj?.app!=='Gestao de Clientes'||!data||!Array.isArray(data.clients)||!Array.isArray(data.payments)||!Array.isArray(data.costs))throw new Error('Arquivo de backup inválido.');
+  if(data.clients.length>20)throw new Error('Este backup tem mais de 20 clientes e ultrapassa o limite do plano Free.');
+  if(data.payments.length>5000||data.costs.length>5000)throw new Error('O backup contém registros demais.');
+  for(const key of ['clients','payments','costs'])for(const item of data[key]){
+    if(!item||typeof item!=='object'||Array.isArray(item))throw new Error('Há um registro inválido no backup.');
+    if(item.id!=null&&(typeof item.id!=='string'||item.id.length>128))throw new Error('Há um identificador inválido no backup.');
+  }
+  return {clients:data.clients,payments:data.payments,costs:data.costs};
+}
+$('importBtn').onclick=async()=>{
+  const f=$('importFile').files[0];
+  if(!f){$('backupMsg').textContent='Selecione um arquivo de backup primeiro.';return}
+  if(f.size>10*1024*1024){$('backupMsg').textContent='O arquivo deve ter até 10 MB.';return}
+  try{
+    const data=validateBackup(JSON.parse(await f.text()));
+    if(!confirm('Restaurar '+data.clients.length+' clientes, '+data.payments.length+' pagamentos e '+data.costs.length+' custos substituirá os dados atuais na nuvem. Deseja continuar?'))return;
+    const previous=db;
+    db=data;
+    try{await persist()}catch(error){db=previous;throw error}
+    renderAll();
+    $('backupMsg').textContent='Backup validado e restaurado com sucesso na nuvem.';
+  }catch(e){$('backupMsg').textContent=e.message||'Não foi possível restaurar o backup. Verifique o arquivo e sua conexão.'}
+};
 $('lockBtn').onclick=async()=>{if(unsubscribeCloud){unsubscribeCloud();unsubscribeCloud=null}await signOut(auth)};
 })();
   </script>
