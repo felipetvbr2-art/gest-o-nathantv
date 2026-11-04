@@ -234,8 +234,14 @@ async function syncFinancialCollections(){
       await Promise.all(stale.slice(i,i+100).map(([,ref])=>deleteDoc(ref)));
     }
     const verified=await getDocs(target);
-    const saved=new Set(verified.docs.map(d=>d.id));
-    if(saved.size!==ids.size||[...ids].some(id=>!saved.has(id)))throw new Error('A conferência de '+group.name+' falhou.');
+    const saved=new Map(verified.docs.map(d=>[d.id,d.data()]));
+    if(saved.size!==ids.size||[...ids].some(id=>!saved.has(id)))throw new Error('A conferência de '+group.name+' falhou: quantidade ou identificadores diferentes.');
+    for(const item of prepared){
+      const actual=saved.get(item.id),expected=item.data;
+      for(const field of ['amount','date','status','paidAt','method','clientId','clientName','desc','vendor','kind']){
+        if((actual?.[field]??null)!==(expected?.[field]??null))throw new Error('A conferência do campo '+field+' falhou no registro '+item.id+' da coleção '+group.name+'.');
+      }
+    }
   }
 }
 async function persist(){
