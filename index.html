@@ -143,7 +143,7 @@ main{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
-import { getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp, collection, getDocs } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp, collection, getDocs, deleteDoc } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
 (()=> {
 const $=id=>document.getElementById(id);
@@ -203,7 +203,53 @@ async function migrateLegacyRecords(userId,legacyData){
   }
   return copied;
 }
-async function persist(){if(!currentUser||!cloudRef)throw new Error('Faça login para salvar os dados.');saving=true;setStatus('Salvando na nuvem...');try{await setDoc(cloudRef,{clients:db.clients,payments:db.payments,costs:db.costs,updatedAt:serverTimestamp()});setStatus('Sincronizado com a nuvem')}catch(e){setStatus('Falha ao sincronizar. Verifique sua conexão e as regras do Firestore.',true);throw e}finally{saving=false}}
+function stableFinancialId(record,index,key){
+  const raw=typeof record.id==='string'?record.id.trim():'';
+  return /^[A-Za-z0-9_-]{1,128}$/.test(raw)?raw:('legacy_'+key+'_'+String(index).padStart(6,'0'));
+}
+async function syncFinancialCollections(){
+  const groups=[{key:'payments',name:'pagamentos'},{key:'costs',name:'custos'}];
+  for(const group of groups){
+    const records=Array.isArray(db[group.key])?db[group.key]:[];
+    const target=collection(store,'usuarios',currentUser.uid,'dados','principal',group.name);
+    const snapshot=await getDocs(target);
+    const existing=new Map(snapshot.docs.map(d=>[d.id,d.ref]));
+    const prepared=[];
+    const ids=new Set();
+    records.forEach((record,index)=>{
+      if(!record||typeof record!=='object'||Array.isArray(record))throw new Error('Registro inválido em '+group.name+'.');
+      const id=stableFinancialId(record,index,group.key);
+      if(ids.has(id))throw new Error('Identificador repetido em '+group.name+'.');
+      ids.add(id);
+      const amount=Number(record.amount);
+      if(!Number.isFinite(amount)||amount<0)throw new Error('Valor inválido em '+group.name+'.');
+      const date=typeof record.date==='string'?record.date:'';
+      prepared.push({id,data:{...record,id,amount,date}});
+    });
+    for(let i=0;i<prepared.length;i+=100){
+      await Promise.all(prepared.slice(i,i+100).map(item=>setDoc(doc(target,item.id),item.data)));
+    }
+    const stale=[...existing.entries()].filter(([id])=>!ids.has(id));
+    for(let i=0;i<stale.length;i+=100){
+      await Promise.all(stale.slice(i,i+100).map(([,ref])=>deleteDoc(ref)));
+    }
+    const verified=await getDocs(target);
+    const saved=new Set(verified.docs.map(d=>d.id));
+    if(saved.size!==ids.size||[...ids].some(id=>!saved.has(id)))throw new Error('A conferência de '+group.name+' falhou.');
+  }
+}
+async function persist(){
+  if(!currentUser||!cloudRef)throw new Error('Faça login para salvar os dados.');
+  saving=true;setStatus('Salvando na nuvem...');
+  try{
+    await syncFinancialCollections();
+    await setDoc(cloudRef,{clients:db.clients,payments:db.payments,costs:db.costs,updatedAt:serverTimestamp()},{merge:true});
+    setStatus('Sincronizado com a nuvem');
+  }catch(e){
+    setStatus('Falha ao sincronizar os dados. Verifique a conexão e as regras do Firestore.',true);
+    throw e;
+  }finally{saving=false}
+}
 function showAuth(msg=''){ $('appLoading').classList.add('hidden');$('auth').classList.remove('hidden');$('app').classList.add('hidden');$('authMsg').textContent=msg; }
 function enter(){ $('appLoading').classList.add('hidden');$('auth').classList.add('hidden');$('app').classList.remove('hidden');loadTheme();renderAll(); }
 async function login(){const email=$('loginEmail').value.trim(),password=$('loginPassword').value;if(!email||!password){$('authMsg').textContent='Informe seu e-mail e sua senha.';return} $('loginBtn').disabled=true;$('registerBtn').disabled=true;$('authMsg').textContent='Entrando...';try{await signInWithEmailAndPassword(auth,email,password)}catch(e){$('authMsg').textContent=e.code==='auth/invalid-credential'?'E-mail ou senha incorretos.':e.code==='auth/too-many-requests'?'Muitas tentativas. Aguarde um pouco e tente novamente.':'Não foi possível entrar. Confira a conexão e os dados de acesso.'}finally{$('loginBtn').disabled=false;$('registerBtn').disabled=false}}
