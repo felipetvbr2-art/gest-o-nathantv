@@ -332,9 +332,28 @@ function validateBackup(obj){
   if(obj?.app!=='Gestao de Clientes'||!data||!Array.isArray(data.clients)||!Array.isArray(data.payments)||!Array.isArray(data.costs))throw new Error('Arquivo de backup inválido.');
   if(data.clients.length>20)throw new Error('Este backup tem mais de 20 clientes e ultrapassa o limite do plano Free.');
   if(data.payments.length>5000||data.costs.length>5000)throw new Error('O backup contém registros demais.');
-  for(const key of ['clients','payments','costs'])for(const item of data[key]){
-    if(!item||typeof item!=='object'||Array.isArray(item))throw new Error('Há um registro inválido no backup.');
-    if(item.id!=null&&(typeof item.id!=='string'||item.id.length>128))throw new Error('Há um identificador inválido no backup.');
+  const validText=(v,max,optional=false)=>optional&&(v==null||v==='')||typeof v==='string'&&v.length<=max;
+  const validDate=v=>typeof v==='string'&&/^\\d{4}-\\d{2}-\\d{2}$/.test(v)&&!Number.isNaN(Date.parse(v+'T00:00:00'));
+  for(const [key,items] of Object.entries({clients:data.clients,payments:data.payments,costs:data.costs})){
+    const ids=new Set();
+    for(const item of items){
+      if(!item||typeof item!=='object'||Array.isArray(item))throw new Error('Há um registro inválido no backup.');
+      if(!validText(item.id,128)||!item.id)throw new Error('Há um identificador inválido no backup.');
+      if(ids.has(item.id))throw new Error('O backup contém identificadores duplicados em '+key+'.');
+      ids.add(item.id);
+      if(key==='clients'){
+        if(!validText(item.name,120)||!item.name.trim()||!validText(item.phone,30)||!Number.isFinite(Number(item.price))||Number(item.price)<=0)throw new Error('Há um cliente com nome, telefone ou mensalidade inválidos.');
+        if(item.dueDate!=null&&!validDate(item.dueDate))throw new Error('Há um vencimento inválido no backup.');
+        for(const field of ['notes','serviceType','serviceUser','servicePass','lastRenewal'])if(!validText(item[field],2000,true))throw new Error('Há um campo de cliente muito longo ou inválido: '+field+'.');
+      }else if(key==='payments'){
+        if(!Number.isFinite(Number(item.amount))||Number(item.amount)<=0||!validDate(item.date))throw new Error('Há um pagamento com valor ou data inválidos.');
+        for(const field of ['clientId','clientName','method','proof','ref','status','paidAt'])if(!validText(item[field],500,true))throw new Error('Há um campo de pagamento muito longo ou inválido: '+field+'.');
+        if(item.paidAt!=null&&item.paidAt!==''&&!validDate(item.paidAt))throw new Error('Há uma data de confirmação inválida no backup.');
+      }else{
+        if(!Number.isFinite(Number(item.amount))||Number(item.amount)<0||!validDate(item.date))throw new Error('Há um custo com valor ou data inválidos.');
+        for(const field of ['desc','vendor','kind','clientId'])if(!validText(item[field],500,true))throw new Error('Há um campo de custo muito longo ou inválido: '+field+'.');
+      }
+    }
   }
   return {clients:data.clients,payments:data.payments,costs:data.costs};
 }
