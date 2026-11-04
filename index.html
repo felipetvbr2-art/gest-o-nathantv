@@ -143,7 +143,7 @@ main{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
-import { getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp, collection, getDocs } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
 (()=> {
 const $=id=>document.getElementById(id);
@@ -166,6 +166,43 @@ const money=n=>Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'B
 const monthKey=d=>(d||'').slice(0,7);
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 function setStatus(message,isError=false){const el=$('syncStatus');if(el){el.textContent=(isError?'● ':'● ')+message;el.style.color=isError?'#ff8585':'#8dffb7'}}
+async function migrateLegacyRecords(userId,legacyData){
+  const groups=[{key:'payments',name:'pagamentos'},{key:'costs',name:'custos'}];
+  let copied=0;
+  for(const group of groups){
+    const records=Array.isArray(legacyData[group.key])?legacyData[group.key]:[];
+    const target=collection(store,'usuarios',userId,'dados','principal',group.name);
+    const before=await getDocs(target);
+    const existing=new Map(before.docs.map(d=>[d.id,d.data()]));
+    const prepared=[];
+    const sourceIds=new Set();
+    records.forEach((record,index)=>{
+      if(!record||typeof record!=='object'||Array.isArray(record))throw new Error('Registro inválido em '+group.name+'.');
+      const rawId=typeof record.id==='string'?record.id.trim():'';
+      const id=/^[A-Za-z0-9_-]{1,128}$/.test(rawId)?rawId:('legacy_'+group.key+'_'+String(index).padStart(6,'0'));
+      if(sourceIds.has(id))throw new Error('Identificador repetido em '+group.name+'.');
+      sourceIds.add(id);
+      const amount=Number(record.amount);
+      if(!Number.isFinite(amount)||amount<0)throw new Error('Valor inválido em '+group.name+'.');
+      const date=typeof record.date==='string'?record.date:'';
+      const data={...record,id,amount,date};
+      if(existing.has(id)){
+        const saved=existing.get(id);
+        if(Number(saved.amount)!==amount||(saved.date||'')!==date)throw new Error('Foi encontrada divergência no registro '+id+'. Nenhum registro existente foi sobrescrito.');
+      }
+      prepared.push({id,data});
+    });
+    for(let i=0;i<prepared.length;i+=100){
+      const chunk=prepared.slice(i,i+100).filter(item=>!existing.has(item.id));
+      await Promise.all(chunk.map(item=>setDoc(doc(target,item.id),item.data)));
+      copied+=chunk.length;
+    }
+    const after=await getDocs(target);
+    const savedIds=new Set(after.docs.map(d=>d.id));
+    if(prepared.some(item=>!savedIds.has(item.id)))throw new Error('A conferência de '+group.name+' não encontrou todos os registros.');
+  }
+  return copied;
+}
 async function persist(){if(!currentUser||!cloudRef)throw new Error('Faça login para salvar os dados.');saving=true;setStatus('Salvando na nuvem...');try{await setDoc(cloudRef,{clients:db.clients,payments:db.payments,costs:db.costs,updatedAt:serverTimestamp()});setStatus('Sincronizado com a nuvem')}catch(e){setStatus('Falha ao sincronizar. Verifique sua conexão e as regras do Firestore.',true);throw e}finally{saving=false}}
 function showAuth(msg=''){ $('appLoading').classList.add('hidden');$('auth').classList.remove('hidden');$('app').classList.add('hidden');$('authMsg').textContent=msg; }
 function enter(){ $('appLoading').classList.add('hidden');$('auth').classList.add('hidden');$('app').classList.remove('hidden');loadTheme();renderAll(); }
@@ -174,7 +211,7 @@ async function register(){const email=$('loginEmail').value.trim(),password=$('l
 $('loginBtn').onclick=login;$('registerBtn').onclick=register;
 $('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
 const authFallback=setTimeout(()=>{if($('appLoading')&&!$('appLoading').classList.contains('hidden')&&$('app').classList.contains('hidden'))showAuth('A verificação demorou. Confira sua conexão e entre novamente.');},12000);
-onAuthStateChanged(auth,async user=>{clearTimeout(authFallback);if(user)$('appLoading').classList.remove('hidden');if(unsubscribeCloud){unsubscribeCloud();unsubscribeCloud=null}currentUser=user;if(!user){cloudRef=null;db={clients:[],payments:[],costs:[]};showAuth();return}cloudRef=doc(store,'usuarios',user.uid,'dados','principal');setStatus('Carregando seus dados...');try{const snap=await getDoc(cloudRef);if(!snap.exists()){await setDoc(cloudRef,{clients:[],payments:[],costs:[],createdAt:serverTimestamp()})}unsubscribeCloud=onSnapshot(cloudRef,s=>{if(!s.exists())return;const data=s.data();db={clients:Array.isArray(data.clients)?data.clients:[],payments:Array.isArray(data.payments)?data.payments:[],costs:Array.isArray(data.costs)?data.costs:[]};db.clients=db.clients.map(c=>({...c,dueDate:c.dueDate||(c.due?`${today().slice(0,7)}-${String(Math.min(Number(c.due),new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate())).padStart(2,'0')}`:today())}));enter();setStatus('Sincronizado com a nuvem')},err=>setStatus('Erro ao receber atualizações do Firestore.',true));}catch(e){setStatus('Não foi possível abrir o banco. Confira as regras do Firestore.',true);showAuth('Não foi possível carregar os dados. Confira as regras do Firestore e tente entrar novamente.')}});
+onAuthStateChanged(auth,async user=>{clearTimeout(authFallback);if(user)$('appLoading').classList.remove('hidden');if(unsubscribeCloud){unsubscribeCloud();unsubscribeCloud=null}currentUser=user;if(!user){cloudRef=null;db={clients:[],payments:[],costs:[]};showAuth();return}cloudRef=doc(store,'usuarios',user.uid,'dados','principal');setStatus('Carregando seus dados...');try{const snap=await getDoc(cloudRef);if(!snap.exists()){await setDoc(cloudRef,{clients:[],payments:[],costs:[],createdAt:serverTimestamp()})}const legacy=snap.exists()?snap.data():{clients:[],payments:[],costs:[]};let migrationMessage='';try{const copied=await migrateLegacyRecords(user.uid,legacy);migrationMessage=copied?'Cópia conferida: '+copied+' registros financeiros em coleções separadas.':'Coleções financeiras conferidas.'}catch(migrationError){migrationMessage='Migração pendente: '+(migrationError.message||'verifique as regras do Firebase')}unsubscribeCloud=onSnapshot(cloudRef,s=>{if(!s.exists())return;const data=s.data();db={clients:Array.isArray(data.clients)?data.clients:[],payments:Array.isArray(data.payments)?data.payments:[],costs:Array.isArray(data.costs)?data.costs:[]};db.clients=db.clients.map(c=>({...c,dueDate:c.dueDate||(c.due?`${today().slice(0,7)}-${String(Math.min(Number(c.due),new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate())).padStart(2,'0')}`:today())}));enter();setStatus(migrationMessage||'Sincronizado com a nuvem',!!migrationMessage.startsWith('Migração pendente'))},err=>setStatus('Erro ao receber atualizações do Firestore.',true));}catch(e){setStatus('Não foi possível abrir o banco. Confira as regras do Firestore.',true);showAuth('Não foi possível carregar os dados. Confira as regras do Firestore e tente entrar novamente.')}});
 const tabNames=['resumo','clientes','pagamentos','vencimentos','meuPlano','usuarios','backup'];
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x.dataset.tab===b.dataset.tab));tabNames.forEach(t=>$('tab-'+t).classList.toggle('hidden',t!==b.dataset.tab));$('tabs').classList.remove('open');renderAll()});
 $('menuToggle').onclick=()=>$('tabs').classList.toggle('open');
