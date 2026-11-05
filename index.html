@@ -459,6 +459,7 @@ function validateBackup(obj){
   }
   return {clients:data.clients,payments:data.payments,costs:data.costs};
 }
+function stableClientData(value){return JSON.stringify(Object.fromEntries(Object.keys(value||{}).sort().map(key=>[key,value[key]])))}
 async function migrateClientsSafely(){
   const status=$('clientMigrationStatus'),button=$('migrateClientsBtn');
   if(!currentUser){status.textContent='Entre na sua conta antes de iniciar.';return}
@@ -479,7 +480,7 @@ async function migrateClientsSafely(){
       ids.add(id);
       const data={...client,id};
       if(existing.has(id)){
-        if(JSON.stringify(existing.get(id))!==JSON.stringify(data))throw new Error('O documento '+id+' já existe com conteúdo diferente. Nenhum registro foi sobrescrito.');
+        if(stableClientData(existing.get(id))!==stableClientData(data))throw new Error('O documento '+id+' já existe com conteúdo diferente. Nenhum registro foi sobrescrito.');
       }else prepared.push({id,data});
     }
     status.textContent='Conferência concluída. Copiando '+prepared.length+' cliente(s) que ainda não existem...';
@@ -492,7 +493,7 @@ async function migrateClientsSafely(){
     if(saved.size!==ids.size||[...ids].some(id=>!saved.has(id)))throw new Error('A verificação final encontrou diferença na quantidade ou nos identificadores. A lista antiga foi mantida.');
     for(const client of source){
       const actual=saved.get(client.id);
-      if(JSON.stringify(actual)!==JSON.stringify(client))throw new Error('A verificação do cliente '+client.id+' falhou. A lista antiga foi mantida.');
+      if(stableClientData(actual)!==stableClientData(client))throw new Error('A verificação do cliente '+client.id+' falhou. A lista antiga foi mantida.');
     }
     status.textContent='Conferência concluída: '+source.length+' cliente(s) na origem e '+saved.size+' na nova coleção. A lista antiga continua preservada.';
     await showAppDialog('Migração conferida com sucesso. '+saved.size+' cliente(s) estão na nova coleção e a lista antiga continua intacta.',{title:'Migração conferida',okText:'Entendi'});
