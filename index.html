@@ -284,6 +284,7 @@ function stableFinancialId(record,index,key){
 async function prepareFinancialChanges(batch){
   const groups=[{key:'payments',name:'pagamentos'},{key:'costs',name:'custos'}];
   const checks=[];
+  let operationCount=0;
   for(const group of groups){
     const records=Array.isArray(db[group.key])?db[group.key]:[];
     const target=collection(store,'usuarios',currentUser.uid,'dados','principal',group.name);
@@ -301,11 +302,13 @@ async function prepareFinancialChanges(batch){
       const date=typeof record.date==='string'?record.date:'';
       prepared.push({id,data:{...record,id,amount,date}});
     });
+    const stale=[...existing.entries()].filter(([id])=>!ids.has(id));
+    operationCount+=prepared.length+stale.length;
     for(const item of prepared)batch.set(doc(target,item.id),item.data);
-    for(const [id,ref] of existing)if(!ids.has(id))batch.delete(ref);
+    for(const [,ref] of stale)batch.delete(ref);
     checks.push({target,prepared,expectedIds:ids,name:group.name});
   }
-  return checks;
+  return {checks,operationCount};
 }
 async function verifyFinancialChanges(checks){
   for(const group of checks){
@@ -333,16 +336,16 @@ async function persist(){
       nextIds.add(client.id);
     }
     const stale=existing.docs.filter(item=>!nextIds.has(item.id));
-    const operations=1+db.clients.length+stale.length+db.payments.length+db.costs.length+existing.size;
-    if(operations>450)throw new Error('A sincronização excede o limite seguro de operações. Nenhuma alteração foi enviada.');
     const batch=writeBatch(store);
-    const financialChecks=await prepareFinancialChanges(batch);
+    const financialPlan=await prepareFinancialChanges(batch);
+    const operations=1+db.clients.length+stale.length+financialPlan.operationCount;
+    if(operations>450)throw new Error('A sincronização excede o limite seguro de operações. Nenhuma alteração foi enviada.');
     batch.set(cloudRef,{clients:db.clients,payments:db.payments,costs:db.costs,updatedAt:serverTimestamp()},{merge:true});
     for(const client of db.clients)batch.set(doc(target,client.id),client);
     for(const item of stale)batch.delete(item.ref);
     setStatus('Enviando clientes e financeiro em uma única operação...');
     await batch.commit();
-    await verifyFinancialChanges(financialChecks);
+    await verifyFinancialChanges(financialPlan.checks);
     setStatus('Clientes, pagamentos e custos sincronizados.');
   }catch(e){
     setStatus('Falha na sincronização. Os dados locais foram mantidos; confira as regras do Firebase antes de tentar novamente.',true);
