@@ -281,13 +281,14 @@ function stableFinancialId(record,index,key){
   const raw=typeof record.id==='string'?record.id.trim():'';
   return /^[A-Za-z0-9_-]{1,128}$/.test(raw)?raw:('legacy_'+key+'_'+String(index).padStart(6,'0'));
 }
-async function syncFinancialCollections(){
+async function prepareFinancialChanges(batch){
   const groups=[{key:'payments',name:'pagamentos'},{key:'costs',name:'custos'}];
+  const checks=[];
   for(const group of groups){
     const records=Array.isArray(db[group.key])?db[group.key]:[];
     const target=collection(store,'usuarios',currentUser.uid,'dados','principal',group.name);
     const snapshot=await getDocs(target);
-    const existing=new Map(snapshot.docs.map(d=>[d.id,d.ref]));
+    const existing=new Map(snapshot.docs.map(item=>[item.id,item.ref]));
     const prepared=[];
     const ids=new Set();
     records.forEach((record,index)=>{
@@ -300,29 +301,29 @@ async function syncFinancialCollections(){
       const date=typeof record.date==='string'?record.date:'';
       prepared.push({id,data:{...record,id,amount,date}});
     });
-    for(let i=0;i<prepared.length;i+=100){
-      await Promise.all(prepared.slice(i,i+100).map(item=>setDoc(doc(target,item.id),item.data)));
-    }
-    const stale=[...existing.entries()].filter(([id])=>!ids.has(id));
-    for(let i=0;i<stale.length;i+=100){
-      await Promise.all(stale.slice(i,i+100).map(([,ref])=>deleteDoc(ref)));
-    }
-    const verified=await getDocs(target);
-    const saved=new Map(verified.docs.map(d=>[d.id,d.data()]));
-    if(saved.size!==ids.size||[...ids].some(id=>!saved.has(id)))throw new Error('A conferência de '+group.name+' falhou: quantidade ou identificadores diferentes.');
-    for(const item of prepared){
+    for(const item of prepared)batch.set(doc(target,item.id),item.data);
+    for(const [id,ref] of existing)if(!ids.has(id))batch.delete(ref);
+    checks.push({target,prepared,expectedIds:ids,name:group.name});
+  }
+  return checks;
+}
+async function verifyFinancialChanges(checks){
+  for(const group of checks){
+    const snapshot=await getDocs(group.target);
+    const saved=new Map(snapshot.docs.map(item=>[item.id,item.data()]));
+    if(saved.size!==group.expectedIds.size||[...group.expectedIds].some(id=>!saved.has(id)))throw new Error('A conferência de '+group.name+' falhou após a sincronização.');
+    for(const item of group.prepared){
       const actual=saved.get(item.id),expected=item.data;
-      for(const field of ['amount','date','status','paidAt','method','clientId','clientName','desc','vendor','kind']){
-        if((actual?.[field]??null)!==(expected?.[field]??null))throw new Error('A conferência do campo '+field+' falhou no registro '+item.id+' da coleção '+group.name+'.');
+      for(const field of Object.keys(expected)){
+        if((actual?.[field]??null)!==(expected?.[field]??null))throw new Error('A conferência do campo '+field+' falhou em '+group.name+'.');
       }
     }
   }
 }
 async function persist(){
   if(!currentUser||!cloudRef)throw new Error('Faça login para salvar os dados.');
-  saving=true;setStatus('Salvando na nuvem...');
+  saving=true;setStatus('Preparando sincronização segura...');
   try{
-    await syncFinancialCollections();
     const target=collection(store,'usuarios',currentUser.uid,'clientes');
     const existing=await getDocs(target);
     const nextIds=new Set();
@@ -332,16 +333,19 @@ async function persist(){
       nextIds.add(client.id);
     }
     const stale=existing.docs.filter(item=>!nextIds.has(item.id));
-    const operations=1+db.clients.length+stale.length;
-    if(operations>500)throw new Error('A sincronização excedeu o limite de operações do Firestore.');
+    const operations=1+db.clients.length+stale.length+db.payments.length+db.costs.length+existing.size;
+    if(operations>450)throw new Error('A sincronização excede o limite seguro de operações. Nenhuma alteração foi enviada.');
     const batch=writeBatch(store);
+    const financialChecks=await prepareFinancialChanges(batch);
     batch.set(cloudRef,{clients:db.clients,payments:db.payments,costs:db.costs,updatedAt:serverTimestamp()},{merge:true});
     for(const client of db.clients)batch.set(doc(target,client.id),client);
     for(const item of stale)batch.delete(item.ref);
+    setStatus('Enviando clientes e financeiro em uma única operação...');
     await batch.commit();
-    setStatus('Sincronizado na lista antiga e nos documentos individuais');
+    await verifyFinancialChanges(financialChecks);
+    setStatus('Clientes, pagamentos e custos sincronizados.');
   }catch(e){
-    setStatus('Falha ao sincronizar os dados. Confira as regras de migração e tente novamente.',true);
+    setStatus('Falha na sincronização. Os dados locais foram mantidos; confira as regras do Firebase antes de tentar novamente.',true);
     throw e;
   }finally{saving=false}
 }
