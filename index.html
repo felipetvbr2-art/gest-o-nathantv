@@ -465,7 +465,10 @@ async function migrateClientsSafely(){
   if(!currentUser){status.textContent='Entre na sua conta antes de iniciar.';return}
   button.disabled=true;
   try{
-    const source=Array.isArray(db.clients)?db.clients:[];
+    const legacySnap=await getDoc(cloudRef);
+    if(!legacySnap.exists())throw new Error('O documento original não foi encontrado. Nenhum dado foi copiado.');
+    const legacyData=legacySnap.data();
+    const source=Array.isArray(legacyData.clients)?legacyData.clients:[];
     const target=collection(store,'usuarios',currentUser.uid,'clientes');
     status.textContent='Conferindo '+source.length+' clientes na origem e na nova coleção...';
     const before=await getDocs(target);
