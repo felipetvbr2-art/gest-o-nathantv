@@ -79,6 +79,22 @@ main{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
 .client-cancel-btn{color:#ff4565;border:1.5px solid #ff4565;box-shadow:inset 0 0 14px #ff456515,0 0 13px #ff456533;text-shadow:0 0 9px #ff456570}
 .client-cancel-btn:hover{background:#ff456518;box-shadow:inset 0 0 18px #ff456520,0 0 20px #ff456560}
 @media(max-width:420px){.client-form-overlay{padding:8px}.client-form-overlay>.client-form-card{padding:16px;border-radius:20px}.client-form-actions{gap:8px}.client-form-actions button{min-height:51px;font-size:13px}}
+
+/* Ajuste mobile: formulário compacto e ações sempre acessíveis */
+@media(max-width:700px){
+ .client-form-overlay{align-items:center;padding:8px 9px calc(12px + env(safe-area-inset-bottom))}
+ .client-form-overlay>.client-form-card{max-height:86dvh;width:min(100%,560px);padding:15px 16px 12px;border-radius:20px;overflow-y:auto;overscroll-behavior:contain}
+ .client-form-card .itemtop{margin-bottom:9px;padding-bottom:9px}
+ .client-form-card h2{font-size:19px}
+ .client-form-card label{margin:8px 0 4px;font-size:12px}
+ .client-form-card input,.client-form-card textarea{min-height:42px;padding:9px 11px;border-radius:11px}
+ .client-form-card input[type=file]{min-height:46px;padding:8px;font-size:12px}
+ .client-form-card .muted{font-size:12px;line-height:1.35;margin-top:7px}
+ .client-form-card #packageSummary{padding:9px 11px;margin-top:9px;font-size:12px}
+ .client-form-actions{position:sticky;bottom:-12px;z-index:3;background:var(--card);padding:10px 0 calc(5px + env(safe-area-inset-bottom));margin-top:10px}
+ .client-form-actions button{min-height:46px;font-size:12px}
+}
+
 </style>
 </head>
 <body>
