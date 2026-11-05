@@ -186,7 +186,7 @@ main{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
 <div class="card"><h2>Backup dos dados</h2><p class="muted">O arquivo de backup contém os dados dos clientes e pagamentos. Guarde-o em local privado e não envie a terceiros.</p><button id="exportBtn" class="btn" style="width:100%">Exportar backup JSON</button>
 <div class="hr"></div><h3>Comprovantes no Google Drive</h3><p class="muted">Conecte sua conta Google para guardar os comprovantes de pagamentos e renovações em seu Drive.</p><button id="connectDriveBtn" class="btn secondary" style="width:100%">Conectar Google Drive</button><p id="driveStatus" class="muted" role="status" style="margin-top:8px">Google Drive não conectado.</p>
 <div class="hr"></div><label>Restaurar backup (.json)</label><input id="importFile" type="file" accept=".json,application/json"><button id="importBtn" class="btn secondary" style="width:100%;margin-top:10px">Restaurar backup</button><p id="backupMsg" class="muted" role="status"></p></div>
-<div class="card"><h2>Segurança</h2><p class="muted">O acesso aos dados é controlado pelas regras do Firestore para sua conta.</p><button id="securityProbeBtn" class="btn secondary" style="width:100%">Testar proteção entre contas</button><p id="securityProbeResult" class="muted" role="status" style="margin-top:10px">Entre com a segunda conta de teste antes de executar esta verificação.</p><div class="hr"></div><button id="lockBtn" class="btn secondary" style="width:100%">Sair da conta</button></div>
+<div class="card"><h2>Migração de clientes</h2><p class="muted">Etapa de preparação: copia os clientes da lista antiga para documentos individuais na coleção clientes. A lista original não será apagada nem modificada.</p><button id="migrateClientsBtn" class="btn secondary" type="button" style="width:100%">Conferir e preparar migração</button><p id="clientMigrationStatus" class="muted" role="status" style="margin-top:10px">Aguardando conferência. As regras do Firestore precisam permitir a coleção clientes.</p></div><div class="card"><h2>Segurança</h2><p class="muted">O acesso aos dados é controlado pelas regras do Firestore para sua conta.</p><button id="securityProbeBtn" class="btn secondary" style="width:100%">Testar proteção entre contas</button><p id="securityProbeResult" class="muted" role="status" style="margin-top:10px">Entre com a segunda conta de teste antes de executar esta verificação.</p><div class="hr"></div><button id="lockBtn" class="btn secondary" style="width:100%">Sair da conta</button></div>
 </section>
 <section id="tab-vencimentos" class="hidden"><div class="card"><h2>Próximos vencimentos</h2><p class="muted">Clientes com vencimento nos próximos 7 dias e clientes em atraso.</p><div id="dueList"></div></div></section>
 <section id="tab-meuPlano" class="hidden"><div class="card"><h2>Meu plano</h2><p class="muted">Veja seu plano atual e acompanhe o uso da sua conta.</p><div class="item" style="border-left:4px solid var(--gold)"><div class="itemtop"><div><span class="pill green">Plano atual</span><h2 style="margin-top:10px">Free</h2><p class="muted">Gratuito • sem cobrança recorrente</p></div><strong style="font-size:22px">R$ 0,00</strong></div><div class="hr"></div><div class="itemtop"><strong>Clientes cadastrados</strong><strong id="planClientCount">0 de 20</strong></div><div style="height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:10px"><div id="planUsageBar" style="height:100%;width:0%;background:var(--gold);border-radius:99px"></div></div><p class="muted" id="planUsageText" style="margin-top:8px">Você pode cadastrar até 20 clientes no plano Free.</p></div><div class="item"><span class="pill amber">Premium</span><h2 style="margin-top:10px">Mais recursos para sua gestão</h2><strong style="font-size:25px">R$ 9,90 <span class="muted">/ mês</span></strong><ul><li>Clientes ilimitados</li><li>Relatórios avançados</li><li>Histórico completo</li><li>Recursos avançados de backup</li></ul><p class="muted">Sem período de teste grátis. A assinatura será feita pela Google Play quando a integração estiver pronta.</p><button class="btn" id="premiumInfoBtn" type="button" style="width:100%">Conhecer o Premium</button></div></div></section>
@@ -459,6 +459,51 @@ function validateBackup(obj){
   }
   return {clients:data.clients,payments:data.payments,costs:data.costs};
 }
+async function migrateClientsSafely(){
+  const status=$('clientMigrationStatus'),button=$('migrateClientsBtn');
+  if(!currentUser){status.textContent='Entre na sua conta antes de iniciar.';return}
+  button.disabled=true;
+  try{
+    const source=Array.isArray(db.clients)?db.clients:[];
+    const target=collection(store,'usuarios',currentUser.uid,'clientes');
+    status.textContent='Conferindo '+source.length+' clientes na origem e na nova coleção...';
+    const before=await getDocs(target);
+    const existing=new Map(before.docs.map(snap=>[snap.id,snap.data()]));
+    const prepared=[];
+    const ids=new Set();
+    for(const client of source){
+      if(!client||typeof client!=='object'||Array.isArray(client))throw new Error('Foi encontrado um cliente inválido na lista antiga.');
+      const id=typeof client.id==='string'?client.id.trim():'';
+      if(!/^[A-Za-z0-9_-]{1,128}$/.test(id))throw new Error('Um cliente possui identificador inválido. Nenhum dado foi copiado.');
+      if(ids.has(id))throw new Error('Existem identificadores repetidos na lista antiga. Nenhum dado foi copiado.');
+      ids.add(id);
+      const data={...client,id};
+      if(existing.has(id)){
+        if(JSON.stringify(existing.get(id))!==JSON.stringify(data))throw new Error('O documento '+id+' já existe com conteúdo diferente. Nenhum registro foi sobrescrito.');
+      }else prepared.push({id,data});
+    }
+    status.textContent='Conferência concluída. Copiando '+prepared.length+' cliente(s) que ainda não existem...';
+    for(let i=0;i<prepared.length;i+=400){
+      const chunk=prepared.slice(i,i+400);
+      await Promise.all(chunk.map(item=>setDoc(doc(target,item.id),item.data)));
+    }
+    const after=await getDocs(target);
+    const saved=new Map(after.docs.map(snap=>[snap.id,snap.data()]));
+    if(saved.size!==ids.size||[...ids].some(id=>!saved.has(id)))throw new Error('A verificação final encontrou diferença na quantidade ou nos identificadores. A lista antiga foi mantida.');
+    for(const client of source){
+      const actual=saved.get(client.id);
+      if(JSON.stringify(actual)!==JSON.stringify(client))throw new Error('A verificação do cliente '+client.id+' falhou. A lista antiga foi mantida.');
+    }
+    status.textContent='Conferência concluída: '+source.length+' cliente(s) na origem e '+saved.size+' na nova coleção. A lista antiga continua preservada.';
+    await showAppDialog('Migração conferida com sucesso. '+saved.size+' cliente(s) estão na nova coleção e a lista antiga continua intacta.',{title:'Migração conferida',okText:'Entendi'});
+  }catch(error){
+    console.error('Migração segura de clientes:',error);
+    const detail=error?.code==='permission-denied'?'O Firestore ainda não permite acessar a coleção clientes. É necessário publicar regras específicas antes de executar a migração.':(error.message||'Falha inesperada.');
+    status.textContent='Migração não concluída: '+detail;
+    await showAppDialog(detail,{title:'Migração não executada',okText:'Entendi'});
+  }finally{button.disabled=false}
+}
+$('migrateClientsBtn').onclick=migrateClientsSafely;
 $('importBtn').onclick=async()=>{
   const f=$('importFile').files[0];
   if(!f){$('backupMsg').textContent='Selecione um arquivo de backup primeiro.';return}
