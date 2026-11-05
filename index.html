@@ -216,7 +216,7 @@ main{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithRedirect, linkWithRedirect, updateProfile } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
-import { getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp, collection, getDocs, deleteDoc } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp, collection, getDocs, deleteDoc, writeBatch } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
 (()=> {
 const $=id=>document.getElementById(id);
@@ -323,10 +323,25 @@ async function persist(){
   saving=true;setStatus('Salvando na nuvem...');
   try{
     await syncFinancialCollections();
-    await setDoc(cloudRef,{clients:db.clients,payments:db.payments,costs:db.costs,updatedAt:serverTimestamp()},{merge:true});
-    setStatus('Sincronizado com a nuvem');
+    const target=collection(store,'usuarios',currentUser.uid,'clientes');
+    const existing=await getDocs(target);
+    const nextIds=new Set();
+    for(const client of db.clients){
+      if(!client||typeof client.id!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(client.id))throw new Error('Cliente com identificador inválido. Nenhuma alteração foi sincronizada.');
+      if(nextIds.has(client.id))throw new Error('Há clientes com identificadores repetidos. Nenhuma alteração foi sincronizada.');
+      nextIds.add(client.id);
+    }
+    const stale=existing.docs.filter(item=>!nextIds.has(item.id));
+    const operations=1+db.clients.length+stale.length;
+    if(operations>500)throw new Error('A sincronização excedeu o limite de operações do Firestore.');
+    const batch=writeBatch(store);
+    batch.set(cloudRef,{clients:db.clients,payments:db.payments,costs:db.costs,updatedAt:serverTimestamp()},{merge:true});
+    for(const client of db.clients)batch.set(doc(target,client.id),client);
+    for(const item of stale)batch.delete(item.ref);
+    await batch.commit();
+    setStatus('Sincronizado na lista antiga e nos documentos individuais');
   }catch(e){
-    setStatus('Falha ao sincronizar os dados. Verifique a conexão e as regras do Firestore.',true);
+    setStatus('Falha ao sincronizar os dados. Confira as regras de migração e tente novamente.',true);
     throw e;
   }finally{saving=false}
 }
