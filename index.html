@@ -57,6 +57,7 @@ main{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
 
 /* Diálogos personalizados do aplicativo */
 .app-dialog-backdrop{position:fixed;inset:0;background:#080d15a8;display:none;align-items:center;justify-content:center;padding:22px;z-index:9999}.app-dialog-backdrop.show{display:flex}.app-dialog{width:min(100%,420px);background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:22px;padding:23px;box-shadow:0 18px 60px #0005}.app-dialog h2{font-size:20px;margin:0 0 12px}.app-dialog p{white-space:pre-line;color:var(--muted);line-height:1.5;margin:0 0 22px}.app-dialog-actions{display:flex;justify-content:flex-end;gap:10px}.app-dialog-actions button{border:0;border-radius:12px;padding:12px 18px;font-weight:700;font-size:14px}.app-dialog-cancel{background:var(--bg);color:var(--ink)}.app-dialog-ok{background:var(--gold);color:#17130a}
+.nickname-dialog-input{width:100%;margin:0 0 22px;padding:12px 13px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font:inherit}.nickname-dialog .app-dialog p{margin-bottom:12px}
 </style>
 </head>
 <body>
@@ -261,7 +262,7 @@ async function persist(){
 }
 function showAuth(msg=''){ $('appLoading').classList.add('hidden');$('auth').classList.remove('hidden');$('app').classList.add('hidden');$('authMsg').textContent=msg; }
 function renderProfile(){const name=(currentUser?.displayName||currentUser?.email?.split('@')[0]||'Usuário').trim();$('profileNickname').textContent=name;$('profileAvatar').textContent=(name[0]||'U').toUpperCase();$('profileBtn').title='Apelido: '+name+' • Toque para editar';}
-async function chooseNickname(force=false){if(!currentUser)return;const current=currentUser.displayName||currentUser.email?.split('@')[0]||'';const value=prompt('Escolha seu apelido (até 24 caracteres):',current);if(value===null&&!force)return;const nickname=(value||'').trim().replace(/\\s+/g,' ').slice(0,24);if(nickname.length<2){alert('O apelido precisa ter pelo menos 2 caracteres.');return}try{await updateProfile(currentUser,{displayName:nickname});renderProfile()}catch(e){alert('Não foi possível salvar o apelido. Tente novamente.');}}
+async function chooseNickname(force=false){if(!currentUser)return;const current=currentUser.displayName||currentUser.email?.split('@')[0]||'';const value=await window.showNicknameDialog(current);if(value===null&&!force)return;const nickname=(value||'').trim().replace(/\\s+/g,' ').slice(0,24);if(nickname.length<2){alert('O apelido precisa ter pelo menos 2 caracteres.');return}try{await updateProfile(currentUser,{displayName:nickname});renderProfile()}catch(e){alert('Não foi possível salvar o apelido. Tente novamente.');}}
 function enter(){ $('appLoading').classList.add('hidden');$('auth').classList.add('hidden');$('app').classList.remove('hidden');loadTheme();renderProfile();renderAll(); }
 async function login(){const email=$('loginEmail').value.trim(),password=$('loginPassword').value;if(!email||!password){$('authMsg').textContent='Informe seu e-mail e sua senha.';return} $('loginBtn').disabled=true;$('authMsg').textContent='Entrando...';try{await signInWithEmailAndPassword(auth,email,password)}catch(e){$('authMsg').textContent=e.code==='auth/invalid-credential'?'E-mail ou senha incorretos.':e.code==='auth/too-many-requests'?'Muitas tentativas. Aguarde um pouco e tente novamente.':'Não foi possível entrar. Confira a conexão e os dados de acesso.'}finally{$('loginBtn').disabled=false}}
 $('loginBtn').onclick=login;
@@ -450,6 +451,21 @@ if ("serviceWorker" in navigator) {
 <div id="appDialogBackdrop" class="app-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="appDialogTitle"><div class="app-dialog"><h2 id="appDialogTitle">Gestão de Clientes</h2><p id="appDialogMessage"></p><div class="app-dialog-actions"><button id="appDialogCancel" class="app-dialog-cancel">Cancelar</button><button id="appDialogOk" class="app-dialog-ok">OK</button></div></div></div>
 <script>
 window.showAppDialog=(message,{title='Gestão de Clientes',confirm=false,okText='OK',cancelText='Cancelar'}={})=>new Promise(resolve=>{const box=document.getElementById('appDialogBackdrop'),msg=document.getElementById('appDialogMessage'),heading=document.getElementById('appDialogTitle'),ok=document.getElementById('appDialogOk'),cancel=document.getElementById('appDialogCancel');heading.textContent=title;msg.textContent=message;ok.textContent=okText;cancel.textContent=cancelText;cancel.style.display=confirm?'inline-block':'none';const finish=value=>{box.classList.remove('show');ok.onclick=null;cancel.onclick=null;resolve(value)};ok.onclick=()=>finish(true);cancel.onclick=()=>finish(false);box.onclick=e=>{if(e.target===box&&!confirm)finish(true)};box.classList.add('show')});
+
+window.showNicknameDialog=(initial='')=>new Promise(resolve=>{
+ const backdrop=document.createElement('div');backdrop.className='app-dialog-backdrop show';
+ const box=document.createElement('div');box.className='app-dialog nickname-dialog';
+ const title=document.createElement('h2');title.textContent='Escolha um apelido';
+ const message=document.createElement('p');message.textContent='Como você gostaria de ser chamado no aplicativo?';
+ const input=document.createElement('input');input.className='nickname-dialog-input';input.type='text';input.maxLength=24;input.placeholder='Digite seu apelido';input.value=initial;
+ const actions=document.createElement('div');actions.className='app-dialog-actions';
+ const cancel=document.createElement('button');cancel.className='app-dialog-cancel';cancel.textContent='Cancelar';
+ const ok=document.createElement('button');ok.className='app-dialog-ok';ok.textContent='Salvar';
+ actions.append(cancel,ok);box.append(title,message,input,actions);backdrop.append(box);document.body.append(backdrop);
+ const finish=value=>{backdrop.remove();resolve(value)};
+ cancel.onclick=()=>finish(null);ok.onclick=()=>finish(input.value);backdrop.onclick=e=>{if(e.target===backdrop)finish(null)};
+ input.focus();input.select();
+});
 </script>
 </body>
 </html>
