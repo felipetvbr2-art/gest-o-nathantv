@@ -394,17 +394,35 @@ $('securityProbeBtn').onclick=async()=>{
   const output=$('securityProbeResult'),button=$('securityProbeBtn');
   if(!currentUser){output.textContent='Faça login para executar o teste.';return}
   if(currentUser.uid==='7yWKtydeTmPf13mmIeP5XOsSp372'){output.textContent='Entre com a segunda conta de teste. Não execute este teste na conta administradora.';return}
-  button.disabled=true;output.textContent='Testando leitura de dados da conta administradora...';
+  button.disabled=true;output.textContent='Testando leitura, criação e exclusão na conta administradora...';
   const target='7yWKtydeTmPf13mmIeP5XOsSp372';
-  const checks=[
-    {label:'Documento principal',run:()=>getDoc(doc(store,'usuarios',target,'dados','principal'))},
-    {label:'Pagamentos',run:()=>getDocs(collection(store,'usuarios',target,'dados','principal','pagamentos'))},
-    {label:'Custos',run:()=>getDocs(collection(store,'usuarios',target,'dados','principal','custos'))}
-  ];
   const results=[];
-  for(const check of checks){
-    try{await check.run();results.push(check.label+': ACESSO PERMITIDO — revisar regra')}
-    catch(error){results.push(check.label+': '+(error.code==='permission-denied'?'BLOQUEADO corretamente':'ERRO: '+(error.code||error.message||'desconhecido')))}
+  const reads=[
+    {label:'Leitura principal',run:()=>getDoc(doc(store,'usuarios',target,'dados','principal'))},
+    {label:'Leitura pagamentos',run:()=>getDocs(collection(store,'usuarios',target,'dados','principal','pagamentos'))},
+    {label:'Leitura custos',run:()=>getDocs(collection(store,'usuarios',target,'dados','principal','custos'))}
+  ];
+  for(const check of reads){
+    try{await check.run();results.push(check.label+': ACESSO INDEVIDO')}
+    catch(error){results.push(check.label+': '+(error.code==='permission-denied'?'BLOQUEADO':'ERRO '+(error.code||'desconhecido')))}
+  }
+  for(const name of ['pagamentos','custos']){
+    const path=collection(store,'usuarios',target,'dados','principal',name);
+    const probeId='security_probe_'+currentUser.uid+'_'+Date.now()+'_'+name;
+    try{
+      await setDoc(doc(path,probeId),{id:probeId,amount:0,date:today()});
+      await deleteDoc(doc(path,probeId));
+      results.push('Criação '+name+': ACESSO INDEVIDO (teste removido)');
+    }catch(error){
+      if(error.code==='permission-denied')results.push('Criação '+name+': BLOQUEADO');
+      else results.push('Criação '+name+': ERRO '+(error.code||error.message||'desconhecido'));
+    }
+    try{
+      await deleteDoc(doc(path,'security_probe_inexistente_'+name));
+      results.push('Exclusão '+name+': ACESSO INDEVIDO');
+    }catch(error){
+      results.push('Exclusão '+name+': '+(error.code==='permission-denied'?'BLOQUEADO':'ERRO '+(error.code||'desconhecido')));
+    }
   }
   output.textContent=results.join(' | ');
   button.disabled=false;
