@@ -59,6 +59,26 @@ main{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
 .app-dialog-backdrop{position:fixed;inset:0;background:#080d15a8;display:none;align-items:center;justify-content:center;padding:22px;z-index:9999}.app-dialog-backdrop.show{display:flex}.app-dialog{width:min(100%,420px);background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:22px;padding:23px;box-shadow:0 18px 60px #0005}.app-dialog h2{font-size:20px;margin:0 0 12px}.app-dialog p{white-space:pre-line;color:var(--muted);line-height:1.5;margin:0 0 22px}.app-dialog-actions{display:flex;justify-content:flex-end;gap:10px}.app-dialog-actions button{border:0;border-radius:12px;padding:12px 18px;font-weight:700;font-size:14px}.app-dialog-cancel{background:var(--bg);color:var(--ink)}.app-dialog-ok{background:var(--gold);color:#17130a}
 .nickname-dialog-input{width:100%;margin:0 0 22px;padding:12px 13px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font:inherit}.nickname-dialog .app-dialog p{margin-bottom:12px}
 .avatar-choice-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:14px 0 18px}.avatar-choice{border:1px solid var(--line);border-radius:14px;background:var(--bg);font-size:27px;padding:10px;min-height:54px}.avatar-choice:active{outline:2px solid var(--gold)}.avatar-file{max-width:125px;font-size:11px;color:var(--muted)}#profileAvatar{background-size:cover;background-position:center}
+/* Formulário de cliente: visual moderno e ações neon */
+.client-form-overlay{backdrop-filter:blur(7px);background:rgba(8,13,22,.68);padding:14px}
+.client-form-overlay>.client-form-card{width:min(100%,590px);max-height:92dvh;padding:22px;border-radius:24px;border:1px solid color-mix(in srgb,var(--gold) 24%,var(--line));box-shadow:0 24px 70px #0005,0 0 0 1px #ffffff12;scrollbar-width:thin}
+.client-form-card form{padding-top:8px}
+.client-form-card .itemtop{align-items:center;margin-bottom:14px;padding-bottom:13px;border-bottom:1px solid var(--line)}
+.client-form-card h2{font-size:21px;letter-spacing:-.35px}
+.client-form-card label{font-size:13px;font-weight:750;margin:13px 0 6px;color:var(--ink)}
+.client-form-card input,.client-form-card textarea{border-radius:13px;min-height:49px;padding:12px 14px;background:var(--bg);border:1px solid var(--line);transition:border-color .18s,box-shadow .18s}
+.client-form-card input:focus,.client-form-card textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px #d6aa4526}
+.client-form-card input[type=file]{font-size:13px;min-height:54px}
+.client-form-card .muted{line-height:1.45}
+.client-form-card #packageSummary{border-radius:14px;border:1px solid #d6aa4540;background:#d6aa4518;color:var(--ink);padding:13px;margin-top:14px}
+.client-form-actions{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:17px}
+.client-form-actions button{min-height:54px;border-radius:14px;font-size:14px;font-weight:900;letter-spacing:1px;background:transparent;transition:transform .15s,box-shadow .15s}
+.client-form-actions button:active{transform:scale(.98)}
+.client-save-btn{color:#39ff88;border:1.5px solid #39ff88;box-shadow:inset 0 0 14px #39ff8815,0 0 13px #39ff8833;text-shadow:0 0 9px #39ff8870}
+.client-save-btn:hover{background:#39ff8818;box-shadow:inset 0 0 18px #39ff8820,0 0 20px #39ff8860}
+.client-cancel-btn{color:#ff4565;border:1.5px solid #ff4565;box-shadow:inset 0 0 14px #ff456515,0 0 13px #ff456533;text-shadow:0 0 9px #ff456570}
+.client-cancel-btn:hover{background:#ff456518;box-shadow:inset 0 0 18px #ff456520,0 0 20px #ff456560}
+@media(max-width:420px){.client-form-overlay{padding:8px}.client-form-overlay>.client-form-card{padding:16px;border-radius:20px}.client-form-actions{gap:8px}.client-form-actions button{min-height:51px;font-size:13px}}
 </style>
 </head>
 <body>
@@ -97,7 +117,7 @@ main{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
 <label>Comprovante do pagamento (opcional)</label><input id="cClientProof" type="file" accept="image/*,application/pdf"><p class="muted" id="clientProofHint">Você pode anexar uma foto ou PDF de até 15 MB. O arquivo será enviado ao Google Drive após salvar o cliente.</p>
 <label>Observações</label><textarea id="cNotes" rows="2" placeholder="Informações adicionais"></textarea>
 <div id="packageSummary" class="notice">Valor cobrado R$ 30,00 · Custo R$ 0,00 · Lucro estimado R$ 30,00</div>
-<div class="btnrow"><button class="btn" type="submit">Salvar cliente e registrar pagamento</button><button class="btn secondary" type="button" id="clearClient">Cancelar</button></div>
+<div class="client-form-actions"><button class="client-save-btn" type="submit">SALVAR</button><button class="client-cancel-btn" type="button" id="clearClient">CANCELAR</button></div>
 </form></div></div>
 <input id="clientSearch" class="search" placeholder="Buscar cliente por nome ou telefone">
 <div class="client-filter-wrap">
