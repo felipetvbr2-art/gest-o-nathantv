@@ -345,8 +345,14 @@ async function persist(){
     for(const item of stale)batch.delete(item.ref);
     setStatus('Enviando clientes e financeiro em uma única operação...');
     await batch.commit();
-    await verifyFinancialChanges(financialPlan.checks);
-    setStatus('Clientes, pagamentos e custos sincronizados.');
+    setStatus('Dados enviados. Conferindo pagamentos e custos...');
+    try{
+      await verifyFinancialChanges(financialPlan.checks);
+      setStatus('Clientes, pagamentos e custos sincronizados e conferidos.');
+    }catch(verifyError){
+      console.warn('A gravação foi concluída, mas a conferência posterior não terminou:',verifyError);
+      setStatus('Dados enviados ao Firebase. Não foi possível concluir a conferência automática; não repita a operação.');
+    }
   }catch(e){
     setStatus('Falha na sincronização. Os dados locais foram mantidos; confira as regras do Firebase antes de tentar novamente.',true);
     throw e;
