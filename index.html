@@ -1,594 +1,111 @@
-<!doctype html>
-<html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<link rel="manifest" href="./manifest.json">
-<title>Gestão de Clientes</title>
-<style>
-:root{--bg:#f3f5f8;--card:#fff;--ink:#18202b;--muted:#687386;--line:#dce2ea;--green:#16845b;--red:#c93643;--amber:#a66a00;--gold:#d6aa45;--nav:var(--card);--navink:var(--ink);--shadow:0 5px 18px #18202b0d}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;transition:background .2s,color .2s}
-body.dark{--bg:#090d14;--card:#151c27;--ink:#f3f6fb;--muted:#aab5c5;--line:#303b4b;--nav:var(--card);--navink:var(--ink);--shadow:0 5px 18px #0004}
-header{background:var(--card);color:var(--ink);padding:15px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);position:sticky;top:0;z-index:10}header h1{font-size:20px;margin:0 0 3px}header p{margin:0;color:var(--muted);font-size:12px}header .headcopy{flex:1}.headbtn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 12px}
-main{max-width:1280px;margin:auto;padding:16px 14px 88px}.layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:16px}.tabs{display:flex;flex-direction:column;gap:7px;align-self:start;position:sticky;top:88px;background:var(--nav);border-radius:15px;padding:12px;min-height:calc(100vh - 115px)}.tabs button{width:100%;text-align:left;border:1px solid transparent;background:transparent;border-radius:10px;padding:12px;color:var(--navink)}.tabs button.active{background:var(--bg);color:var(--ink);border-color:var(--line);font-weight:800}.tabs .navlabel{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;padding:10px 8px 2px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:16px;margin:0 0 12px;box-shadow:var(--shadow)}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.metric{padding:15px;border:1px solid var(--line);border-radius:12px;background:var(--card)}.metric small{display:block;color:var(--muted);margin-bottom:7px}.metric strong{font-size:21px;overflow-wrap:anywhere}.muted{color:var(--muted);font-size:13px}h2{font-size:18px;margin:0 0 12px}h3{font-size:15px;margin:0 0 8px}
-label{display:block;font-size:13px;font-weight:650;margin:10px 0 5px}input,select,textarea{width:100%;font:inherit;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}input:focus,select:focus,textarea:focus{outline:2px solid #d6aa4555;border-color:var(--gold)}button{font:inherit;cursor:pointer}.btn{border:0;background:var(--gold);color:#1b160b;border-radius:10px;padding:10px 12px;font-weight:750}.btn.secondary{background:var(--bg);color:var(--ink);border:1px solid var(--line)}.btn.danger{background:#fff0f0;color:#b42332;border:1px solid #f1c5ca}.dark .btn.danger{background:#351b22;color:#ff9ba5;border-color:#67323b}.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.btnrow .btn{flex:1}.item{border:1px solid var(--line);border-radius:14px;padding:15px;margin:10px 0;background:var(--card);box-shadow:var(--shadow)}.client-card{border-left:4px solid var(--gold)}.itemtop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.item strong{overflow-wrap:anywhere}.pill{display:inline-block;font-size:11px;border-radius:999px;padding:4px 8px;background:#f2dfb7;color:#46310e;margin-top:5px}.pill.red{background:#fff0ef;color:#a31f26}.pill.green{background:#e4f6ed;color:#176b52}.pill.amber{background:#fff4d6;color:#805b00}.hidden{display:none!important}.notice{border-radius:10px;padding:11px 12px;background:#fff5dc;color:#75520a;font-size:13px;margin-bottom:12px}.dark .notice{background:#342713;color:#f3d99c}.success{background:#e8f5ee;color:#176b52}.dangertext{color:var(--red)}.search{margin-bottom:10px}.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.hr{height:1px;background:var(--line);margin:13px 0}.foot{font-size:12px;color:var(--muted);text-align:center;padding:10px}.app-loading{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--ink);text-align:center}.app-loading span{font-size:13px;color:var(--muted)}.loading-spinner{width:42px;height:42px;border:4px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.auth{max-width:420px;margin:8vh auto;padding:20px}.auth h1{margin:0 0 8px}.auth p{color:var(--muted);line-height:1.45}.smallbtn{border:0;background:transparent;color:var(--gold);padding:5px;font-weight:650}.menuwrap{position:relative}.dots{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:9px;padding:5px 11px;font-size:20px;line-height:1}.menu{position:absolute;right:0;top:38px;z-index:5;min-width:185px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:6px;box-shadow:var(--shadow)}.menu button{display:block;width:100%;text-align:left;padding:10px;border:0;border-radius:7px;background:transparent;color:var(--ink)}.menu button:hover{background:var(--bg)}.client-filter-wrap{position:relative;margin:10px 0 14px;display:flex;justify-content:flex-end}.client-filter-trigger{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:10px 14px;font-size:13px;font-weight:800;box-shadow:var(--shadow)}.client-filter-trigger span:nth-child(2){color:var(--gold)}.client-filter-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:30;min-width:180px;padding:7px;background:var(--card);border:1px solid var(--line);border-radius:13px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:5px}.client-filter-menu.hidden{display:none}.client-filter{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:999px;padding:8px 11px;font-size:12px;font-weight:700;white-space:nowrap}.client-filter span{display:inline-grid;place-items:center;min-width:19px;height:19px;margin-left:4px;padding:0 5px;border-radius:999px;background:var(--bg);font-size:10px}.client-filter.active{background:var(--gold);border-color:var(--gold);color:#1b160b}.client-filter.active span{background:#ffffff66;color:#1b160b}.client-modern{padding:14px;border-radius:17px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);margin:12px 0}.client-modern-head{display:flex;align-items:center;gap:10px}.client-avatar{width:42px;height:42px;flex:0 0 42px;border-radius:50%;display:grid;place-items:center;background:#e4eefb;color:#1769d2;font-weight:800;font-size:18px}.client-main{min-width:0;flex:1}.client-name{font-size:16px;font-weight:800}.client-sub{font-size:12px;color:var(--muted);margin-top:2px}.client-status{font-size:10px;font-weight:800;padding:5px 8px;border-radius:7px;background:#e3f6eb;color:#16734a}.client-status.late{background:#fde8e8;color:#b42332}.client-status.soon{background:#fff2d6;color:#8a5a00}.client-details{display:flex;justify-content:space-between;gap:8px;margin:13px 0 8px;font-size:12px}.client-details span{color:var(--muted)}.client-actions-icons{display:flex;align-items:center;justify-content:flex-end;gap:5px;margin-top:8px;border-top:1px solid var(--line);padding-top:9px}.client-icon-btn{width:34px;height:34px;border:0;border-radius:9px;background:transparent;color:var(--muted);display:grid;place-items:center;font-size:18px;padding:0}.client-icon-btn:active{background:var(--bg);transform:scale(.96)}.client-icon-btn.edit{color:#329b72}.client-icon-btn.renew{color:#d6aa45}.client-icon-btn.whatsapp{color:#21965b}.client-icon-btn.history{color:#347fd1}.client-icon-btn.delete{color:#df547c}.client-icon-btn.more{color:var(--muted)}.client-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:14px}.client-actions .btn{font-size:12px;padding:10px 5px}.hamb{display:none}
+// ==========================================
+// MÓDULO DE PERFIL: APELIDO E SENHA
+// ==========================================
 
-/* Cartões de clientes: visual renovado */
-.client-modern{position:relative;padding:15px;border-radius:18px;background:linear-gradient(145deg,var(--card),var(--bg));border:1px solid var(--line);box-shadow:0 7px 22px #18202b0b;margin:13px 0;overflow:hidden}
-.client-modern:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--gold)}
-.client-modern-head{gap:11px}
-.client-avatar{width:46px;height:46px;flex-basis:46px;border:2px solid var(--card);box-shadow:0 2px 8px #18202b18;background:linear-gradient(145deg,#e4eefb,#d5e5fa);font-size:19px}
-.client-name{font-size:16px;letter-spacing:.1px;line-height:1.25}
-.client-sub{font-size:12px;line-height:1.4}
-.client-status{white-space:nowrap;letter-spacing:.25px;padding:6px 9px;border-radius:999px}
-.client-details{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0 9px}
-.client-info-box{min-width:0;padding:10px 11px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
-.client-info-box span{display:block;color:var(--muted);font-size:9px;font-weight:800;letter-spacing:.55px;margin-bottom:5px}
-.client-info-box strong{display:block;font-size:14px;line-height:1.3}
-.client-price-box strong{color:var(--green);font-size:16px}
-.client-notes{padding:8px 10px;margin-top:8px;border-radius:10px;background:var(--bg);color:var(--muted);font-size:12px;line-height:1.45}
-.client-actions-icons{justify-content:space-between;gap:7px;margin-top:12px;padding-top:11px}
-.client-icon-btn{width:40px;height:38px;border:1px solid var(--line);border-radius:11px;background:var(--card);font-size:19px;transition:transform .15s,background .15s}
-.client-icon-btn:active{transform:scale(.94);background:var(--bg)}
-.dark .client-modern{background:linear-gradient(145deg,#171e2a,#121923);border-color:#303b4c;box-shadow:0 8px 22px #0003}
-.dark .client-info-box,.dark .client-notes{background:#111824;border-color:#303b4c}
-.dark .client-avatar{background:linear-gradient(145deg,#263b58,#1c2c43);color:#a9ceff}
-@media(max-width:380px){.client-modern{padding:12px}.client-details{gap:6px}.client-info-box{padding:9px 8px}.client-info-box strong{font-size:13px}.client-icon-btn{width:36px;height:36px}}
-.whatsapp-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:#e8f7ee!important;color:#137a43!important;border:1px solid #b8e4c8!important}
-.whatsapp-btn svg{width:18px;height:18px;fill:currentColor}
-.dark .whatsapp-btn{background:#153526!important;color:#75e0a3!important;border-color:#285b40!important}
-.wa-overlay{position:fixed;inset:0;background:#0008;z-index:100;display:flex;align-items:flex-end;justify-content:center;padding:12px}
-.wa-panel{width:min(100%,520px);max-height:92dvh;overflow:auto;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 15px 50px #0005}
-.wa-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
-.wa-close{border:0;background:transparent;color:var(--muted);font-size:26px;padding:0 5px}
-.wa-info{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0}
-.wa-info div{margin:4px 0}
-.wa-types{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
-.wa-types button{padding:11px 8px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font-weight:700}
-.wa-types button.active{background:#dff5e7;border-color:#25a45a;color:#126b38}
-.dark .wa-types button.active{background:#153526;color:#75e0a3;border-color:#287a4b}
-.wa-send{width:100%;background:#20a65a;color:white;border:0;border-radius:11px;padding:13px;font-weight:800;font-size:15px;margin-top:12px}
-.wa-panel textarea{min-height:130px;resize:vertical}
-.client-form-overlay{position:fixed!important;inset:0;z-index:90;display:flex;align-items:flex-end;justify-content:center;overflow:auto;background:#0009;padding:12px}
-.client-form-overlay>.client-form-card{width:min(100%,560px);max-height:94dvh;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 15px 50px #0005}
-.client-form-overlay h2{font-size:20px}
-.package-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:8px 0}
-.package-option{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg);color:var(--ink);text-align:left}
-.package-option.active{border:2px solid var(--gold);background:#fff7df;color:#38290a}
-.dark .package-option.active{background:#332a18;color:#f7dfaa}
-.package-option strong,.package-option span{display:block}
-.package-option span{font-size:13px;margin-top:4px}
-.package-option small{display:block;color:var(--muted);margin-top:5px}
-@media(min-width:701px){.client-form-overlay{align-items:center}}
-@media(min-width:701px){.wa-overlay{align-items:center}}
-.bottom-nav{display:none}
-@media(max-width:700px){
-body{padding-bottom:calc(68px + env(safe-area-inset-bottom))}
-main{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
-.bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:1fr 1fr 1.15fr 1fr 1fr;align-items:end;gap:2px;padding:7px 8px calc(7px + env(safe-area-inset-bottom));background:var(--card);border-top:1px solid var(--line);box-shadow:0 -5px 18px #18202b12}
-.bottom-nav button{border:0;background:transparent;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:48px;padding:3px 2px;font-size:10px;font-weight:650}
-.bottom-nav button .navicon{font-size:21px;line-height:1.1}.bottom-nav button .navicon svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}.bottom-nav .add-client .navicon svg{width:29px;height:29px;stroke-width:1.9}
-.bottom-nav button.active{color:var(--gold);font-weight:850}
-.bottom-nav .add-client{width:52px;height:52px;min-height:52px;margin:0 auto 2px;border-radius:50%;background:#1769d2;color:#fff;box-shadow:0 3px 9px #1769d255;font-size:10px}
-.bottom-nav .add-client .navicon{font-size:25px}.bottom-nav .add-client{font-size:0}.bottom-nav .add-client .navicon svg{width:34px;height:34px;stroke-width:1.7}.bottom-nav .money-icon svg{width:25px;height:25px;stroke:#171717;stroke-width:2.2;fill:none}
-}
-@media(min-width:701px){.bottom-nav{display:none}}
-@media(max-width:700px){header{padding:12px}.hamb{display:block}.layout{grid-template-columns:1fr}.tabs{position:fixed;z-index:20;top:0;bottom:0;left:0;width:265px;min-height:0;border-radius:0 16px 16px 0;transform:translateX(-110%);transition:transform .2s;box-shadow:8px 0 30px #0005}.tabs.open{transform:translateX(0)}.tabs button{text-align:left;padding:13px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.client-actions{grid-template-columns:repeat(2,minmax(0,1fr))}main{padding:12px 10px 80px}}
-@media(min-width:900px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.metric strong{font-size:24px}}
-
-/* Diálogos personalizados do aplicativo */
-.app-dialog-backdrop{position:fixed;inset:0;background:#080d15a8;display:none;align-items:center;justify-content:center;padding:22px;z-index:9999}.app-dialog-backdrop.show{display:flex}.app-dialog{width:min(100%,420px);background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:22px;padding:23px;box-shadow:0 18px 60px #0005}.app-dialog h2{font-size:20px;margin:0 0 12px}.app-dialog p{white-space:pre-line;color:var(--muted);line-height:1.5;margin:0 0 22px}.app-dialog-actions{display:flex;justify-content:flex-end;gap:10px}.app-dialog-actions button{border:0;border-radius:12px;padding:12px 18px;font-weight:700;font-size:14px}.app-dialog-cancel{background:var(--bg);color:var(--ink)}.app-dialog-ok{background:var(--gold);color:#17130a}
-.nickname-dialog-input{width:100%;margin:0 0 22px;padding:12px 13px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font:inherit}.nickname-dialog .app-dialog p{margin-bottom:12px}
-.avatar-choice-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:14px 0 18px}.avatar-choice{border:1px solid var(--line);border-radius:14px;background:var(--bg);font-size:27px;padding:10px;min-height:54px}.avatar-choice:active{outline:2px solid var(--gold)}.avatar-file{max-width:125px;font-size:11px;color:var(--muted)}#profileAvatar{background-size:cover;background-position:center}
-/* Formulário de cliente: visual moderno e ações neon */
-.client-form-overlay{backdrop-filter:blur(7px);background:rgba(8,13,22,.68);padding:14px}
-.client-form-overlay>.client-form-card{width:min(100%,590px);max-height:92dvh;padding:22px;border-radius:24px;border:1px solid color-mix(in srgb,var(--gold) 24%,var(--line));box-shadow:0 24px 70px #0005,0 0 0 1px #ffffff12;scrollbar-width:thin}
-.client-form-card form{padding-top:8px}
-.client-form-card .itemtop{align-items:center;margin-bottom:14px;padding-bottom:13px;border-bottom:1px solid var(--line)}
-.client-form-card h2{font-size:21px;letter-spacing:-.35px}
-.client-form-card label{font-size:13px;font-weight:750;margin:13px 0 6px;color:var(--ink)}
-.client-form-card input,.client-form-card textarea{border-radius:13px;min-height:49px;padding:12px 14px;background:var(--bg);border:1px solid var(--line);transition:border-color .18s,box-shadow .18s}
-.client-form-card input:focus,.client-form-card textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px #d6aa4526}
-.client-form-card input[type=file]{font-size:13px;min-height:54px}
-.client-form-card .muted{line-height:1.45}
-.client-form-card #packageSummary{border-radius:14px;border:1px solid #d6aa4540;background:#d6aa4518;color:var(--ink);padding:13px;margin-top:14px}
-.client-form-actions{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:17px}
-.client-form-actions button{min-height:54px;border-radius:14px;font-size:14px;font-weight:900;letter-spacing:1px;background:transparent;transition:transform .15s,box-shadow .15s}
-.client-form-actions button:active{transform:scale(.98)}
-.client-save-btn{color:#39ff88;border:1.5px solid #39ff88;box-shadow:inset 0 0 14px #39ff8815,0 0 13px #39ff8833;text-shadow:0 0 9px #39ff8870}
-.client-save-btn:hover{background:#39ff8818;box-shadow:inset 0 0 18px #39ff8820,0 0 20px #39ff8860}
-.client-cancel-btn{color:#ff4565;border:1.5px solid #ff4565;box-shadow:inset 0 0 14px #ff456515,0 0 13px #ff456533;text-shadow:0 0 9px #ff456570}
-.client-cancel-btn:hover{background:#ff456518;box-shadow:inset 0 0 18px #ff456520,0 0 20px #ff456560}
-@media(max-width:420px){.client-form-overlay{padding:8px}.client-form-overlay>.client-form-card{padding:16px;border-radius:20px}.client-form-actions{gap:8px}.client-form-actions button{min-height:51px;font-size:13px}}
-
-/* Ajuste mobile: formulário compacto e ações sempre acessíveis */
-@media(max-width:700px){
- .client-form-overlay{align-items:center;padding:8px 9px calc(12px + env(safe-area-inset-bottom))}
- .client-form-overlay>.client-form-card{max-height:86dvh;width:min(100%,560px);padding:15px 16px 12px;border-radius:20px;overflow-y:auto;overscroll-behavior:contain}
- .client-form-card .itemtop{margin-bottom:9px;padding-bottom:9px}
- .client-form-card h2{font-size:19px}
- .client-form-card label{margin:8px 0 4px;font-size:12px}
- .client-form-card input,.client-form-card textarea{min-height:42px;padding:9px 11px;border-radius:11px}
- .client-form-card input[type=file]{min-height:46px;padding:8px;font-size:12px}
- .client-form-card .muted{font-size:12px;line-height:1.35;margin-top:7px}
- .client-form-card #packageSummary{padding:9px 11px;margin-top:9px;font-size:12px}
- .client-form-actions{position:sticky;bottom:-12px;z-index:3;background:var(--card);padding:10px 0 calc(5px + env(safe-area-inset-bottom));margin-top:10px}
- .client-form-actions button{min-height:46px;font-size:12px}
-}
-
-
-/* Painel financeiro moderno */
-.finance-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:5px 2px 14px}.finance-heading h2{font-size:22px;margin:4px 0}.finance-kicker{font-size:10px;font-weight:850;letter-spacing:1.1px;color:var(--muted)}.finance-icon{width:48px;height:48px;display:grid;place-items:center;border-radius:15px;background:#e7f6ee;color:#16845b;font-size:28px;font-weight:800}.finance-overview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px}.finance-metric{min-width:0;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--card);box-shadow:var(--shadow)}.finance-metric span{display:block;font-size:9px;font-weight:850;letter-spacing:.55px;color:var(--muted);margin-bottom:8px}.finance-metric strong{display:block;font-size:20px;overflow-wrap:anywhere;line-height:1.2}.finance-metric small{display:block;color:var(--muted);font-size:11px;margin-top:6px}.finance-metric.received strong{color:#16845b}.finance-metric.pending strong{color:#bd8524}.finance-metric.expenses strong{color:#d05a67}.finance-metric.balance strong{color:var(--ink)}.finance-section{padding:15px;margin-bottom:13px}.finance-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:3px}.finance-section-head h2{font-size:19px;margin:3px 0 0}.finance-section-icon{width:36px;height:36px;border-radius:11px;background:var(--bg);display:grid;place-items:center;color:var(--green);font-size:21px;font-weight:800}.finance-record{padding:13px;margin:11px 0;border:1px solid var(--line);border-radius:15px;background:linear-gradient(145deg,var(--card),var(--bg))}.finance-record-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.finance-record-main{min-width:0;display:flex;flex-direction:column;gap:4px}.finance-record-main strong{font-size:15px;overflow-wrap:anywhere}.finance-record-date{font-size:11px;color:var(--muted)}.finance-amount{font-size:17px;white-space:nowrap;color:var(--green)}.finance-record-meta{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:10px}.finance-status{font-size:10px;font-weight:850;letter-spacing:.35px;padding:5px 9px;border-radius:999px}.finance-status.paid{background:#e3f6eb;color:#16734a}.finance-status.pending{background:#fff2d6;color:#8a5a00}.finance-status.cost{background:#fdebed;color:#b64051}.finance-record-actions{display:flex;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}.finance-record-actions .btn{flex:1;font-size:12px;padding:9px}.finance-confirm{background:#16845b;color:white}.finance-proof-link{display:inline-block;margin-top:8px;color:var(--green);font-size:12px;font-weight:700;text-decoration:none}.finance-empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:25px 12px;color:var(--muted)}.finance-empty>span{font-size:30px;margin-bottom:8px}.finance-empty strong{color:var(--ink);font-size:14px}.finance-empty p{font-size:12px;margin:5px 0 0}.dark .finance-icon{background:#153526;color:#75e0a3}.dark .finance-status.paid{background:#153526;color:#75e0a3}.dark .finance-status.pending{background:#382b16;color:#f1c978}.dark .finance-status.cost{background:#3a2028;color:#ff9ba5}.dark .finance-record{background:linear-gradient(145deg,#171e2a,#111824);border-color:#303b4c}.dark .finance-confirm{background:#16845b;color:white}@media(max-width:380px){.finance-metric{padding:11px}.finance-metric strong{font-size:18px}.finance-record{padding:11px}}
-</style>
-</head>
-<body>
-<div id="appLoading" class="app-loading" role="status"><div class="loading-spinner"></div><strong>Carregando aplicativo...</strong><span>Verificando sua sessão e sincronização</span></div>
-<section id="auth" class="auth card hidden">
-<h1>📊 Gestão de Clientes</h1><p>Entre na sua conta ou crie uma conta gratuita para começar.</p>
-<div id="loginFields" style="margin-top:18px"><label>E-mail</label><input id="loginEmail" type="email" autocomplete="username" placeholder="seuemail@gmail.com"><label>Senha</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Sua senha"><button class="btn" style="width:100%;margin-top:14px" id="loginBtn">Entrar</button></div>
-<button class="btn secondary" style="width:100%;margin-top:10px" id="showCreateBtn">Criar conta</button>
-<div id="createAccountOptions" class="hidden" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)"><p style="margin-bottom:10px">Crie sua conta usando uma conta Google verdadeira.</p><button type="button" id="googleLoginBtn" aria-label="Continuar com Google" style="position:relative;display:flex;align-items:center;justify-content:center;width:100%;padding:10px 12px;background:#242424;color:#fff;border:1px solid #303030;border-radius:10px;font-size:16px;font-weight:750;letter-spacing:.1px;cursor:pointer"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 48 48" style="position:absolute;left:16px;flex:none"><path fill="#4285F4" d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.6c3.9-3.6 6.1-8.8 6.1-15z"/><path fill="#34A853" d="M24 44c5.5 0 10.1-1.8 13.5-4.8l-6.6-5.1c-1.8 1.2-4.1 2-6.9 2-5.3 0-9.8-3.6-11.4-8.4H5.8v5.3A20 20 0 0 0 24 44z"/><path fill="#FBBC05" d="M12.6 27.7a12 12 0 0 1 0-7.5v-5.3H5.8a20 20 0 0 0 0 18.1z"/><path fill="#EA4335" d="M24 12.2c3 0 5.7 1 7.8 3.1l5.8-5.8C34.1 6.2 29.5 4 24 4A20 20 0 0 0 5.8 14.9l6.8 5.3c1.6-4.8 6.1-8 11.4-8z"/></svg><span>Continuar com Google</span></button><button class="btn secondary" style="width:100%;margin-top:9px" id="backToLoginBtn">Voltar para entrar</button></div>
-<div id="authMsg" class="muted" style="margin-top:12px" role="status"></div>
-</section>
-<div id="app" class="hidden">
-<header><button class="headbtn hamb" id="menuToggle" aria-label="Abrir menu">☰</button><div class="headcopy"><h1>📺 Gestão de Clientes</h1><p id="syncStatus" style="margin-top:5px;color:#16845b">● Conectando...</p></div><button class="headbtn" id="profileBtn" aria-label="Editar apelido" style="display:flex;align-items:center;gap:6px"><span id="profileAvatar" style="width:28px;height:28px;border-radius:50%;display:inline-grid;place-items:center;background:#d6aa45;color:#172235;font-weight:800">U</span><span id="profileNickname" style="max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px">Perfil</span></button><button class="headbtn" id="themeToggle" aria-label="Alternar tema">🌙</button></header>
-<main>
-<div class="layout"><nav id="tabs" class="tabs" aria-label="Seções">
-<div class="navlabel">Menu principal</div><button class="active" data-tab="resumo">⌂ &nbsp; Início</button><button data-tab="clientes">♙ &nbsp; Clientes</button><button data-tab="pagamentos">▤ &nbsp; Financeiro</button><button data-tab="vencimentos">◷ &nbsp; Vencimentos</button><div class="navlabel">Conta e segurança</div><button data-tab="meuPlano">★ &nbsp; Meu plano</button><button data-tab="backup">⛨ &nbsp; Backup e segurança</button><button id="navLogout">↪ &nbsp; Sair</button>
-</nav><div class="content">
-<section id="tab-resumo">
-<div class="grid">
-<div class="metric"><small>Clientes ativos</small><strong id="mClients">0</strong></div>
-<div class="metric"><small>Previsto no mês</small><strong id="mExpected">R$ 0,00</strong></div>
-<div class="metric"><small>Recebido no mês</small><strong id="mReceived">R$ 0,00</strong></div>
-<div class="metric"><small>Em aberto / vencido</small><strong id="mPending">R$ 0,00</strong></div>
-</div>
-<div class="card" style="margin-top:12px"><h2>Vencimentos</h2><div id="dueSummary" class="muted">Nenhum cliente cadastrado.</div></div>
-<div class="card"><h2>Resultado estimado do mês</h2><div class="grid"><div class="metric"><small>Recebido</small><strong id="mProfitIn">R$ 0,00</strong></div><div class="metric"><small>Custos e renovações</small><strong id="mCreditCost">R$ 0,00</strong></div><div class="metric"><small>Saldo estimado</small><strong id="mProfit">R$ 0,00</strong></div></div><p class="muted">Cálculo simples: pagamentos recebidos no mês menos despesas registradas no mês.</p></div>
-</section>
-<section id="tab-clientes" class="hidden">
-<div class="card hidden" id="clientFormPanel"><div class="client-form-card"><div class="itemtop"><h2 id="clientFormTitle">Cadastrar cliente</h2><button class="headbtn" type="button" id="closeClientX">×</button></div><form id="clientForm">
-<input type="hidden" id="clientId"><input type="hidden" id="cServiceType" value="IPTV">
-<label>Nome completo *</label><input id="cName" required maxlength="100" autocomplete="name" placeholder="Ex.: Maria Silva">
-<label>WhatsApp *</label><div class="row2 contact-row"><input id="cPhone" type="tel" inputmode="tel" autocomplete="tel" required placeholder="DDD + número"><button type="button" class="btn secondary" id="importContactBtn">Importar contato</button></div>
-<div class="row2"><div><label>Usuário</label><input id="cServiceUser" placeholder="Usuário do serviço" autocomplete="off"></div><div><label>Senha do serviço</label><div class="row2" style="grid-template-columns:1fr auto;gap:6px"><input id="cServicePass" type="password" autocomplete="new-password" placeholder="Senha do serviço"><button type="button" class="btn secondary" id="toggleServicePassBtn" onclick="toggleServicePass()" aria-label="Mostrar senha" title="Mostrar senha" style="padding:8px 12px;min-width:44px;font-size:19px">👁</button></div></div></div>
-<div class="row2"><div><label>Valor cobrado (R$) *</label><input id="cAmountCharged" type="number" min="0.01" step="0.01" placeholder="Informe o valor" required></div><div><label>Custo (R$) *</label><input id="cPackageCost" type="number" min="0" step="0.01" placeholder="Informe o custo (use 0 se não houver)" required></div></div>
-<label>Data de vencimento *</label><input id="cDueDate" type="date" required>
-<label>Comprovante do pagamento (opcional)</label><input id="cClientProof" type="file" accept="image/*,application/pdf"><p class="muted" id="clientProofHint">Você pode anexar uma foto ou PDF de até 15 MB. O arquivo será enviado ao Google Drive após salvar o cliente.</p>
-<label>Observações</label><textarea id="cNotes" rows="2" placeholder="Informações adicionais"></textarea>
-<div id="packageSummary" class="notice">Valor cobrado R$ 30,00 · Custo R$ 0,00 · Lucro estimado R$ 30,00</div>
-<div class="client-form-actions"><button class="client-save-btn" type="submit">SALVAR</button><button class="client-cancel-btn" type="button" id="clearClient">CANCELAR</button></div>
-</form></div></div>
-<input id="clientSearch" class="search" placeholder="Buscar cliente por nome ou telefone">
-<div class="client-filter-wrap">
-<button type="button" class="client-filter-trigger" id="clientFilterToggle">☷ Filtro <span id="clientFilterCurrent">Todos</span> <span>⌄</span></button>
-<div class="client-filter-menu hidden" id="clientFilterMenu" role="group" aria-label="Filtrar clientes">
-<button type="button" class="client-filter active" data-client-filter="all">Todos <span id="filterCountAll">0</span></button>
-<button type="button" class="client-filter" data-client-filter="active">Ativos <span id="filterCountActive">0</span></button>
-<button type="button" class="client-filter" data-client-filter="late">Vencidos <span id="filterCountLate">0</span></button>
-<button type="button" class="client-filter" data-client-filter="soon">Próximos <span id="filterCountSoon">0</span></button>
-</div></div>
-<div id="clientList"></div>
-</section>
-<section id="tab-pagamentos" class="hidden">
-<div class="finance-heading"><div><span class="finance-kicker">VISÃO FINANCEIRA</span><h2>Seu financeiro</h2><p class="muted">Acompanhe recebimentos, pendências e despesas.</p></div><span class="finance-icon">＄</span></div>
-<div class="finance-overview">
-<div class="finance-metric received"><span>RECEBIDO NO MÊS</span><strong id="financeReceived">R$ 0,00</strong><small>Pagamentos confirmados</small></div>
-<div class="finance-metric pending"><span>EM ABERTO</span><strong id="financePending">R$ 0,00</strong><small>Pagamentos pendentes</small></div>
-<div class="finance-metric expenses"><span>CUSTOS NO MÊS</span><strong id="financeExpenses">R$ 0,00</strong><small>Despesas e renovações</small></div>
-<div class="finance-metric balance"><span>SALDO DO MÊS</span><strong id="financeBalance">R$ 0,00</strong><small>Recebido menos custos</small></div>
-</div>
-<div class="card finance-section"><div class="finance-section-head"><div><span class="finance-kicker">ENTRADAS</span><h2>Pagamentos</h2></div><span class="finance-section-icon">↙</span></div><p class="muted">Recebimentos registrados nos cadastros e renovações.</p><div id="paymentList"></div></div>
-<div class="card finance-section"><div class="finance-section-head"><div><span class="finance-kicker">SAÍDAS</span><h2>Despesas e renovações</h2></div><span class="finance-section-icon">↗</span></div><p class="muted">Custos registrados na sua conta.</p><div id="costList"></div></div>
-</section>
-<section id="tab-backup" class="hidden">
-<div class="card"><h2>Backup dos dados</h2><p class="muted">O arquivo de backup contém os dados dos clientes e pagamentos. Guarde-o em local privado e não envie a terceiros.</p><button id="exportBtn" class="btn" style="width:100%">Exportar backup JSON</button>
-<div class="hr"></div><h3>Comprovantes no Google Drive</h3><p class="muted">Conecte sua conta Google para guardar os comprovantes de pagamentos e renovações em seu Drive.</p><button id="connectDriveBtn" class="btn secondary" style="width:100%">Conectar Google Drive</button><p id="driveStatus" class="muted" role="status" style="margin-top:8px">Google Drive não conectado.</p>
-<div class="hr"></div><label>Restaurar backup (.json)</label><input id="importFile" type="file" accept=".json,application/json"><button id="importBtn" class="btn secondary" style="width:100%;margin-top:10px">Restaurar backup</button><p id="backupMsg" class="muted" role="status"></p></div>
-<div class="card"><h2>Migração de clientes</h2><p class="muted">Etapa de preparação: copia os clientes da lista antiga para documentos individuais na coleção clientes. A lista original não será apagada nem modificada.</p><button id="migrateClientsBtn" class="btn secondary" type="button" style="width:100%">Conferir e preparar migração</button><p id="clientMigrationStatus" class="muted" role="status" style="margin-top:10px">Aguardando conferência. As regras do Firestore precisam permitir a coleção clientes.</p></div><div class="card"><h2>Segurança</h2><p class="muted">O acesso aos dados é controlado pelas regras do Firestore para sua conta.</p><button id="securityProbeBtn" class="btn secondary" style="width:100%">Testar proteção entre contas</button><p id="securityProbeResult" class="muted" role="status" style="margin-top:10px">Entre com a segunda conta de teste antes de executar esta verificação.</p><div class="hr"></div><button id="lockBtn" class="btn secondary" style="width:100%">Sair da conta</button></div>
-</section>
-<section id="tab-vencimentos" class="hidden"><div class="card"><h2>Próximos vencimentos</h2><p class="muted">Clientes com vencimento nos próximos 7 dias e clientes em atraso.</p><div id="dueList"></div></div></section>
-<section id="tab-meuPlano" class="hidden"><div class="card"><h2>Meu plano</h2><p class="muted">Veja seu plano atual e acompanhe o uso da sua conta.</p><div class="item" style="border-left:4px solid var(--gold)"><div class="itemtop"><div><span class="pill green">Plano atual</span><h2 style="margin-top:10px">Free</h2><p class="muted">Gratuito • sem cobrança recorrente</p></div><strong style="font-size:22px">R$ 0,00</strong></div><div class="hr"></div><div class="itemtop"><strong>Clientes cadastrados</strong><strong id="planClientCount">0 de 20</strong></div><div style="height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:10px"><div id="planUsageBar" style="height:100%;width:0%;background:var(--gold);border-radius:99px"></div></div><p class="muted" id="planUsageText" style="margin-top:8px">Você pode cadastrar até 20 clientes no plano Free.</p></div><div class="item"><span class="pill amber">Premium</span><h2 style="margin-top:10px">Mais recursos para sua gestão</h2><strong style="font-size:25px">R$ 9,90 <span class="muted">/ mês</span></strong><ul><li>Clientes ilimitados</li><li>Relatórios avançados</li><li>Histórico completo</li><li>Recursos avançados de backup</li></ul><p class="muted">Sem período de teste grátis. A assinatura será feita pela Google Play quando a integração estiver pronta.</p><button class="btn" id="premiumInfoBtn" type="button" style="width:100%">Conhecer o Premium</button></div></div></section>
-
-</div></div>
-<p class="foot">Gestão de Clientes • sincronização Firebase • sincronização Firebase</p>
-</main>
-<nav class="bottom-nav" id="bottomNav" aria-label="Navegação inferior">
-<button type="button" data-tab="resumo" class="active"><span class="navicon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg></span><span>Início</span></button>
-<button type="button" data-tab="clientes"><span class="navicon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10" cy="7" r="4"/><path d="M3 21v-2a7 7 0 0 1 14 0v2zM19 8v8m-4-4h8"/></svg></span><span>Clientes</span></button>
-<button type="button" class="add-client" id="bottomNewClient" aria-label="Novo cliente"><span class="navicon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10" cy="7" r="4"/><path d="M3 21v-2a7 7 0 0 1 14 0v2zM19 8v8m-4-4h8"/></svg></span></button>
-<button type="button" data-tab="pagamentos"><span class="navicon money-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M17 5c-1.1-1-2.5-1.5-4.3-1.5-2.8 0-4.7 1.4-4.7 3.5 0 5 8.8 2.2 8.8 7.2 0 2.2-2 3.8-4.9 3.8-1.9 0-3.6-.6-4.9-1.8M12 1v22"/></svg></span><span>Financeiro</span></button>
-<button type="button" id="bottomMore"><span class="navicon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></span><span>Mais</span></button>
-</nav></div>
-<div id="whatsAppModal" class="wa-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="waTitle" onclick="if(event.target===this)closeWhatsAppModal()">
-<div class="wa-panel">
-<div class="wa-head"><h2 id="waTitle" style="margin:0">Enviar mensagem pelo WhatsApp</h2><button class="wa-close" type="button" onclick="closeWhatsAppModal()" aria-label="Fechar">×</button></div>
-<div id="waClientInfo" class="wa-info"></div>
-<strong>Escolha o tipo de aviso</strong>
-<div class="wa-types"><button type="button" id="waFiveDays" onclick="setWhatsAppType('fiveDays')">Avisar: 5 dias</button><button type="button" id="waToday" onclick="setWhatsAppType('today')">Avisar: hoje</button></div>
-<label for="waMessage">Mensagem que será enviada</label>
-<textarea id="waMessage"></textarea>
-<p class="muted">Você poderá revisar e editar a mensagem antes de abrir o WhatsApp. Nada será enviado automaticamente.</p>
-<button class="wa-send" type="button" onclick="openWhatsAppFromModal()">☏ &nbsp; Abrir WhatsApp</button>
-</div></div>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithRedirect, linkWithRedirect, updateProfile } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
-import { getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp, collection, getDocs, deleteDoc } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
-
-(()=> {
-const $=id=>document.getElementById(id);
-const firebaseConfig={
-  apiKey:"AIzaSyBX4w6AdZg4oG-IcDJQVK8Hy0erlMYKpWk",
-  authDomain:"gestaotv-61635.firebaseapp.com",
-  projectId:"gestaotv-61635",
-  storageBucket:"gestaotv-61635.firebasestorage.app",
-  messagingSenderId:"493101764038",
-  appId:"1:493101764038:web:7f72b8869e4dbe213a36c7",
-  measurementId:"G-8S1VE6SQKY"
-};
-const firebaseApp=initializeApp(firebaseConfig);
-const auth=getAuth(firebaseApp);
-const store=getFirestore(firebaseApp);
-const withTimeout=(promise,ms,label)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+' demorou mais que o esperado.')),ms))]);
-let db={clients:[],payments:[],costs:[]}, currentUser=null, cloudRef=null, profileRef=null, profileData={nickname:'',avatar:''}, unsubscribeCloud=null, saving=false;
-const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
-$('cDueDate').value=today();
-const money=n=>Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-const monthKey=d=>(d||'').slice(0,7);
-const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
-function setStatus(message,isError=false){const el=$('syncStatus');if(el){el.textContent=(isError?'● ':'● ')+message;el.style.color=isError?'#ff8585':'#8dffb7'}}
-async function migrateLegacyRecords(userId,legacyData){
-  const groups=[{key:'payments',name:'pagamentos'},{key:'costs',name:'custos'}];
-  let copied=0;
-  for(const group of groups){
-    const records=Array.isArray(legacyData[group.key])?legacyData[group.key]:[];
-    const target=collection(store,'usuarios',userId,'dados','principal',group.name);
-    const before=await getDocs(target);
-    const existing=new Map(before.docs.map(d=>[d.id,d.data()]));
-    const prepared=[];
-    const sourceIds=new Set();
-    records.forEach((record,index)=>{
-      if(!record||typeof record!=='object'||Array.isArray(record))throw new Error('Registro inválido em '+group.name+'.');
-      const rawId=typeof record.id==='string'?record.id.trim():'';
-      const id=/^[A-Za-z0-9_-]{1,128}$/.test(rawId)?rawId:('legacy_'+group.key+'_'+String(index).padStart(6,'0'));
-      if(sourceIds.has(id))throw new Error('Identificador repetido em '+group.name+'.');
-      sourceIds.add(id);
-      const amount=Number(record.amount);
-      if(!Number.isFinite(amount)||amount<0)throw new Error('Valor inválido em '+group.name+'.');
-      const date=typeof record.date==='string'?record.date:'';
-      const data={...record,id,amount,date};
-      if(existing.has(id)){
-        const saved=existing.get(id);
-        if(Number(saved.amount)!==amount||(saved.date||'')!==date)throw new Error('Foi encontrada divergência no registro '+id+'. Nenhum registro existente foi sobrescrito.');
+document.addEventListener('DOMContentLoaded', () => {
+  // Seletor ou botão para abrir o modal de avatar/perfil (ajuste o ID se necessário)
+  const profileAvatarBtn = document.getElementById('profileAvatar') || document.querySelector('.headbtn');
+  
+  if (profileAvatarBtn) {
+    profileAvatarBtn.addEventListener('click', () => {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        // Preenche o input de apelido atual se existir no modal
+        const nickInput = document.getElementById('profileNicknameInput');
+        if (nickInput) {
+          nickInput.value = currentUser.displayName || currentUser.email?.split('@')[0] || '';
+        }
       }
-      prepared.push({id,data});
     });
-    for(let i=0;i<prepared.length;i+=100){
-      const chunk=prepared.slice(i,i+100).filter(item=>!existing.has(item.id));
-      await Promise.all(chunk.map(item=>setDoc(doc(target,item.id),item.data)));
-      copied+=chunk.length;
-    }
-    const after=await getDocs(target);
-    const savedIds=new Set(after.docs.map(d=>d.id));
-    if(prepared.some(item=>!savedIds.has(item.id)))throw new Error('A conferência de '+group.name+' não encontrou todos os registros.');
   }
-  return copied;
-}
-function stableFinancialId(record,index,key){
-  const raw=typeof record.id==='string'?record.id.trim():'';
-  return /^[A-Za-z0-9_-]{1,128}$/.test(raw)?raw:('legacy_'+key+'_'+String(index).padStart(6,'0'));
-}
-async function syncFinancialCollections(){
-  const groups=[{key:'payments',name:'pagamentos'},{key:'costs',name:'custos'}];
-  for(const group of groups){
-    const records=Array.isArray(db[group.key])?db[group.key]:[];
-    const target=collection(store,'usuarios',currentUser.uid,'dados','principal',group.name);
-    const snapshot=await getDocs(target);
-    const existing=new Map(snapshot.docs.map(d=>[d.id,d.ref]));
-    const prepared=[];
-    const ids=new Set();
-    records.forEach((record,index)=>{
-      if(!record||typeof record!=='object'||Array.isArray(record))throw new Error('Registro inválido em '+group.name+'.');
-      const id=stableFinancialId(record,index,group.key);
-      if(ids.has(id))throw new Error('Identificador repetido em '+group.name+'.');
-      ids.add(id);
-      const amount=Number(record.amount);
-      if(!Number.isFinite(amount)||amount<0)throw new Error('Valor inválido em '+group.name+'.');
-      const date=typeof record.date==='string'?record.date:'';
-      prepared.push({id,data:{...record,id,amount,date}});
-    });
-    for(let i=0;i<prepared.length;i+=100){
-      await Promise.all(prepared.slice(i,i+100).map(item=>setDoc(doc(target,item.id),item.data)));
-    }
-    const stale=[...existing.entries()].filter(([id])=>!ids.has(id));
-    for(let i=0;i<stale.length;i+=100){
-      await Promise.all(stale.slice(i,i+100).map(([,ref])=>deleteDoc(ref)));
-    }
-    const verified=await getDocs(target);
-    const saved=new Map(verified.docs.map(d=>[d.id,d.data()]));
-    if(saved.size!==ids.size||[...ids].some(id=>!saved.has(id)))throw new Error('A conferência de '+group.name+' falhou: quantidade ou identificadores diferentes.');
-    for(const item of prepared){
-      const actual=saved.get(item.id),expected=item.data;
-      for(const field of ['amount','date','status','paidAt','method','clientId','clientName','desc','vendor','kind']){
-        if((actual?.[field]??null)!==(expected?.[field]??null))throw new Error('A conferência do campo '+field+' falhou no registro '+item.id+' da coleção '+group.name+'.');
-      }
-    }
-  }
-}
-async function persist(){
-  if(!currentUser||!cloudRef)throw new Error('Faça login para salvar os dados.');
-  saving=true;setStatus('Salvando na nuvem...');
-  try{
-    await syncFinancialCollections();
-    await setDoc(cloudRef,{clients:db.clients,payments:db.payments,costs:db.costs,updatedAt:serverTimestamp()},{merge:true});
-    setStatus('Sincronizado com a nuvem');
-  }catch(e){
-    setStatus('Falha ao sincronizar os dados. Verifique a conexão e as regras do Firestore.',true);
-    throw e;
-  }finally{saving=false}
-}
-function showAuth(msg=''){ $('appLoading').classList.add('hidden');$('auth').classList.remove('hidden');$('app').classList.add('hidden');$('authMsg').textContent=msg; }
-function renderProfile(){if(!currentUser)return;const name=(profileData.nickname||currentUser.displayName||currentUser.email?.split('@')[0]||'Usuário').trim();$('profileNickname').textContent=name;const avatar=$('profileAvatar');const saved=profileData.avatar||'';if(saved.startsWith('data:image/')){avatar.textContent='';avatar.style.backgroundImage='url("'+saved+'")';avatar.style.backgroundSize='cover';avatar.style.backgroundPosition='center';}else{avatar.style.backgroundImage='none';avatar.textContent=saved||((name[0]||'U').toUpperCase());}$('profileBtn').title='Apelido: '+name+' • Toque para editar foto ou avatar';}
-async function saveProfileData(changes){if(!currentUser||!profileRef)throw new Error('Perfil não carregado');profileData={...profileData,...changes};await setDoc(profileRef,{nickname:profileData.nickname||'Usuário',avatar:profileData.avatar||''});renderProfile();}
-async function loadProfileData(){profileRef=doc(store,'usuarios',currentUser.uid,'perfil','principal');const snap=await getDoc(profileRef);if(snap.exists()){const data=snap.data();profileData={nickname:typeof data.nickname==='string'?data.nickname:'',avatar:typeof data.avatar==='string'?data.avatar:''};}else{profileData={nickname:(currentUser.displayName||currentUser.email?.split('@')[0]||'Usuário').trim(),avatar:localStorage.getItem('avatar_'+currentUser.uid)||''};await setDoc(profileRef,profileData);}renderProfile();}
-async function chooseAvatar(){if(!currentUser)return;const choices=['👤','😀','😎','🦁','🐯','🐼','🐸','🦊','🐻','🐵','⚽','🚀'];const backdrop=document.createElement('div');backdrop.className='app-dialog-backdrop show';const box=document.createElement('div');box.className='app-dialog';const title=document.createElement('h2');title.textContent='Personalizar avatar';const desc=document.createElement('p');desc.textContent='Escolha um avatar ou envie uma foto. Sua escolha ficará sincronizada na sua conta.';const grid=document.createElement('div');grid.className='avatar-choice-grid';choices.forEach(emoji=>{const btn=document.createElement('button');btn.type='button';btn.className='avatar-choice';btn.textContent=emoji;btn.onclick=async()=>{btn.disabled=true;try{await saveProfileData({avatar:emoji});backdrop.remove();}catch(e){btn.disabled=false;alert('Não foi possível sincronizar o avatar. Confira sua conexão.');}};grid.append(btn)});const file=document.createElement('input');file.type='file';file.accept='image/*';file.className='avatar-file';const upload=document.createElement('button');upload.type='button';upload.className='app-dialog-ok';upload.textContent='Enviar foto';upload.onclick=async()=>{const f=file.files?.[0];if(!f){file.click();return}if(!f.type.startsWith('image/')){alert('Escolha uma imagem.');return}try{const data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(f)});const img=await new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=reject;im.src=data});const canvas=document.createElement('canvas');const scale=Math.min(1,256/Math.max(img.width,img.height));canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);const compact=canvas.toDataURL('image/jpeg',0.72);if(compact.length>190000){alert('Escolha uma imagem menor.');return}await saveProfileData({avatar:compact});backdrop.remove();}catch(e){alert('Não foi possível carregar a foto. Tente outra imagem.')}};const cancel=document.createElement('button');cancel.type='button';cancel.className='app-dialog-cancel';cancel.textContent='Fechar';cancel.onclick=()=>backdrop.remove();const actions=document.createElement('div');actions.className='app-dialog-actions';actions.append(file,upload,cancel);box.append(title,desc,grid,actions);backdrop.append(box);backdrop.onclick=e=>{if(e.target===backdrop)backdrop.remove()};document.body.append(backdrop);}
-async function chooseNickname(force=false){if(!currentUser)return;const current=profileData.nickname||currentUser.displayName||currentUser.email?.split('@')[0]||'';const value=await window.showNicknameDialog(current);if(value===null&&!force)return;const nickname=(value||'').trim().replace(/\\s+/g,' ').slice(0,24);if(nickname.length<2){alert('O apelido precisa ter pelo menos 2 caracteres.');return}try{await updateProfile(currentUser,{displayName:nickname});await saveProfileData({nickname});renderProfile()}catch(e){alert('Não foi possível salvar o apelido. Tente novamente.');}}
-function enter(){ $('tabs').classList.remove('open');$('appLoading').classList.add('hidden');$('auth').classList.add('hidden');$('app').classList.remove('hidden');loadTheme();renderProfile();renderAll(); }
-async function login(){const email=$('loginEmail').value.trim(),password=$('loginPassword').value;if(!email||!password){$('authMsg').textContent='Informe seu e-mail e sua senha.';return} $('loginBtn').disabled=true;$('authMsg').textContent='Conectando ao Firebase...';try{await withTimeout(signInWithEmailAndPassword(auth,email,password),15000,'Login');$('authMsg').textContent='Login confirmado. Carregando seus dados...';}catch(e){const code=e?.code||'';$('authMsg').textContent=e.message?.includes('demorou')?'O Firebase não respondeu em 15 segundos. Confira a internet e tente novamente.':code==='auth/invalid-credential'?'E-mail ou senha incorretos.':code==='auth/too-many-requests'?'Muitas tentativas. Aguarde um pouco e tente novamente.':code==='auth/network-request-failed'?'Falha de conexão com o Firebase. Troque de rede ou tente novamente.':'Falha no login ('+(code||'erro desconhecido')+'). Tente novamente.';}finally{$('loginBtn').disabled=false}}
-$('loginBtn').onclick=login;
-$('showCreateBtn').onclick=()=>{$('createAccountOptions').classList.remove('hidden');$('loginFields').classList.add('hidden');$('showCreateBtn').classList.add('hidden');$('authMsg').textContent='';};
-$('backToLoginBtn').onclick=()=>{$('createAccountOptions').classList.add('hidden');$('loginFields').classList.remove('hidden');$('showCreateBtn').classList.remove('hidden');$('authMsg').textContent='';};
-const googleProvider=new GoogleAuthProvider();googleProvider.setCustomParameters({prompt:'select_account'});
-$('googleLoginBtn').onclick=async()=>{ $('googleLoginBtn').disabled=true;$('authMsg').textContent='Abrindo o acesso seguro do Google...';try{await signInWithRedirect(auth,googleProvider)}catch(e){$('googleLoginBtn').disabled=false;$('authMsg').textContent='Não foi possível iniciar o Google. Confira os domínios autorizados e o provedor Google no Firebase.'}};
-$('profileBtn').onclick=()=>chooseAvatar();
-$('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
-const authFallback=setTimeout(()=>{if($('appLoading')&&!$('appLoading').classList.contains('hidden')&&$('app').classList.contains('hidden'))showAuth('A verificação demorou. Confira sua conexão e entre novamente.');},12000);
-onAuthStateChanged(auth,async user=>{clearTimeout(authFallback);if(user)$('appLoading').classList.remove('hidden');if(unsubscribeCloud){unsubscribeCloud();unsubscribeCloud=null}currentUser=user;if(!user){cloudRef=null;profileRef=null;profileData={nickname:'',avatar:''};db={clients:[],payments:[],costs:[]};showAuth();return}cloudRef=doc(store,'usuarios',user.uid,'dados','principal');setStatus('Carregando seu perfil...');try{await withTimeout(loadProfileData(),15000,'Carregamento do perfil');}catch(profileError){console.warn('Perfil indisponível; seguindo para os dados principais:',profileError);profileRef=doc(store,'usuarios',user.uid,'perfil','principal');profileData={nickname:(user.displayName||user.email?.split('@')[0]||'Usuário').trim(),avatar:localStorage.getItem('avatar_'+user.uid)||''};renderProfile();setStatus('Perfil temporariamente indisponível. Carregando clientes...');}try{setStatus('Carregando seus dados...');const snap=await withTimeout(getDoc(cloudRef),15000,'Leitura dos clientes');if(!snap.exists()){await setDoc(cloudRef,{clients:[],payments:[],costs:[],createdAt:serverTimestamp()})}const legacy=snap.exists()?snap.data():{clients:[],payments:[],costs:[]};const applyCloudData=data=>{db={clients:Array.isArray(data.clients)?data.clients:[],payments:Array.isArray(data.payments)?data.payments:[],costs:Array.isArray(data.costs)?data.costs:[]};db.clients=db.clients.map(c=>({...c,dueDate:c.dueDate||(c.due?`${today().slice(0,7)}-${String(Math.min(Number(c.due),new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate())).padStart(2,'0')}`:today())}));};applyCloudData(legacy);enter();setStatus('Dados carregados. Atualizações em segundo plano.');unsubscribeCloud=onSnapshot(cloudRef,s=>{if(!s.exists())return;applyCloudData(s.data());renderAll();setStatus('Dados sincronizados com a nuvem.')},err=>setStatus('Não foi possível atualizar em tempo real. Seus dados carregados continuam disponíveis.',true));withTimeout(migrateLegacyRecords(user.uid,legacy),20000,'Migração financeira').then(copied=>{if(copied)setStatus('Dados carregados; '+copied+' registros financeiros conferidos.')}).catch(migrationError=>setStatus('Dados carregados. Sincronização financeira pendente: '+(migrationError.message||'tente novamente depois.'),true));}catch(e){console.error('Falha ao carregar conta/dados:',e);const code=e?.code||'sem-código';const detail=String(e?.message||'Erro desconhecido').slice(0,220);setStatus('Falha ao carregar: '+code,true);showAuth('Falha no Firestore ('+code+'): '+detail)}});
-const tabNames=['resumo','clientes','pagamentos','vencimentos','meuPlano','backup'];
-document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x.dataset.tab===b.dataset.tab));tabNames.forEach(t=>$('tab-'+t).classList.toggle('hidden',t!==b.dataset.tab));$('tabs').classList.remove('open');renderAll()});
-$('menuToggle').onclick=()=>$('tabs').classList.toggle('open');
-$('bottomMore').onclick=()=>$('tabs').classList.toggle('open');
-$('premiumInfoBtn').onclick=()=>showAppDialog('O Premium por R$ 9,90 por mês está planejado, sem período grátis. A assinatura pela Google Play ainda está em preparação e não há cobrança disponível neste momento.',{title:'Premium em breve',okText:'Entendi'});
-$('bottomNewClient').onclick=()=>{document.querySelector('[data-tab="clientes"]').click();closeClientForm();openClientForm('Cadastrar cliente')};
-$('navLogout').onclick=()=>$('lockBtn').click();
-$('themeToggle').addEventListener('click',()=>{const dark=!document.body.classList.contains('dark');document.body.classList.toggle('dark',dark);$('themeToggle').textContent=dark?'☀️':'🌙';if(currentUser){try{localStorage.setItem('nathan-theme-'+currentUser.uid,dark?'dark':'light')}catch(e){}}});
-function loadTheme(){let dark=false;try{dark=!!currentUser&&localStorage.getItem('nathan-theme-'+currentUser.uid)==='dark'}catch(e){}document.body.classList.toggle('dark',dark);$('themeToggle').textContent=dark?'☀️':'🌙'}
-function renderAll(){renderSummary();renderClients();renderPayments();renderCosts();renderPlan()}
-function renderPlan(){const count=db.clients.length;const pct=Math.min(100,count/20*100);$('planClientCount').textContent=count+' de 20';$('planUsageBar').style.width=pct+'%';$('planUsageText').textContent=count>=20?'Você atingiu o limite de clientes do plano Free.':'Você ainda pode cadastrar '+(20-count)+' cliente(s) no plano Free.'}
-function renderSummary(){const mk=today().slice(0,7);const active=db.clients.length;const expected=db.clients.reduce((s,c)=>s+Number(c.price||0),0);const received=db.payments.filter(p=>monthKey(p.date)===mk).reduce((s,p)=>s+Number(p.amount||0),0);const costs=db.costs.filter(c=>monthKey(c.date)===mk).reduce((s,c)=>s+Number(c.amount||0),0);const paidByClient={};db.payments.filter(p=>monthKey(p.date)===mk).forEach(p=>paidByClient[p.clientId]=(paidByClient[p.clientId]||0)+Number(p.amount||0));const pending=db.clients.reduce((s,c)=>s+Math.max(0,Number(c.price||0)-(paidByClient[c.id]||0)),0);$('mClients').textContent=active;$('mExpected').textContent=money(expected);$('mReceived').textContent=money(received);$('mPending').textContent=money(pending);$('mProfitIn').textContent=money(received);$('mCreditCost').textContent=money(costs);$('mProfit').textContent=money(received-costs);
-const dueDate=c=>c.dueDate||'';const isPaid=c=>paidByClient[c.id]>=Number(c.price||0);const base=new Date(today()+'T00:00:00');const daysUntil=c=>c.dueDate?Math.round((new Date(c.dueDate+'T00:00:00')-base)/86400000):99999;const overdue=db.clients.filter(c=>dueDate(c)&&daysUntil(c)<0&&!isPaid(c)).sort((a,b)=>a.dueDate.localeCompare(b.dueDate));const todayDue=db.clients.filter(c=>dueDate(c)&&daysUntil(c)===0&&!isPaid(c));const nextFive=db.clients.filter(c=>dueDate(c)&&daysUntil(c)>=1&&daysUntil(c)<=5&&!isPaid(c)).sort((a,b)=>a.dueDate.localeCompare(b.dueDate));$('dueSummary').innerHTML=`<p><span class="pill red">${overdue.length} em atraso</span> &nbsp; <span class="pill amber">${todayDue.length} hoje</span> &nbsp; <span class="pill green">${nextFive.length} próximos 5 dias</span></p>`+(overdue.length?'<strong>Em atraso</strong>'+overdue.map(c=>`<div>${esc(c.name)} — ${dateBR(dueDate(c))}</div>`).join(''):'')+(todayDue.length?'<p><strong>Vencem hoje</strong></p>'+todayDue.map(c=>`<div>${esc(c.name)}</div>`).join(''):'')+(nextFive.length?'<p><strong>Próximos 5 dias</strong></p>'+nextFive.map(c=>`<div>${esc(c.name)} — ${dateBR(dueDate(c))}</div>`).join(''):'')+(!overdue.length&&!todayDue.length&&!nextFive.length?'<p>Nenhum vencimento em atraso ou nos próximos 5 dias.</p>':'');
-const renderDueGroup=(title,items,pillClass)=>items.length?`<div class="due-group"><div class="itemtop" style="align-items:center;margin:16px 0 6px"><h3>${title}</h3><span class="pill ${pillClass}">${items.length} cliente(s)</span></div>`+items.map(c=>`<div class="item"><div class="itemtop"><div><strong>${esc(c.name)}</strong><div class="muted">Vencimento: ${dateBR(c.dueDate)}</div><div class="muted">Mensalidade: ${money(c.price)}</div></div></div><div class="btnrow"><button class="btn" onclick="renewClient('${c.id}')">Renovar</button><button class="btn secondary whatsapp-btn" onclick="openWhatsAppModal('${c.id}')"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 .5A15.4 15.4 0 0 0 2.7 23.7L.6 31.4l7.9-2.1A15.5 15.5 0 1 0 16 .5zm0 28.2c-2.4 0-4.7-.6-6.7-1.8l-.5-.3-4.7 1.2 1.3-4.6-.3-.5A12.7 12.7 0 1 1 16 28.7zm7-9.5c-.4-.2-2.2-1.1-2.5-1.2-.3-.1-.6-.2-.8.2-.2.4-1 1.2-1.2 1.4-.2.2-.4.3-.8.1-.4-.2-1.6-.6-3-1.9-1.1-1-1.9-2.2-2.1-2.6-.2-.4 0-.6.2-.8l.6-.7c.2-.2.2-.4.4-.6.1-.2.1-.5 0-.7-.1-.2-.8-2-1.1-2.7-.3-.7-.6-.6-.8-.6h-.7c-.2 0-.7.1-1 .5-.4.4-1.3 1.3-1.3 3.1s1.3 3.5 1.5 3.7c.2.2 2.6 4 6.3 5.6.9.4 1.6.6 2.2.8.9.3 1.7.2 2.3.1.7-.1 2.2-.9 2.5-1.8.3-.9.3-1.6.2-1.8-.1-.2-.3-.3-.7-.5z"/></svg> WhatsApp</button><button class="btn secondary" onclick="toggleClientHistory('${c.id}')">▤ Histórico</button></div></div>`).join('')+'</div>':'';
-if($('dueList'))$('dueList').innerHTML=renderDueGroup('Em atraso',overdue,'red')+renderDueGroup('Vencem hoje',todayDue,'amber')+renderDueGroup('Próximos 5 dias',nextFive,'green')+(!overdue.length&&!todayDue.length&&!nextFive.length?'<p class="muted">Nenhum vencimento em atraso ou nos próximos 5 dias.</p>':'');
-}
-function dateBR(s){if(!s)return '—';const [y,m,d]=s.split('-');return `${d}/${m}/${y}`}
-function addMonth(dateStr){const [y,m,d]=dateStr.split('-').map(Number);const nextMonth=m===12?1:m+1;const nextYear=m===12?y+1:y;const last=new Date(nextYear,nextMonth,0).getDate();return `${nextYear}-${String(nextMonth).padStart(2,'0')}-${String(Math.min(d,last)).padStart(2,'0')}`}
-function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-let clientFilter='all';
-function clientDays(c){const due=c.dueDate||today();return Math.ceil((new Date(due+'T00:00:00')-new Date(today()+'T00:00:00'))/86400000)}
-function updateClientFilterCounts(){const counts={all:db.clients.length,active:0,late:0,soon:0};db.clients.forEach(c=>{const d=clientDays(c);if(d<0)counts.late++;else if(d<=5)counts.soon++;else counts.active++});$('filterCountAll').textContent=counts.all;$('filterCountActive').textContent=counts.active;$('filterCountLate').textContent=counts.late;$('filterCountSoon').textContent=counts.soon;document.querySelectorAll('[data-client-filter]').forEach(b=>b.classList.toggle('active',b.dataset.clientFilter===clientFilter))}
-$('clientFilterToggle').addEventListener('click',()=>$('clientFilterMenu').classList.toggle('hidden'));document.querySelectorAll('[data-client-filter]').forEach(b=>b.addEventListener('click',()=>{clientFilter=b.dataset.clientFilter;$('clientFilterCurrent').textContent=b.textContent.trim().replace(/[0-9]+$/,'').trim();$('clientFilterMenu').classList.add('hidden');renderClients()}));
-function renderClients(){const term=$('clientSearch').value.toLowerCase();updateClientFilterCounts();const arr=db.clients.filter(c=>{const match=(c.name+' '+c.phone).toLowerCase().includes(term);const days=clientDays(c);const filterMatch=clientFilter==='all'||(clientFilter==='late'&&days<0)||(clientFilter==='soon'&&days>=0&&days<=5)||(clientFilter==='active'&&days>5);return match&&filterMatch});$('clientList').innerHTML=arr.length?arr.map(c=>{const due=c.dueDate||today();const days=clientDays(c);const status=days<0?'VENCIDO':days===0?'VENCE HOJE':days<=5?'PRÓXIMO':'ATIVO';const cls=days<0?'late':days<=5?'soon':'';return `<article class="client-modern"><div class="client-modern-head"><div class="client-avatar">${esc((c.name||'?').trim().charAt(0).toUpperCase())}</div><div class="client-main"><div class="client-name">${esc(c.name)}</div><div class="client-sub">☎ ${esc(c.phone||'Sem telefone')}</div></div><span class="client-status ${cls}">${status}</span></div><div class="client-details"><div class="client-info-box"><span>PRÓXIMO VENCIMENTO</span><strong>◷ ${dateBR(due)}</strong></div><div class="client-info-box client-price-box"><span>MENSALIDADE</span><strong>${money(c.price)}</strong></div></div>${c.notes?`<div class="client-notes">${esc(c.notes)}</div>`:''}<div class="client-actions-icons"><button class="client-icon-btn edit" title="Editar cliente" aria-label="Editar cliente" onclick="editClient('${c.id}')">✎</button><button class="client-icon-btn renew" title="Renovar cliente" aria-label="Renovar cliente" onclick="renewClient('${c.id}')">↻</button><button class="client-icon-btn whatsapp" title="WhatsApp" aria-label="WhatsApp" onclick="openWhatsAppModal('${c.id}')">☏</button><button class="client-icon-btn history" title="Histórico" aria-label="Histórico" onclick="toggleClientHistory('${c.id}')">▤</button><button class="client-icon-btn delete" title="Excluir cliente" aria-label="Excluir cliente" onclick="deleteClient('${c.id}')">⌫</button></div><div id="client-history-${c.id}" class="hidden"></div></article>`}).join(''):'<div class="card muted">Nenhum cliente encontrado neste filtro.</div>'}
-window.toggleClientHistory=id=>{const c=db.clients.find(x=>x.id===id);const panel=$('client-history-'+id);if(!c||!panel)return;if(!panel.classList.contains('hidden')){panel.classList.add('hidden');return}const payments=db.payments.filter(p=>p.clientId===id).sort((a,b)=>(b.date||'').localeCompare(a.date||''));const renewals=db.costs.filter(x=>x.clientId===id&&x.kind==='renewal').sort((a,b)=>(b.date||'').localeCompare(a.date||''));const received=payments.reduce((sum,p)=>sum+Number(p.amount||0),0);const costs=renewals.reduce((sum,x)=>sum+Number(x.amount||0),0);const events=[...payments.map(p=>({date:p.date||'',kind:'payment',amount:Number(p.amount||0),label:'Pagamento recebido',detail:[p.method,p.ref].filter(Boolean).join(' · ')})),...renewals.map(x=>({date:x.date||'',kind:'cost',amount:Number(x.amount||0),label:'Custo de renovação',detail:x.desc||'Renovação mensal'}))].sort((a,b)=>b.date.localeCompare(a.date));panel.innerHTML='<div class="hr"></div><h3>Histórico de '+esc(c.name)+'</h3><div class="grid"><div class="metric"><small>Total recebido</small><strong>'+money(received)+'</strong></div><div class="metric"><small>Custos de renovação</small><strong>'+money(costs)+'</strong></div><div class="metric"><small>Saldo após renovações</small><strong>'+money(received-costs)+'</strong></div><div class="metric"><small>Renovações registradas</small><strong>'+renewals.length+'</strong></div></div><div class="hr"></div><h3>Movimentações</h3>'+(events.length?events.map(e=>'<div class="item"><div class="itemtop"><div><strong>'+esc(e.label)+'</strong><div class="muted">'+dateBR(e.date)+' · '+esc(e.detail)+'</div></div><strong class="'+(e.kind==='payment'?'':'dangertext')+'">'+(e.kind==='payment'?'+ ':'− ')+money(e.amount)+'</strong></div></div>').join(''):'<p class="muted">Ainda não há pagamentos ou custos de renovação vinculados a este cliente.</p>');panel.classList.remove('hidden')};
-
-$('clientSearch').addEventListener('input',renderClients);
-const packagePlans={1:{months:1,price:30}};
-let selectedPackage='1';let packageBaseDate=today();
-function updatePackageSummary(){const amount=Math.max(0,Number($('cAmountCharged')?.value)||0);const cost=Math.max(0,Number($('cPackageCost')?.value)||0);$('packageSummary').textContent='Valor cobrado '+money(amount)+' · Custo '+money(cost)+' · Lucro estimado '+money(amount-cost)}
-$('cPackageCost').addEventListener('input',updatePackageSummary);$('cAmountCharged').addEventListener('input',updatePackageSummary);
-function addMonths(dateStr,count){let [y,m,d]=dateStr.split('-').map(Number);const index=m-1+count;const ny=y+Math.floor(index/12),nm=index%12+1;const last=new Date(ny,nm,0).getDate();return ny+'-'+String(nm).padStart(2,'0')+'-'+String(Math.min(d,last)).padStart(2,'0')}
-function openClientForm(title='Cadastrar cliente'){ $('clientFormTitle').textContent=title;const editing=!!$('clientId').value;$('cClientProof').disabled=editing;$('clientProofHint').textContent=editing?'Para anexar comprovante, use o histórico financeiro do cliente.':'Você pode anexar uma foto ou PDF de até 15 MB. O arquivo será enviado ao Google Drive após salvar o cliente.';$('clientFormPanel').classList.add('client-form-overlay');$('clientFormPanel').classList.remove('hidden');$('packageSummary').classList.remove('hidden');if(!editing){packageBaseDate=today();$('cDueDate').value=addMonths(packageBaseDate,1)}updatePackageSummary(); }
-function closeClientForm(){ $('clientForm').reset();$('cClientProof').disabled=false; $('clientId').value=''; $('cDueDate').value=today();$('cAmountCharged').value='';$('cPackageCost').value='';packageBaseDate=today();$('packageSummary').classList.remove('hidden');updatePackageSummary();$('clientFormTitle').textContent='Cadastrar cliente';$('clientFormPanel').classList.add('hidden');$('clientFormPanel').classList.remove('client-form-overlay'); }
-$('closeClientX').onclick=closeClientForm;
-$('clientForm').onsubmit=async e=>{e.preventDefault();const id=$('clientId').value;const isNew=!id;const proofFile=$('cClientProof').files?.[0]||null;if(proofFile&&proofFile.size>15*1024*1024){await showAppDialog('O comprovante deve ter até 15 MB.',{title:'Arquivo muito grande'});return}if(isNew&&db.clients.length>=20){await showAppDialog('O plano Free permite cadastrar até 20 clientes. Para adicionar mais, será necessário assinar o Premium.',{title:'Limite do plano Free',okText:'Entendi'});return}const charged=Math.max(0,Number($('cAmountCharged').value)||0);const packageCost=Math.max(0,Number($('cPackageCost').value)||0);const now=today();const due=$('cDueDate').value;const fullName=$('cName').value.trim().replace(/\\s+/g,' ');const phone=$('cPhone').value.trim();const phoneDigits=phone.replace(/\\D/g,'');if(fullName.split(' ').filter(Boolean).length<2){await showAppDialog('Informe o nome completo do cliente, com nome e sobrenome.',{title:'Nome incompleto'});$('cName').focus();return}if(phoneDigits.length<10||phoneDigits.length>13){await showAppDialog('Informe um WhatsApp válido com DDD e número.',{title:'WhatsApp obrigatório'});$('cPhone').focus();return}if(!Number.isFinite(Number($('cAmountCharged').value))||$('cAmountCharged').value.trim()===''||charged<=0){await showAppDialog('Informe um valor cobrado maior que zero.',{title:'Valor obrigatório'});$('cAmountCharged').focus();return}if($('cPackageCost').value.trim()===''||!Number.isFinite(Number($('cPackageCost').value))||packageCost<0){await showAppDialog('Informe o custo. Se não houver custo, digite 0.',{title:'Custo obrigatório'});$('cPackageCost').focus();return}if(!due){await showAppDialog('Informe a data de vencimento.',{title:'Vencimento obrigatório'});return}const c={id:id||uid(),name:fullName,phone,price:charged,dueDate:due,notes:$('cNotes').value.trim(),serviceType:$('cServiceType').value,serviceUser:$('cServiceUser').value.trim(),servicePass:$('cServicePass').value,lastRenewal:isNew?now:(db.clients.find(x=>x.id===id)?.lastRenewal||'')};if(!c.name)return;const oldClients=db.clients.slice(),oldPayments=db.payments.slice(),oldCosts=db.costs.slice();if(isNew){db.clients.push(c);db.payments.unshift({id:uid(),clientId:c.id,clientName:c.name,amount:charged,date:now,method:'Pendente de confirmação',ref:'Cadastro de cliente',proof:'Cadastro automático'});if(packageCost>0)db.costs.unshift({id:uid(),amount:packageCost,date:now,desc:'Custo informado no cadastro — '+c.name,vendor:'Custo informado no cadastro',kind:'renewal',clientId:c.id});}else{db.clients=db.clients.map(x=>x.id===id?c:x)}try{await persist();const createdPayment=isNew?db.payments.find(p=>p.clientId===c.id&&p.ref==='Cadastro de cliente'):null;closeClientForm();renderAll();if(proofFile&&createdPayment){try{await uploadPaymentProofFile(createdPayment,proofFile);await showAppDialog('Cliente cadastrado e comprovante enviado ao Google Drive.',{title:'Cadastro concluído',okText:'Ótimo!'})}catch(uploadError){await showAppDialog('O cliente foi cadastrado, mas o comprovante não foi enviado: '+uploadError.message+' Você poderá anexá-lo depois pelo Financeiro.',{title:'Cadastro salvo; anexo pendente',okText:'Entendi'})}}else if(isNew)await showAppDialog('Cliente cadastrado com sucesso!\nValor cobrado: '+money(charged)+'\nCusto informado: '+money(packageCost)+'\nO pagamento foi registrado como pendente. Confirme quando receber.',{title:'Cliente cadastrado',okText:'Entendi'})}catch(error){db.clients=oldClients;db.payments=oldPayments;db.costs=oldCosts;renderAll();alert('Não foi possível salvar na nuvem. Nenhuma alteração foi mantida. Verifique a conexão.')}};
-$('importContactBtn').onclick=async()=>{try{if(!('contacts' in navigator)||!navigator.contacts.select){alert('A importação de contatos não é compatível com este navegador. Você pode digitar o WhatsApp manualmente.');return}const contacts=await navigator.contacts.select(['name','tel'],{multiple:false});if(contacts&&contacts.length){const c=contacts[0];if(c.name&&c.name[0])$('cName').value=c.name[0];if(c.tel&&c.tel[0])$('cPhone').value=c.tel[0]}}catch(e){if(e.name!=='AbortError')alert('Não foi possível importar o contato. Digite os dados manualmente.')}};$('clearClient').onclick=closeClientForm;
-window.toggleServicePass=()=>{const input=$('cServicePass');const button=$('toggleServicePassBtn');if(!input||!button)return;const reveal=input.type==='password';input.type=reveal?'text':'password';button.textContent=reveal?'🙈':'👁';button.setAttribute('aria-label',reveal?'Ocultar senha':'Mostrar senha');button.title=reveal?'Ocultar senha':'Mostrar senha'};
-window.editClient=id=>{const c=db.clients.find(x=>x.id===id);if(!c)return;$('clientId').value=c.id;$('cName').value=c.name;$('cPhone').value=c.phone;$('cAmountCharged').value=c.price;$('cPackageCost').value='0';$('cDueDate').value=c.dueDate||today();$('cNotes').value=c.notes||'';$('cServiceType').value=c.serviceType||'IPTV';$('cServiceUser').value=c.serviceUser||'';$('cServicePass').value=c.servicePass||'';document.querySelector('[data-tab="clientes"]').click();openClientForm('Editar cliente')};
-window.toggleMenu=id=>{document.querySelectorAll('.menu').forEach(m=>{if(m.id!=='menu-'+id)m.classList.add('hidden')});$('menu-'+id)?.classList.toggle('hidden')};
-window.renewClient=async id=>{const c=db.clients.find(x=>x.id===id);if(!c)return;const base=c.dueDate&&c.dueDate>=today()?c.dueDate:today();const next=addMonth(base);if(!await showAppDialog(`Renovar ${c.name} por 1 mês?\nNovo vencimento: ${dateBR(next)}\nSerá registrado um pagamento pendente de ${money(c.price)} e R$ 6,00 de custo de renovação.`,{confirm:true,okText:'Renovar'}))return;const oldDue=c.dueDate,oldRenewal=c.lastRenewal,oldCosts=db.costs.slice(),oldPayments=db.payments.slice();c.dueDate=next;c.lastRenewal=today();db.costs.unshift({id:uid(),amount:6,date:today(),desc:`Renovação de 1 mês — ${c.name}`,vendor:'Renovação automática',kind:'renewal',clientId:c.id});db.payments.unshift({id:uid(),clientId:c.id,clientName:c.name,amount:Number(c.price||0),date:today(),method:'Pendente de confirmação',ref:'Renovação mensal',proof:'Aguardando comprovante'});try{await persist();renderAll();await showAppDialog(`Renovação concluída!\nNovo vencimento: ${dateBR(next)}.\nO pagamento ficou pendente até a confirmação.`,{title:'Renovação concluída',okText:'Entendi'})}catch(e){c.dueDate=oldDue;c.lastRenewal=oldRenewal;db.costs=oldCosts;db.payments=oldPayments;renderAll();await showAppDialog('Não foi possível salvar a renovação. Confira a conexão.',{title:'Não foi possível concluir'})}};
-window.deleteClient=async id=>{const c=db.clients.find(x=>x.id===id);if(!c)return;if(!await showAppDialog('Deseja excluir '+c.name+'? Os pagamentos já registrados serão mantidos no histórico.',{title:'Excluir cliente',confirm:true,okText:'Excluir',cancelText:'Cancelar'}))return;const oldClients=db.clients.slice();db.clients=db.clients.filter(x=>x.id!==id);try{await persist();renderAll();await showAppDialog('Cliente excluído com sucesso.',{title:'Cliente excluído',okText:'Entendi'})}catch(e){db.clients=oldClients;renderAll();await showAppDialog('Não foi possível excluir o cliente. Tente novamente.',{title:'Falha ao excluir'})}};
-let activeWhatsAppClientId=null;let activeWhatsAppType='fiveDays';
-function buildWhatsAppMessage(c,type){const due=dateBR(c.dueDate||'');return type==='fiveDays'?'Olá, '+c.name+'! Tudo bem? Passando para avisar que seu sinal vence em 5 dias, no dia '+due+'. Se precisar de ajuda, estou à disposição!':'Olá, '+c.name+'! Tudo bem? Passando para avisar que seu sinal acaba hoje ('+due+'). Para continuar assistindo, entre em contato para renovar. Obrigado!'}
-window.openWhatsAppModal=id=>{const c=db.clients.find(x=>x.id===id);if(!c)return;const phone=(c.phone||'').replace(/\D/g,'');if(!phone){alert('Este cliente não tem telefone cadastrado.');return}activeWhatsAppClientId=id;activeWhatsAppType='fiveDays';$('waClientInfo').innerHTML='<div><strong>Cliente:</strong> '+esc(c.name)+'</div><div><strong>WhatsApp:</strong> '+esc(c.phone||'Não cadastrado')+'</div><div><strong>Vencimento:</strong> '+dateBR(c.dueDate||'')+'</div><div><strong>Mensalidade:</strong> '+money(c.price)+'</div>';$('whatsAppModal').classList.remove('hidden');setWhatsAppType('fiveDays')};
-window.setWhatsAppType=type=>{const c=db.clients.find(x=>x.id===activeWhatsAppClientId);if(!c)return;activeWhatsAppType=type;$('waFiveDays').classList.toggle('active',type==='fiveDays');$('waToday').classList.toggle('active',type==='today');$('waMessage').value=buildWhatsAppMessage(c,type)};
-window.closeWhatsAppModal=()=>{$('whatsAppModal').classList.add('hidden');activeWhatsAppClientId=null};
-window.openWhatsAppFromModal=()=>{const c=db.clients.find(x=>x.id===activeWhatsAppClientId);if(!c)return;let phone=(c.phone||'').replace(/\D/g,'');if(!phone){alert('Este cliente não tem telefone cadastrado.');return}if(!phone.startsWith('55'))phone='55'+phone;const message=$('waMessage').value.trim();if(!message){alert('Digite uma mensagem antes de continuar.');return}window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(message),'_blank','noopener')};
-
-const GOOGLE_DRIVE_CLIENT_ID="493101764038-elh5ttqnq9gk93fvh70b53edtslt7823.apps.googleusercontent.com";
-const DRIVE_SCOPE='https://www.googleapis.com/auth/drive.file';
-let driveAccessToken=null, driveTokenClient=null;
-function driveMessage(msg,isError=false){const el=$('driveStatus');if(el){el.textContent=msg;el.style.color=isError?'#c93643':'var(--muted)'}}
-function requestDriveAccess(){return new Promise((resolve,reject)=>{if(!window.google?.accounts?.oauth2){reject(new Error('O serviço de login do Google ainda está carregando. Aguarde alguns segundos e tente novamente.'));return}if(!driveTokenClient){driveTokenClient=google.accounts.oauth2.initTokenClient({client_id:GOOGLE_DRIVE_CLIENT_ID,scope:DRIVE_SCOPE,callback:response=>{if(response?.access_token){driveAccessToken=response.access_token;driveMessage('Google Drive conectado nesta sessão.');resolve(driveAccessToken)}else reject(new Error(response?.error_description||response?.error||'Não foi possível autorizar o Google Drive.'))}})}driveTokenClient.requestAccessToken({prompt:driveAccessToken?'':'consent'});})}
-$('connectDriveBtn')?.addEventListener('click',async()=>{try{driveMessage('Aguardando autorização do Google...');await requestDriveAccess()}catch(e){driveMessage(e.message,true);alert(e.message)}});
-async function uploadPaymentProofFile(payment,file){
- if(!payment||!file)throw new Error('Pagamento ou arquivo não encontrado.');
- if(file.size>15*1024*1024)throw new Error('O comprovante deve ter até 15 MB.');
- if(!driveAccessToken)await requestDriveAccess();
- driveMessage('Enviando comprovante ao Google Drive...');
- const safeName=(payment.clientName||'Cliente').replace(/[^a-z0-9-_ ]/gi,'').trim()||'Cliente';
- const metadata={name:'Comprovante - '+safeName+' - '+(payment.date||today())+' - '+file.name,mimeType:file.type||'application/octet-stream',description:'Comprovante do pagamento '+payment.id+' no Gestão de Clientes'};
- const boundary='-------gestaoclientes'+uid();
- const body='--'+boundary+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(metadata)+'\r\n--'+boundary+'\r\nContent-Type: '+(file.type||'application/octet-stream')+'\r\n\r\n';
- const ending='\r\n--'+boundary+'--';
- const blob=new Blob([body,file,ending],{type:'multipart/related; boundary='+boundary});
- let response=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,mimeType,webViewLink',{method:'POST',headers:{Authorization:'Bearer '+driveAccessToken},body:blob});
- if(response.status===401){driveAccessToken=null;await requestDriveAccess();response=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,mimeType,webViewLink',{method:'POST',headers:{Authorization:'Bearer '+driveAccessToken},body:blob})}
- if(!response.ok)throw new Error('O Google Drive recusou o envio ('+response.status+'). Confira a autorização e tente novamente.');
- const uploaded=await response.json();payment.proofFileId=uploaded.id;payment.proofFileName=uploaded.name;payment.proofMimeType=uploaded.mimeType;
- await persist();renderPayments();driveMessage('Comprovante enviado e vinculado ao pagamento.');
-}
-window.attachPaymentProof=async(id,input)=>{const file=input?.files?.[0];if(!file)return;const payment=db.payments.find(p=>p.id===id);if(!payment){alert('Pagamento não encontrado.');input.value='';return}try{await uploadPaymentProofFile(payment,file);alert('Comprovante salvo no Google Drive!')}catch(e){driveMessage(e.message,true);alert('Não foi possível enviar o comprovante: '+e.message)}finally{input.value=''}};
-
-function updateFinanceOverview(){const month=today().slice(0,7);const received=db.payments.filter(p=>p.status==='paid'&&(p.paidAt||p.date||'').slice(0,7)===month).reduce((s,p)=>s+Number(p.amount||0),0);const pending=db.payments.filter(p=>p.status!=='paid'&&(p.date||'').slice(0,7)===month).reduce((s,p)=>s+Number(p.amount||0),0);const expenses=db.costs.filter(c=>(c.date||'').slice(0,7)===month).reduce((s,c)=>s+Number(c.amount||0),0);$('financeReceived').textContent=money(received);$('financePending').textContent=money(pending);$('financeExpenses').textContent=money(expenses);$('financeBalance').textContent=money(received-expenses)}
-function renderPayments(){updateFinanceOverview();$('paymentList').innerHTML=db.payments.length?db.payments.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(p=>{const pending=p.status!=='paid'&&(String(p.method||'').toLowerCase().includes('pendente')||String(p.proof||'').toLowerCase().includes('aguardando'));const paid=p.status==='paid';return `<article class="finance-record ${paid?'is-paid':'is-pending'}"><div class="finance-record-top"><div class="finance-record-main"><strong>${esc(p.clientName||db.clients.find(c=>c.id===p.clientId)?.name||'Cliente excluído')}</strong><span class="finance-record-date">${esc(p.date||'')}${paid&&p.paidAt?' · Pago em '+dateBR(p.paidAt):''}</span></div><strong class="finance-amount">${money(p.amount)}</strong></div><div class="finance-record-meta"><span class="finance-status ${paid?'paid':'pending'}">${paid?'✓ PAGO':'◷ PENDENTE'}</span>${p.method?'<span>'+esc(p.method)+'</span>':''}</div>${p.ref?'<div class="muted">'+esc(p.ref)+'</div>':''}${p.proof?'<div class="muted">Comprovante: '+esc(p.proof)+'</div>':''}${p.proofFileId?'<a class="finance-proof-link" href="https://drive.google.com/file/d/'+encodeURIComponent(p.proofFileId)+'/view" target="_blank" rel="noopener">Abrir comprovante ↗</a>':''}<div class="finance-record-actions">${pending?'<button class="btn finance-confirm" onclick="confirmPayment(\''+p.id+'\')">Confirmar recebimento</button>':''}<button class="btn danger" onclick="deletePayment(\''+p.id+'\')">Excluir registro</button></div></article>`}).join(''):'<div class="finance-empty"><span>▤</span><strong>Nenhum pagamento registrado</strong><p>Os recebimentos aparecerão aqui automaticamente.</p></div>'}
-window.confirmPayment=async id=>{const p=db.payments.find(x=>x.id===id);if(!p||p.status==='paid')return;if(!await showAppDialog('Você confirma que recebeu o pagamento de '+(p.clientName||'cliente')+' no valor de '+money(p.amount)+'?',{confirm:true,okText:'Confirmar'}))return;const oldStatus=p.status,oldPaidAt=p.paidAt; p.status='paid';p.paidAt=today();try{await persist();renderAll();await showAppDialog('Pagamento confirmado e registrado no financeiro.',{title:'Pagamento confirmado',okText:'Ótimo!'})}catch(e){p.status=oldStatus;p.paidAt=oldPaidAt;renderAll();await showAppDialog('Não foi possível confirmar o pagamento. Confira sua conexão.',{title:'Falha ao confirmar'})}};
-window.deletePayment=async id=>{const payment=db.payments.find(p=>p.id===id);if(!payment)return;if(!await showAppDialog('Deseja excluir este registro de pagamento? Esta ação não poderá ser desfeita.',{title:'Excluir pagamento',confirm:true,okText:'Excluir',cancelText:'Cancelar'}))return;const oldPayments=db.payments.slice();db.payments=db.payments.filter(p=>p.id!==id);try{await persist();renderAll();await showAppDialog('Registro de pagamento excluído com sucesso.',{title:'Pagamento excluído',okText:'Entendi'})}catch(e){db.payments=oldPayments;renderAll();await showAppDialog('Não foi possível excluir o pagamento. Tente novamente.',{title:'Falha ao excluir'})}};
-
-function renderCosts(){$('costList').innerHTML=db.costs.length?db.costs.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(c=>`<article class="finance-record finance-cost"><div class="finance-record-top"><div class="finance-record-main"><strong>${esc(c.desc||(c.kind==='renewal'?'Renovação':'Despesa registrada'))}</strong><span class="finance-record-date">${dateBR(c.date)}${c.vendor?' · '+esc(c.vendor):''}</span></div><strong class="finance-amount">${money(c.amount)}</strong></div><div class="finance-record-meta"><span class="finance-status cost">${c.kind==='renewal'?'↻ RENOVAÇÃO':'↗ DESPESA'}</span><span class="muted">${c.kind==='renewal'?'Custo de renovação mensal':'Despesa registrada'}</span></div><div class="finance-record-actions"><button class="btn danger" onclick="deleteCost('${c.id}')">Excluir despesa</button></div></article>`).join(''):'<div class="finance-empty"><span>↗</span><strong>Nenhuma despesa registrada</strong><p>Os custos e renovações aparecerão aqui.</p></div>'}
-window.deleteCost=async id=>{if(!confirm('Excluir este custo?'))return;db.costs=db.costs.filter(c=>c.id!==id);await persist();renderAll()};
-$('exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify({app:'Gestao de Clientes',backupVersion:1,exportedAt:new Date().toISOString(),data:db},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='backup-gestao-de-clientes-'+today()+'.json';a.click();URL.revokeObjectURL(a.href);$('backupMsg').textContent='Backup exportado. Mantenha o arquivo em local privado.'};
-function validateBackup(obj){
-  const data=obj&&obj.data;
-  if(obj?.app!=='Gestao de Clientes'||!data||!Array.isArray(data.clients)||!Array.isArray(data.payments)||!Array.isArray(data.costs))throw new Error('Arquivo de backup inválido.');
-  if(data.clients.length>20)throw new Error('Este backup tem mais de 20 clientes e ultrapassa o limite do plano Free.');
-  if(data.payments.length>5000||data.costs.length>5000)throw new Error('O backup contém registros demais.');
-  const validText=(v,max,optional=false)=>optional&&(v==null||v==='')||typeof v==='string'&&v.length<=max;
-  const validDate=v=>typeof v==='string'&&/^\\d{4}-\\d{2}-\\d{2}$/.test(v)&&!Number.isNaN(Date.parse(v+'T00:00:00'));
-  for(const [key,items] of Object.entries({clients:data.clients,payments:data.payments,costs:data.costs})){
-    const ids=new Set();
-    for(const item of items){
-      if(!item||typeof item!=='object'||Array.isArray(item))throw new Error('Há um registro inválido no backup.');
-      if(!validText(item.id,128)||!item.id)throw new Error('Há um identificador inválido no backup.');
-      if(ids.has(item.id))throw new Error('O backup contém identificadores duplicados em '+key+'.');
-      ids.add(item.id);
-      if(key==='clients'){
-        if(!validText(item.name,120)||!item.name.trim()||!validText(item.phone,30)||!Number.isFinite(Number(item.price))||Number(item.price)<=0)throw new Error('Há um cliente com nome, telefone ou mensalidade inválidos.');
-        if(item.dueDate!=null&&!validDate(item.dueDate))throw new Error('Há um vencimento inválido no backup.');
-        for(const field of ['notes','serviceType','serviceUser','servicePass','lastRenewal'])if(!validText(item[field],2000,true))throw new Error('Há um campo de cliente muito longo ou inválido: '+field+'.');
-      }else if(key==='payments'){
-        if(!Number.isFinite(Number(item.amount))||Number(item.amount)<=0||!validDate(item.date))throw new Error('Há um pagamento com valor ou data inválidos.');
-        for(const field of ['clientId','clientName','method','proof','ref','status','paidAt'])if(!validText(item[field],500,true))throw new Error('Há um campo de pagamento muito longo ou inválido: '+field+'.');
-        if(item.paidAt!=null&&item.paidAt!==''&&!validDate(item.paidAt))throw new Error('Há uma data de confirmação inválida no backup.');
-      }else{
-        if(!Number.isFinite(Number(item.amount))||Number(item.amount)<0||!validDate(item.date))throw new Error('Há um custo com valor ou data inválidos.');
-        for(const field of ['desc','vendor','kind','clientId'])if(!validText(item[field],500,true))throw new Error('Há um campo de custo muito longo ou inválido: '+field+'.');
-      }
-    }
-  }
-  return {clients:data.clients,payments:data.payments,costs:data.costs};
-}
-function stableClientData(value){return JSON.stringify(Object.fromEntries(Object.keys(value||{}).sort().map(key=>[key,value[key]])))}
-async function migrateClientsSafely(){
-  const status=$('clientMigrationStatus'),button=$('migrateClientsBtn');
-  if(!currentUser){status.textContent='Entre na sua conta antes de iniciar.';return}
-  button.disabled=true;
-  try{
-    const legacySnap=await getDoc(cloudRef);
-    if(!legacySnap.exists())throw new Error('O documento original não foi encontrado. Nenhum dado foi copiado.');
-    const legacyData=legacySnap.data();
-    const source=Array.isArray(legacyData.clients)?legacyData.clients:[];
-    const target=collection(store,'usuarios',currentUser.uid,'clientes');
-    status.textContent='Conferindo '+source.length+' clientes na origem e na nova coleção...';
-    const before=await getDocs(target);
-    const existing=new Map(before.docs.map(snap=>[snap.id,snap.data()]));
-    const prepared=[];
-    const ids=new Set();
-    for(const client of source){
-      if(!client||typeof client!=='object'||Array.isArray(client))throw new Error('Foi encontrado um cliente inválido na lista antiga.');
-      const id=typeof client.id==='string'?client.id.trim():'';
-      if(!/^[A-Za-z0-9_-]{1,128}$/.test(id))throw new Error('Um cliente possui identificador inválido. Nenhum dado foi copiado.');
-      if(ids.has(id))throw new Error('Existem identificadores repetidos na lista antiga. Nenhum dado foi copiado.');
-      ids.add(id);
-      const data={...client,id};
-      if(existing.has(id)){
-        if(stableClientData(existing.get(id))!==stableClientData(data))throw new Error('O documento '+id+' já existe com conteúdo diferente. Nenhum registro foi sobrescrito.');
-      }else prepared.push({id,data});
-    }
-    status.textContent='Conferência concluída. Copiando '+prepared.length+' cliente(s) que ainda não existem...';
-    for(let i=0;i<prepared.length;i+=400){
-      const chunk=prepared.slice(i,i+400);
-      await Promise.all(chunk.map(item=>setDoc(doc(target,item.id),item.data)));
-    }
-    const after=await getDocs(target);
-    const saved=new Map(after.docs.map(snap=>[snap.id,snap.data()]));
-    if(saved.size!==ids.size||[...ids].some(id=>!saved.has(id)))throw new Error('A verificação final encontrou diferença na quantidade ou nos identificadores. A lista antiga foi mantida.');
-    for(const client of source){
-      const actual=saved.get(client.id);
-      if(stableClientData(actual)!==stableClientData(client))throw new Error('A verificação do cliente '+client.id+' falhou. A lista antiga foi mantida.');
-    }
-    status.textContent='Conferência concluída: '+source.length+' cliente(s) na origem e '+saved.size+' na nova coleção. A lista antiga continua preservada.';
-    await showAppDialog('Migração conferida com sucesso. '+saved.size+' cliente(s) estão na nova coleção e a lista antiga continua intacta.',{title:'Migração conferida',okText:'Entendi'});
-  }catch(error){
-    console.error('Migração segura de clientes:',error);
-    const detail=error?.code==='permission-denied'?'O Firestore ainda não permite acessar a coleção clientes. É necessário publicar regras específicas antes de executar a migração.':(error.message||'Falha inesperada.');
-    status.textContent='Migração não concluída: '+detail;
-    await showAppDialog(detail,{title:'Migração não executada',okText:'Entendi'});
-  }finally{button.disabled=false}
-}
-$('migrateClientsBtn').onclick=migrateClientsSafely;
-$('importBtn').onclick=async()=>{
-  const f=$('importFile').files[0];
-  if(!f){$('backupMsg').textContent='Selecione um arquivo de backup primeiro.';return}
-  if(f.size>10*1024*1024){$('backupMsg').textContent='O arquivo deve ter até 10 MB.';return}
-  try{
-    const data=validateBackup(JSON.parse(await f.text()));
-    if(!confirm('Restaurar '+data.clients.length+' clientes, '+data.payments.length+' pagamentos e '+data.costs.length+' custos substituirá os dados atuais na nuvem. Deseja continuar?'))return;
-    const previous=db;
-    db=data;
-    try{await persist()}catch(error){db=previous;throw error}
-    renderAll();
-    $('backupMsg').textContent='Backup validado e restaurado com sucesso na nuvem.';
-  }catch(e){$('backupMsg').textContent=e.message||'Não foi possível restaurar o backup. Verifique o arquivo e sua conexão.'}
-};
-$('securityProbeBtn').onclick=async()=>{
-  const output=$('securityProbeResult'),button=$('securityProbeBtn');
-  if(!currentUser){output.textContent='Faça login para executar o teste.';return}
-  if(currentUser.uid==='7yWKtydeTmPf13mmIeP5XOsSp372'){output.textContent='Entre com a segunda conta de teste. Não execute este teste na conta administradora.';return}
-  button.disabled=true;output.textContent='Testando leitura, criação e exclusão na conta administradora...';
-  const target='7yWKtydeTmPf13mmIeP5XOsSp372';
-  const results=[];
-  const reads=[
-    {label:'Leitura principal',run:()=>getDoc(doc(store,'usuarios',target,'dados','principal'))},
-    {label:'Leitura pagamentos',run:()=>getDocs(collection(store,'usuarios',target,'dados','principal','pagamentos'))},
-    {label:'Leitura custos',run:()=>getDocs(collection(store,'usuarios',target,'dados','principal','custos'))}
-  ];
-  for(const check of reads){
-    try{await check.run();results.push(check.label+': ACESSO INDEVIDO')}
-    catch(error){results.push(check.label+': '+(error.code==='permission-denied'?'BLOQUEADO':'ERRO '+(error.code||'desconhecido')))}
-  }
-  for(const name of ['pagamentos','custos']){
-    const path=collection(store,'usuarios',target,'dados','principal',name);
-    const probeId='security_probe_'+currentUser.uid+'_'+Date.now()+'_'+name;
-    try{
-      await setDoc(doc(path,probeId),{id:probeId,amount:0,date:today()});
-      await deleteDoc(doc(path,probeId));
-      results.push('Criação '+name+': ACESSO INDEVIDO (teste removido)');
-    }catch(error){
-      if(error.code==='permission-denied')results.push('Criação '+name+': BLOQUEADO');
-      else results.push('Criação '+name+': ERRO '+(error.code||error.message||'desconhecido'));
-    }
-    try{
-      await deleteDoc(doc(path,'security_probe_inexistente_'+name));
-      results.push('Exclusão '+name+': ACESSO INDEVIDO');
-    }catch(error){
-      results.push('Exclusão '+name+': '+(error.code==='permission-denied'?'BLOQUEADO':'ERRO '+(error.code||'desconhecido')));
-    }
-  }
-  output.textContent=results.join(' | ');
-  button.disabled=false;
-};
-$('lockBtn').onclick=async()=>{if(unsubscribeCloud){unsubscribeCloud();unsubscribeCloud=null}await signOut(auth)};
-})();
-  </script>
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./service-worker.js")
-      .catch(error => console.error("Erro no Service Worker:", error));
-  });
-}
-</script>
-
-<div id="appDialogBackdrop" class="app-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="appDialogTitle"><div class="app-dialog"><h2 id="appDialogTitle">Gestão de Clientes</h2><p id="appDialogMessage"></p><div class="app-dialog-actions"><button id="appDialogCancel" class="app-dialog-cancel">Cancelar</button><button id="appDialogOk" class="app-dialog-ok">OK</button></div></div></div>
-<script>
-window.showAppDialog=(message,{title='Gestão de Clientes',confirm=false,okText='OK',cancelText='Cancelar'}={})=>new Promise(resolve=>{const box=document.getElementById('appDialogBackdrop'),msg=document.getElementById('appDialogMessage'),heading=document.getElementById('appDialogTitle'),ok=document.getElementById('appDialogOk'),cancel=document.getElementById('appDialogCancel');heading.textContent=title;msg.textContent=message;ok.textContent=okText;cancel.textContent=cancelText;cancel.style.display=confirm?'inline-block':'none';const finish=value=>{box.classList.remove('show');ok.onclick=null;cancel.onclick=null;resolve(value)};ok.onclick=()=>finish(true);cancel.onclick=()=>finish(false);box.onclick=e=>{if(e.target===box&&!confirm)finish(true)};box.classList.add('show')});
-
-window.showNicknameDialog=(initial='')=>new Promise(resolve=>{
- const backdrop=document.createElement('div');backdrop.className='app-dialog-backdrop show';
- const box=document.createElement('div');box.className='app-dialog nickname-dialog';
- const title=document.createElement('h2');title.textContent='Escolha um apelido';
- const message=document.createElement('p');message.textContent='Como você gostaria de ser chamado no aplicativo?';
- const input=document.createElement('input');input.className='nickname-dialog-input';input.type='text';input.maxLength=24;input.placeholder='Digite seu apelido';input.value=initial;
- const actions=document.createElement('div');actions.className='app-dialog-actions';
- const cancel=document.createElement('button');cancel.className='app-dialog-cancel';cancel.textContent='Cancelar';
- const ok=document.createElement('button');ok.className='app-dialog-ok';ok.textContent='Salvar';
- actions.append(cancel,ok);box.append(title,message,input,actions);backdrop.append(box);document.body.append(backdrop);
- const finish=value=>{backdrop.remove();resolve(value)};
- cancel.onclick=()=>finish(null);ok.onclick=()=>finish(input.value);backdrop.onclick=e=>{if(e.target===backdrop)finish(null)};
- input.focus();input.select();
 });
-</script>
-</body>
-</html>
+
+// 1. Salvar Novo Apelido
+document.getElementById('saveNicknameBtn')?.addEventListener('click', async () => {
+  const newNick = document.getElementById('profileNicknameInput')?.value.trim();
+  const feedback = document.getElementById('profileFeedback');
+  const user = auth.currentUser;
+
+  if (!user) {
+    if (feedback) feedback.textContent = 'Usuário não conectado.';
+    return;
+  }
+
+  if (!newNick) {
+    if (feedback) {
+      feedback.style.color = 'var(--red)';
+      feedback.textContent = 'Digite um apelido válido.';
+    }
+    return;
+  }
+
+  try {
+    // Atualiza no perfil do Firebase Auth
+    await updateProfile(user, { displayName: newNick });
+
+    // Atualiza o texto na interface do cabeçalho na hora
+    const headerNick = document.querySelector('header .headbtn span, #headerNickname');
+    if (headerNick) headerNick.textContent = newNick;
+
+    if (feedback) {
+      feedback.style.color = 'var(--green)';
+      feedback.textContent = 'Apelido atualizado com sucesso!';
+    }
+  } catch (err) {
+    if (feedback) {
+      feedback.style.color = 'var(--red)';
+      feedback.textContent = 'Erro ao salvar apelido: ' + err.message;
+    }
+  }
+});
+
+// 2. Trocar Senha
+document.getElementById('changePasswordBtn')?.addEventListener('click', async () => {
+  const newPass = document.getElementById('newPasswordInput')?.value;
+  const feedback = document.getElementById('profileFeedback');
+  const user = auth.currentUser;
+
+  if (!user) {
+    if (feedback) feedback.textContent = 'Usuário não conectado.';
+    return;
+  }
+
+  // Verifica se o usuário logou com Google
+  const isGoogleUser = user.providerData.some(p => p.providerId === 'google.com');
+  if (isGoogleUser) {
+    if (feedback) {
+      feedback.style.color = 'var(--amber)';
+      feedback.textContent = 'Conta conectada via Google. A senha deve ser gerenciada nas configurações da sua Conta Google.';
+    }
+    return;
+  }
+
+  if (!newPass || newPass.length < 6) {
+    if (feedback) {
+      feedback.style.color = 'var(--red)';
+      feedback.textContent = 'A nova senha precisa ter pelo menos 6 caracteres.';
+    }
+    return;
+  }
+
+  try {
+    await updatePassword(user, newPass);
+    const passInput = document.getElementById('newPasswordInput');
+    if (passInput) passInput.value = '';
+    
+    if (feedback) {
+      feedback.style.color = 'var(--green)';
+      feedback.textContent = 'Senha alterada com sucesso!';
+    }
+  } catch (err) {
+    if (feedback) {
+      feedback.style.color = 'var(--red)';
+      if (err.code === 'auth/requires-recent-login') {
+        feedback.textContent = 'Por segurança, faça login novamente antes de alterar a senha.';
+      } else {
+        feedback.textContent = 'Erro ao alterar senha: ' + err.message;
+      }
+    }
+  }
+});
+   
