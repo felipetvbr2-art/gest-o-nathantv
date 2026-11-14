@@ -1,0 +1,111 @@
+// ==========================================
+// MÓDULO DE PERFIL: APELIDO E SENHA
+// ==========================================
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Seletor ou botão para abrir o modal de avatar/perfil (ajuste o ID se necessário)
+  const profileAvatarBtn = document.getElementById('profileAvatar') || document.querySelector('.headbtn');
+  
+  if (profileAvatarBtn) {
+    profileAvatarBtn.addEventListener('click', () => {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        // Preenche o input de apelido atual se existir no modal
+        const nickInput = document.getElementById('profileNicknameInput');
+        if (nickInput) {
+          nickInput.value = currentUser.displayName || currentUser.email?.split('@')[0] || '';
+        }
+      }
+    });
+  }
+});
+
+// 1. Salvar Novo Apelido
+document.getElementById('saveNicknameBtn')?.addEventListener('click', async () => {
+  const newNick = document.getElementById('profileNicknameInput')?.value.trim();
+  const feedback = document.getElementById('profileFeedback');
+  const user = auth.currentUser;
+
+  if (!user) {
+    if (feedback) feedback.textContent = 'Usuário não conectado.';
+    return;
+  }
+
+  if (!newNick) {
+    if (feedback) {
+      feedback.style.color = 'var(--red)';
+      feedback.textContent = 'Digite um apelido válido.';
+    }
+    return;
+  }
+
+  try {
+    // Atualiza no perfil do Firebase Auth
+    await updateProfile(user, { displayName: newNick });
+
+    // Atualiza o texto na interface do cabeçalho na hora
+    const headerNick = document.querySelector('header .headbtn span, #headerNickname');
+    if (headerNick) headerNick.textContent = newNick;
+
+    if (feedback) {
+      feedback.style.color = 'var(--green)';
+      feedback.textContent = 'Apelido atualizado com sucesso!';
+    }
+  } catch (err) {
+    if (feedback) {
+      feedback.style.color = 'var(--red)';
+      feedback.textContent = 'Erro ao salvar apelido: ' + err.message;
+    }
+  }
+});
+
+// 2. Trocar Senha
+document.getElementById('changePasswordBtn')?.addEventListener('click', async () => {
+  const newPass = document.getElementById('newPasswordInput')?.value;
+  const feedback = document.getElementById('profileFeedback');
+  const user = auth.currentUser;
+
+  if (!user) {
+    if (feedback) feedback.textContent = 'Usuário não conectado.';
+    return;
+  }
+
+  // Verifica se o usuário logou com Google
+  const isGoogleUser = user.providerData.some(p => p.providerId === 'google.com');
+  if (isGoogleUser) {
+    if (feedback) {
+      feedback.style.color = 'var(--amber)';
+      feedback.textContent = 'Conta conectada via Google. A senha deve ser gerenciada nas configurações da sua Conta Google.';
+    }
+    return;
+  }
+
+  if (!newPass || newPass.length < 6) {
+    if (feedback) {
+      feedback.style.color = 'var(--red)';
+      feedback.textContent = 'A nova senha precisa ter pelo menos 6 caracteres.';
+    }
+    return;
+  }
+
+  try {
+    await updatePassword(user, newPass);
+    const passInput = document.getElementById('newPasswordInput');
+    if (passInput) passInput.value = '';
+    
+    if (feedback) {
+      feedback.style.color = 'var(--green)';
+      feedback.textContent = 'Senha alterada com sucesso!';
+    }
+  } catch (err) {
+    if (feedback) {
+      feedback.style.color = 'var(--red)';
+      if (err.code === 'auth/requires-recent-login') {
+        feedback.textContent = 'Por segurança, faça login novamente antes de alterar a senha.';
+      } else {
+        feedback.textContent = 'Erro ao alterar senha: ' + err.message;
+      }
+    }
+  }
+});
+   
