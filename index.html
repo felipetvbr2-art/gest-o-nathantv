@@ -81,6 +81,29 @@ main{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
 .app-dialog-backdrop{position:fixed;inset:0;background:#080d15a8;display:none;align-items:center;justify-content:center;padding:22px;z-index:9999}.app-dialog-backdrop.show{display:flex}.app-dialog{width:min(100%,420px);background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:22px;padding:23px;box-shadow:0 18px 60px #0005}.app-dialog h2{font-size:20px;margin:0 0 12px}.app-dialog p{white-space:pre-line;color:var(--muted);line-height:1.5;margin:0 0 22px}.app-dialog-actions{display:flex;justify-content:flex-end;gap:10px}.app-dialog-actions button{border:0;border-radius:12px;padding:12px 18px;font-weight:700;font-size:14px}.app-dialog-cancel{background:var(--bg);color:var(--ink)}.app-dialog-ok{background:var(--gold);color:#17130a}
 .nickname-dialog-input{width:100%;margin:0 0 22px;padding:12px 13px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font:inherit}.nickname-dialog .app-dialog p{margin-bottom:12px}
 .avatar-choice-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:14px 0 18px}.avatar-choice{border:1px solid var(--line);border-radius:14px;background:var(--bg);font-size:27px;padding:10px;min-height:54px}.avatar-choice:active{outline:2px solid var(--gold)}.avatar-file{max-width:125px;font-size:11px;color:var(--muted)}#profileAvatar{background-size:cover;background-position:center}
+
+/* Perfil: painel moderno, compacto e responsivo */
+.profile-dialog{width:min(100%,440px);padding:22px;border-radius:26px;border:1px solid color-mix(in srgb,var(--gold) 30%,var(--line));background:linear-gradient(155deg,var(--card),color-mix(in srgb,var(--card) 88%,var(--gold)));box-shadow:0 28px 90px #0008;}
+.profile-dialog-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.profile-dialog-top h2{font-size:21px;letter-spacing:-.45px;margin:0}
+.profile-close{width:36px;height:36px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--muted);font-size:24px;line-height:1;cursor:pointer}
+.profile-hero{display:flex;flex-direction:column;align-items:center;text-align:center;padding:18px 12px 20px;margin-bottom:16px;border:1px solid color-mix(in srgb,var(--gold) 24%,var(--line));border-radius:20px;background:color-mix(in srgb,var(--bg) 82%,transparent)}
+.profile-hero-avatar{width:82px;height:82px;display:grid;place-items:center;border-radius:50%;border:3px solid var(--gold);background:linear-gradient(145deg,#f6d98d,#d6aa45);color:#172235;font-size:34px;font-weight:850;box-shadow:0 8px 24px #0003;margin-bottom:12px;background-size:cover;background-position:center}
+.profile-hero-avatar.has-photo{color:transparent}
+.profile-hero-name{font-size:18px;font-weight:850;line-height:1.3}
+.profile-hero-email{font-size:12px;color:var(--muted);margin-top:4px;overflow-wrap:anywhere}
+.profile-hero-hint{font-size:12px;color:var(--muted);margin:10px 0 0!important}
+.profile-actions{display:grid;gap:10px}
+.profile-action{width:100%;display:flex;align-items:center;gap:12px;text-align:left;padding:13px;border:1px solid var(--line);border-radius:16px;background:var(--bg);color:var(--ink);cursor:pointer;transition:transform .16s,border-color .16s,background .16s}
+.profile-action:active{transform:scale(.985);border-color:var(--gold)}
+.profile-action-icon{width:44px;height:44px;flex:0 0 44px;display:grid;place-items:center;border-radius:13px;background:color-mix(in srgb,var(--gold) 16%,var(--card));font-size:21px}
+.profile-action-copy{display:grid;gap:3px;min-width:0;flex:1}
+.profile-action-copy strong{font-size:14px;font-weight:800}
+.profile-action-copy small{font-size:11px;color:var(--muted);line-height:1.35}
+.profile-action-arrow{font-size:25px;color:var(--gold);line-height:1}
+.profile-close-bottom{width:100%;margin-top:14px;padding:12px;border:0;border-radius:13px;background:transparent;color:var(--muted);font:inherit;font-size:13px;font-weight:750;cursor:pointer}
+@media(max-width:380px){.profile-dialog{padding:17px;border-radius:22px}.profile-hero-avatar{width:72px;height:72px}.profile-action{padding:11px}.profile-action-icon{width:40px;height:40px;flex-basis:40px}}
+
 /* Formulário de cliente: visual moderno e ações neon */
 .client-form-overlay{backdrop-filter:blur(7px);background:rgba(8,13,22,.68);padding:14px}
 .client-form-overlay>.client-form-card{width:min(100%,590px);max-height:92dvh;padding:22px;border-radius:24px;border:1px solid color-mix(in srgb,var(--gold) 24%,var(--line));box-shadow:0 24px 70px #0005,0 0 0 1px #ffffff12;scrollbar-width:thin}
@@ -366,22 +389,33 @@ async function chooseAvatar(){if(!currentUser)return;const choices=['👤','😀
 function showProfileMenu(){
  if(!currentUser)return;
  const backdrop=document.createElement('div');backdrop.className='app-dialog-backdrop show';
- const box=document.createElement('div');box.className='app-dialog';
+ const box=document.createElement('div');box.className='app-dialog profile-dialog';
+ const top=document.createElement('div');top.className='profile-dialog-top';
  const title=document.createElement('h2');title.textContent='Meu perfil';
- const desc=document.createElement('p');desc.textContent='Escolha o que deseja atualizar na sua conta.';
- const actions=document.createElement('div');actions.style.cssText='display:grid;gap:9px';
- const make=(label,fn)=>{const b=document.createElement('button');b.type='button';b.className='btn secondary';b.textContent=label;b.style.width='100%';b.onclick=async()=>{backdrop.remove();await fn()};actions.append(b)};
- make('📷 Trocar foto ou avatar',()=>chooseAvatar());
- make('✏️ Editar nome de usuário',()=>chooseNickname());
- make('🔒 Alterar senha',async()=>{
-   const email=currentUser.email;
-   if(!email){alert('Esta conta não possui e-mail para recuperação de senha.');return}
-   if(!confirm('Enviar um link de redefinição de senha para '+email+'?'))return;
-   try{await sendPasswordResetEmail(auth,email);alert('Enviamos um link de redefinição para '+email+'. Confira também a caixa de spam.');}
+ const closeX=document.createElement('button');closeX.type='button';closeX.className='profile-close';closeX.textContent='×';closeX.setAttribute('aria-label','Fechar perfil');closeX.onclick=()=>backdrop.remove();
+ top.append(title,closeX);
+ const hero=document.createElement('div');hero.className='profile-hero';
+ const avatar=document.createElement('div');avatar.className='profile-hero-avatar';
+ const savedAvatar=profileData.avatar||'';
+ if(savedAvatar.startsWith('data:image/')){avatar.style.backgroundImage='url("'+savedAvatar+'")';avatar.classList.add('has-photo');}
+ else{avatar.textContent=savedAvatar||((profileData.nickname||currentUser.displayName||'U').trim().charAt(0).toUpperCase()||'U');}
+ const name=document.createElement('strong');name.className='profile-hero-name';name.textContent=profileData.nickname||currentUser.displayName||'Usuário';
+ const email=document.createElement('span');email.className='profile-hero-email';email.textContent=currentUser.email||'Conta Gestão Nathan TV';
+ const hint=document.createElement('p');hint.className='profile-hero-hint';hint.textContent='Gerencie suas informações e segurança';
+ hero.append(avatar,name,email,hint);
+ const actions=document.createElement('div');actions.className='profile-actions';
+ const make=(icon,label,detail,fn)=>{const b=document.createElement('button');b.type='button';b.className='profile-action';const symbol=document.createElement('span');symbol.className='profile-action-icon';symbol.textContent=icon;const copy=document.createElement('span');copy.className='profile-action-copy';const strong=document.createElement('strong');strong.textContent=label;const small=document.createElement('small');small.textContent=detail;copy.append(strong,small);const arrow=document.createElement('span');arrow.className='profile-action-arrow';arrow.textContent='›';b.append(symbol,copy,arrow);b.onclick=async()=>{backdrop.remove();await fn()};actions.append(b);};
+ make('📷','Foto ou avatar','Personalize sua imagem',()=>chooseAvatar());
+ make('✏️','Nome de usuário','Atualize como seu nome aparece',()=>chooseNickname());
+ make('🔒','Segurança da senha','Receba um link para redefinir sua senha',async()=>{
+   const userEmail=currentUser.email;
+   if(!userEmail){alert('Esta conta não possui e-mail para recuperação de senha.');return}
+   if(!confirm('Enviar um link de redefinição de senha para '+userEmail+'?'))return;
+   try{await sendPasswordResetEmail(auth,userEmail);alert('Enviamos um link de redefinição para '+userEmail+'. Confira também a caixa de spam.');}
    catch(e){console.error(e);alert('Não foi possível enviar o link. Tente novamente mais tarde.');}
  });
- const close=document.createElement('button');close.type='button';close.className='app-dialog-cancel';close.textContent='Fechar';close.style.width='100%';close.onclick=()=>backdrop.remove();
- box.append(title,desc,actions,close);backdrop.append(box);backdrop.onclick=e=>{if(e.target===backdrop)backdrop.remove()};document.body.append(backdrop);
+ const close=document.createElement('button');close.type='button';close.className='profile-close-bottom';close.textContent='Fechar';close.onclick=()=>backdrop.remove();
+ box.append(top,hero,actions,close);backdrop.append(box);backdrop.onclick=e=>{if(e.target===backdrop)backdrop.remove()};document.body.append(backdrop);
 }
 async function chooseNickname(force=false){if(!currentUser)return;const current=profileData.nickname||currentUser.displayName||currentUser.email?.split('@')[0]||'';const value=await window.showNicknameDialog(current);if(value===null&&!force)return;const nickname=(value||'').trim().replace(/\\s+/g,' ').slice(0,24);if(nickname.length<2){alert('O apelido precisa ter pelo menos 2 caracteres.');return}try{await updateProfile(currentUser,{displayName:nickname});await saveProfileData({nickname});renderProfile()}catch(e){alert('Não foi possível salvar o apelido. Tente novamente.');}}
 function enter(){ $('tabs').classList.remove('open');$('appLoading').classList.add('hidden');$('auth').classList.add('hidden');$('app').classList.remove('hidden');loadTheme();renderProfile();renderAll(); }
