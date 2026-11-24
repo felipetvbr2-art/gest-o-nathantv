@@ -253,6 +253,29 @@ body.login-screen #auth #authMsg{color:#f0dba8}
 body.login-screen #auth .auth-divider{color:#aaa}
 @media(max-width:480px){body.login-screen #auth{margin:clamp(18px,6vh,55px) auto 24px;padding:21px 18px 19px;border-radius:20px}body.login-screen #auth .auth-brand img{width:58px;height:58px;flex-basis:58px}}
 
+
+/* Cadastro de cliente: campos com ícones e hierarquia visual conforme referência */
+.client-form-card .client-input-icon{position:relative;display:flex;align-items:center}
+.client-form-card .client-input-icon>svg,.client-form-card .client-proof-field>svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.client-form-card .client-input-icon input,.client-form-card .client-input-icon textarea{padding-left:58px}
+.client-form-card .name-icon{color:#4388ff}.client-form-card .whatsapp-input{color:#20c978}.client-form-card .money-input{color:#159cff}.client-form-card .cost-input{color:#f3f5f8}.client-form-card .notes-input{color:#9b68ff}
+.client-form-card .client-input-icon input,.client-form-card .client-input-icon textarea{color:#f6f7fa}
+.client-form-card .contact-row{display:grid;grid-template-columns:minmax(0,1fr) 88px;gap:10px;align-items:stretch}
+.client-form-card .contact-import-icon{width:88px;height:100%;min-height:52px;display:grid;place-items:center;border:1px solid #ffffff20;border-radius:15px;background:#ffffff0b;color:#f5f7fb;padding:0}
+.client-form-card .contact-import-icon svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.client-form-card .client-proof-field{position:relative;display:flex;align-items:center;min-height:68px;padding-left:58px;border:1px solid #ffffff20;border-radius:14px;background:#090d14}
+.client-form-card .client-proof-field>svg{left:17px;color:#159cff;width:28px;height:28px}
+.client-form-card .client-proof-field input[type=file]{min-width:0;width:100%;border:0;background:transparent;padding:10px 8px 10px 0;min-height:62px}
+.client-form-card .client-money-row{gap:12px}
+.client-form-card #cNotes{min-height:100px;resize:vertical}
+.client-form-card #packageSummary{font-size:14px;font-weight:650;border-color:#d6aa4577;background:linear-gradient(100deg,#d6aa4525,#d6aa450b);color:#f6d77f}
+.client-form-actions{grid-template-columns:1.2fr 1fr;gap:12px;margin-top:20px}
+.client-form-actions button{min-height:60px;border-radius:16px;font-size:15px;letter-spacing:.2px}
+.client-save-btn{background:linear-gradient(110deg,#ffc62e,#e9ac26)!important;border:1px solid #ffcf4b!important;color:#17130a!important;box-shadow:0 7px 20px #e8aa2930}
+.client-cancel-btn{background:linear-gradient(110deg,#171b24,#1c2029)!important;border:1px solid #343b49!important;color:#f2f4f8!important}
+@media(max-width:700px){.client-form-overlay>.client-form-card{max-height:94dvh;padding:19px 16px 14px}.client-form-card label{font-size:13px;margin:12px 0 6px}.client-form-card input,.client-form-card textarea{min-height:53px;font-size:14px}.client-form-card .client-input-icon input{padding-left:58px}.client-form-card .contact-import-icon{min-height:53px}.client-form-card .client-proof-field{min-height:74px}.client-form-card .client-proof-field input[type=file]{min-height:68px;font-size:11px}.client-form-card #cNotes{min-height:108px}.client-form-card #packageSummary{font-size:13px;padding:14px}.client-form-actions button{min-height:58px;font-size:14px}}
+@media(max-width:380px){.client-form-card .contact-row{grid-template-columns:minmax(0,1fr) 68px}.client-form-card .contact-import-icon{width:68px}.client-form-card .client-money-row{gap:8px}.client-form-card .client-money-row input{font-size:12px}}
+
 </style>
 </head>
 <body>
@@ -292,13 +315,13 @@ body.login-screen #auth .auth-divider{color:#aaa}
 <section id="tab-clientes" class="hidden">
 <div class="card hidden" id="clientFormPanel"><div class="client-form-card"><div class="itemtop"><div class="client-form-heading"><span class="client-form-eyebrow">GESTÃO DE CLIENTES</span><h2 id="clientFormTitle">Cadastrar cliente</h2><p>Preencha os dados do cliente e as informações financeiras.</p></div><button class="headbtn" type="button" id="closeClientX" aria-label="Fechar">×</button></div><form id="clientForm">
 <input type="hidden" id="clientId"><input type="hidden" id="cServiceType" value="IPTV">
-<label>Nome completo *</label><input id="cName" required maxlength="100" autocomplete="name" placeholder="Ex.: Maria Silva">
-<label>WhatsApp *</label><div class="row2" style="grid-template-columns:minmax(0,1fr) 48px;gap:8px;align-items:center"><input id="cPhone" type="tel" inputmode="tel" autocomplete="tel" required placeholder="DDD + número"><button type="button" class="headbtn" id="importContactBtn" aria-label="Importar contato" title="Importar contato" style="width:48px;height:48px;display:grid;place-items:center"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2.3"/><path d="M5.5 17c.7-2 2-3 3.5-3s2.8 1 3.5 3M16 9h2.5M16 13h2.5"/></svg></button></div>
+<label>Nome completo *</label><div class="client-input-icon name-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="7" r="3.5"/><path d="M2.5 20v-1.5a6.5 6.5 0 0 1 13 0V20M18 14v7m-3.5-3.5h7"/></svg><input id="cName" required maxlength="100" autocomplete="name" placeholder="Ex.: Maria Silva"></div>
+<label>WhatsApp *</label><div class="row2 contact-row"><div class="client-input-icon whatsapp-input"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11.7a8.5 8.5 0 0 1-12.6 7.4L3 20l.9-4.7a8.5 8.5 0 1 1 16.6-3.6Z"/><path d="M8.3 8.2c.4-.7.8-.6 1.1-.6.2 0 .4 0 .5.4l.8 1.8c.1.3.1.5-.1.7l-.6.7c-.2.2-.2.4 0 .7.7 1.2 1.7 2.1 3 2.7.3.1.5.1.7-.1l.8-1c.2-.2.4-.3.7-.2l1.7.8c.3.1.4.3.4.5 0 .3-.2 1.1-.8 1.5-.6.4-1.3.6-2.1.4-1-.2-2.3-.8-3.8-2.1-1.2-1.1-2-2.4-2.2-3.4-.2-.8.1-1.5.5-2Z"/></svg><input id="cPhone" type="tel" inputmode="tel" autocomplete="tel" required placeholder="DDD + número"></div><button type="button" class="headbtn contact-import-icon" id="importContactBtn" aria-label="Importar contato" title="Importar contato"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="7" r="3.5"/><path d="M2.5 20v-1.5a6.5 6.5 0 0 1 13 0V20M18 14v7m-3.5-3.5h7"/></svg></button></div>
 <input type="hidden" id="cServiceUser"><input type="hidden" id="cServicePass">
-<div class="row2"><div><label>Valor cobrado (R$) *</label><input id="cAmountCharged" type="number" min="0.01" step="0.01" placeholder="Informe o valor" required></div><div><label>Custo (R$) *</label><input id="cPackageCost" type="number" min="0" step="0.01" placeholder="Informe o custo (use 0 se não houver)" required></div></div>
+<div class="row2 client-money-row"><div><label>Valor cobrado (R$) *</label><div class="client-input-icon money-input"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M17 6.5c-.8-1-2.2-1.5-4.2-1.5-2.4 0-4 1.1-4 2.8 0 4.2 8.4 1.9 8.4 6.3 0 1.9-1.7 3.1-4.4 3.1-2 0-3.6-.6-4.8-1.8"/></svg><input id="cAmountCharged" type="number" min="0.01" step="0.01" placeholder="Informe o valor" required></div></div><div><label>Custo (R$) *</label><div class="client-input-icon cost-input"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13 11 22l-9-9V2h11l9 9Z"/><circle cx="7" cy="7" r="1.5"/></svg><input id="cPackageCost" type="number" min="0" step="0.01" placeholder="Informe o custo" required></div></div></div>
 <input id="cDueDate" type="hidden">
-<label>Comprovante de pagamento (opcional)</label><input id="cClientProof" type="file" accept="image/*,application/pdf"><p class="muted" id="clientProofHint">Anexe uma foto ou PDF de até 15 MB. O comprovante ficará vinculado ao pagamento no Google Drive.</p><div id="clientProofActions" class="finance-record-actions hidden"></div>
-<label>Observações</label><textarea id="cNotes" rows="2" placeholder="Informações adicionais"></textarea>
+<label>Comprovante de pagamento (opcional)</label><div class="client-proof-field"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h5M8 15l2-2 2 2 2-3 2 3"/></svg><input id="cClientProof" type="file" accept="image/*,application/pdf"></div><p class="muted" id="clientProofHint">Anexe uma foto ou PDF de até 15 MB. O comprovante ficará vinculado ao pagamento no Google Drive.</p><div id="clientProofActions" class="finance-record-actions hidden"></div>
+<label>Observações</label><div class="client-input-icon notes-input"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v13H9l-5 4V4Z"/><path d="M8 9h8M8 13h5"/></svg><textarea id="cNotes" rows="2" placeholder="Informações adicionais"></textarea></div>
 <div id="packageSummary" class="notice">Valor cobrado R$ 30,00 · Custo R$ 0,00 · Lucro estimado R$ 30,00</div>
 <div class="client-form-actions"><button class="client-save-btn" type="submit">SALVAR</button><button class="client-cancel-btn" type="button" id="clearClient">CANCELAR</button></div>
 </form></div></div>
