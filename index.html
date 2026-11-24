@@ -118,6 +118,49 @@ main{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
 }
 
 
+/* Cadastro de cliente — acabamento moderno */
+.client-form-overlay{background:rgba(0,0,0,.78);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:12px}
+.client-form-overlay>.client-form-card{background:#10141d;color:#f4f6fb;border:1px solid #ffffff18;border-radius:25px;width:min(100%,570px);padding:21px;box-shadow:0 28px 90px #000b,0 0 0 1px #d6aa4512}
+.client-form-card .itemtop{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;padding-bottom:16px;margin-bottom:14px;border-bottom:1px solid #ffffff16}
+.client-form-heading{min-width:0}
+.client-form-eyebrow{display:inline-block;color:#d6aa45;font-size:10px;font-weight:900;letter-spacing:1.5px;margin-bottom:5px}
+.client-form-card h2{font-size:22px;font-weight:850;letter-spacing:-.45px;margin:0;color:#fff}
+.client-form-heading p{font-size:12px;line-height:1.45;color:#9ba5b5;margin:5px 0 0}
+.client-form-card .headbtn{width:38px;height:38px;flex:0 0 38px;border:1px solid #ffffff20;border-radius:12px;background:#ffffff08;color:#e8edf5;font-size:22px}
+.client-form-card label{display:block;color:#dce2ec;font-size:12px;font-weight:750;letter-spacing:.15px;margin:12px 0 6px}
+.client-form-card input,.client-form-card textarea{width:100%;box-sizing:border-box;background:#090d14;color:#f6f7fa;border:1px solid #ffffff20;border-radius:13px;min-height:47px;padding:11px 13px;font-size:14px;transition:border-color .18s,box-shadow .18s}
+.client-form-card input::placeholder,.client-form-card textarea::placeholder{color:#737e8e}
+.client-form-card input:focus,.client-form-card textarea:focus{outline:none;border-color:#d6aa45;box-shadow:0 0 0 3px #d6aa4522}
+.client-form-card input[type=file]{min-height:52px;padding:10px;font-size:12px;color:#aeb7c5;background:#0b1018}
+.client-form-card input[type=file]::file-selector-button{background:#202938;color:#f3d58a;border:1px solid #d6aa4545;border-radius:9px;padding:8px 11px;margin-right:10px;font-weight:750}
+.client-form-card .row2{gap:10px;align-items:end}
+.client-form-card .contact-row{grid-template-columns:minmax(0,1fr) auto}
+.client-form-card .contact-row button,.client-form-card .row2 .btn{min-height:47px;border-radius:12px;background:#202938;border:1px solid #ffffff20;color:#f2d58d;font-weight:750;padding:9px 13px}
+.client-form-card .muted{color:#8f9aaa;font-size:11px;line-height:1.45;margin-top:7px}
+.client-form-card #packageSummary{background:linear-gradient(110deg,#d6aa4520,#d6aa4508);border:1px solid #d6aa4555;color:#f3d994;border-radius:14px;padding:12px 14px;margin-top:14px;font-size:12px;line-height:1.5}
+.client-form-actions{display:grid;grid-template-columns:1.2fr 1fr;gap:10px;margin-top:17px}
+.client-form-actions button{min-height:49px;border-radius:13px;font-size:13px;font-weight:850;letter-spacing:.5px}
+.client-save-btn{background:#d6aa45!important;color:#17130a!important;border:1px solid #e7c46b!important;box-shadow:0 5px 18px #d6aa4530;text-shadow:none!important}
+.client-save-btn:hover{background:#e4bd62!important;box-shadow:0 7px 22px #d6aa4540}
+.client-cancel-btn{background:#ffffff08!important;color:#d8dee8!important;border:1px solid #ffffff25!important;box-shadow:none!important;text-shadow:none!important}
+@media(max-width:700px){
+ .client-form-overlay{align-items:center;padding:8px 9px calc(10px + env(safe-area-inset-bottom))}
+ .client-form-overlay>.client-form-card{width:100%;max-height:90dvh;padding:16px 15px 12px;border-radius:22px}
+ .client-form-card .itemtop{margin-bottom:10px;padding-bottom:11px}
+ .client-form-card h2{font-size:20px}
+ .client-form-card label{margin:9px 0 5px;font-size:11px}
+ .client-form-card input,.client-form-card textarea{min-height:43px;padding:9px 11px;font-size:13px;border-radius:11px}
+ .client-form-card input[type=file]{min-height:46px;font-size:11px}
+ .client-form-card .contact-row{grid-template-columns:minmax(0,1fr) auto}
+ .client-form-card .contact-row button{font-size:11px;padding:8px 10px;min-height:43px}
+ .client-form-card .row2{gap:8px}
+ .client-form-card .muted{font-size:10px}
+ .client-form-card #packageSummary{padding:10px 11px;font-size:11px}
+ .client-form-actions{position:sticky;bottom:-12px;background:#10141d;padding:10px 0 calc(5px + env(safe-area-inset-bottom));margin-top:10px}
+ .client-form-actions button{min-height:46px;font-size:12px}
+}
+@media(max-width:360px){.client-form-card .row2{grid-template-columns:1fr}.client-form-card .contact-row{grid-template-columns:1fr}.client-form-card .contact-row button{width:100%}}
+
 /* Painel financeiro moderno */
 .finance-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:5px 2px 14px}.finance-heading h2{font-size:22px;margin:4px 0}.finance-kicker{font-size:10px;font-weight:850;letter-spacing:1.1px;color:var(--muted)}.finance-icon{width:48px;height:48px;display:grid;place-items:center;border-radius:15px;background:#e7f6ee;color:#16845b;font-size:28px;font-weight:800}.finance-overview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px}.finance-metric{min-width:0;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--card);box-shadow:var(--shadow)}.finance-metric span{display:block;font-size:9px;font-weight:850;letter-spacing:.55px;color:var(--muted);margin-bottom:8px}.finance-metric strong{display:block;font-size:20px;overflow-wrap:anywhere;line-height:1.2}.finance-metric small{display:block;color:var(--muted);font-size:11px;margin-top:6px}.finance-metric.received strong{color:#16845b}.finance-metric.pending strong{color:#bd8524}.finance-metric.expenses strong{color:#d05a67}.finance-metric.balance strong{color:var(--ink)}.finance-section{padding:15px;margin-bottom:13px}.finance-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:3px}.finance-section-head h2{font-size:19px;margin:3px 0 0}.finance-section-icon{width:36px;height:36px;border-radius:11px;background:var(--bg);display:grid;place-items:center;color:var(--green);font-size:21px;font-weight:800}.finance-record{padding:13px;margin:11px 0;border:1px solid var(--line);border-radius:15px;background:linear-gradient(145deg,var(--card),var(--bg))}.finance-record-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.finance-record-main{min-width:0;display:flex;flex-direction:column;gap:4px}.finance-record-main strong{font-size:15px;overflow-wrap:anywhere}.finance-record-date{font-size:11px;color:var(--muted)}.finance-amount{font-size:17px;white-space:nowrap;color:var(--green)}.finance-record-meta{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:10px}.finance-status{font-size:10px;font-weight:850;letter-spacing:.35px;padding:5px 9px;border-radius:999px}.finance-status.paid{background:#e3f6eb;color:#16734a}.finance-status.pending{background:#fff2d6;color:#8a5a00}.finance-status.cost{background:#fdebed;color:#b64051}.finance-record-actions{display:flex;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}.finance-record-actions .btn{flex:1;font-size:12px;padding:9px}.finance-confirm{background:#16845b;color:white}.finance-proof-link{display:inline-block;margin-top:8px;color:var(--green);font-size:12px;font-weight:700;text-decoration:none}.finance-empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:25px 12px;color:var(--muted)}.finance-empty>span{font-size:30px;margin-bottom:8px}.finance-empty strong{color:var(--ink);font-size:14px}.finance-empty p{font-size:12px;margin:5px 0 0}.dark .finance-icon{background:#153526;color:#75e0a3}.dark .finance-status.paid{background:#153526;color:#75e0a3}.dark .finance-status.pending{background:#382b16;color:#f1c978}.dark .finance-status.cost{background:#3a2028;color:#ff9ba5}.dark .finance-record{background:linear-gradient(145deg,#171e2a,#111824);border-color:#303b4c}.dark .finance-confirm{background:#16845b;color:white}@media(max-width:380px){.finance-metric{padding:11px}.finance-metric strong{font-size:18px}.finance-record{padding:11px}}
 
@@ -227,7 +270,7 @@ main{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
 <div class="card finance-trend-card"><div class="finance-trend-heading"><div><span class="finance-kicker">ACOMPANHAMENTO</span><h2>Evolução financeira</h2><p class="muted">Recebimentos e custos dos últimos 6 meses.</p></div><span class="finance-trend-icon" aria-hidden="true">↗</span></div><div class="finance-legend"><span><i class="legend-dot received"></i>Recebido</span><span><i class="legend-dot spent"></i>Custos</span></div><div id="financialTrendChart" class="finance-chart" role="img" aria-label="Gráfico de recebimentos e custos dos últimos seis meses"></div><div class="finance-chart-foot" id="financialTrendSummary"></div></div>
 </section>
 <section id="tab-clientes" class="hidden">
-<div class="card hidden" id="clientFormPanel"><div class="client-form-card"><div class="itemtop"><h2 id="clientFormTitle">Cadastrar cliente</h2><button class="headbtn" type="button" id="closeClientX">×</button></div><form id="clientForm">
+<div class="card hidden" id="clientFormPanel"><div class="client-form-card"><div class="itemtop"><div class="client-form-heading"><span class="client-form-eyebrow">GESTÃO DE CLIENTES</span><h2 id="clientFormTitle">Cadastrar cliente</h2><p>Preencha os dados para organizar o cadastro e os pagamentos.</p></div><button class="headbtn" type="button" id="closeClientX" aria-label="Fechar">×</button></div><form id="clientForm">
 <input type="hidden" id="clientId"><input type="hidden" id="cServiceType" value="IPTV">
 <label>Nome completo *</label><input id="cName" required maxlength="100" autocomplete="name" placeholder="Ex.: Maria Silva">
 <label>WhatsApp *</label><div class="row2 contact-row"><input id="cPhone" type="tel" inputmode="tel" autocomplete="tel" required placeholder="DDD + número"><button type="button" class="btn secondary" id="importContactBtn">Importar contato</button></div>
