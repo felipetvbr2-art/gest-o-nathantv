@@ -233,12 +233,32 @@ main{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
 .dark .bottom-nav{background:#111;border-color:#303030}.dark .bottom-nav button.active{color:#4d91ff}.dark .bottom-nav .add-client{background:#286cff;box-shadow:0 0 18px #286cff66;color:#fff}
 .dark .finance-metric.received strong,.dark .finance-amount{color:#20d995}.dark .finance-metric.pending strong{color:#ffc247}.dark .finance-metric.expenses strong{color:#ff557e}.dark .finance-confirm{background:#16b978;color:#fff}
 .dark .finance-icon{background:#102c22;color:#20d995}.dark .client-status{background:#103b2a;color:#72f0b4}.dark .pill.green{background:#103b2a;color:#72f0b4}
+
+/* Tela de login com paisagens aleatórias e identidade visual dourada */
+body.login-screen{min-height:100vh;background:#050608;color:#f7f7f7;position:relative;isolation:isolate}
+body.login-screen:before{content:"";position:fixed;inset:0;z-index:-2;background-image:linear-gradient(180deg,rgba(0,0,0,.38),rgba(0,0,0,.68)),var(--login-landscape);background-size:cover;background-position:center;background-repeat:no-repeat;transform:scale(1.025);transition:opacity .35s ease}
+body.login-screen:after{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(ellipse at 50% 42%,transparent 0%,rgba(0,0,0,.16) 48%,rgba(0,0,0,.68) 100%);pointer-events:none}
+body.login-screen #auth{width:min(92vw,470px);max-width:470px;margin:clamp(22px,7vh,76px) auto 30px;padding:25px 23px 22px;background:rgba(12,12,13,.88);border:1px solid rgba(214,170,69,.55);border-radius:23px;box-shadow:0 22px 70px #0009,0 0 28px #d6aa4520;backdrop-filter:blur(13px);-webkit-backdrop-filter:blur(13px);position:relative;z-index:1}
+body.login-screen #auth .auth-brand{display:flex;align-items:center;gap:13px;margin-bottom:14px}
+body.login-screen #auth .auth-brand img{width:66px;height:66px;object-fit:contain;flex:0 0 66px;filter:drop-shadow(0 0 10px #d6aa4560)}
+body.login-screen #auth h1{font-size:clamp(22px,5vw,29px);line-height:1.15;margin:0;color:#fff;letter-spacing:-.5px}
+body.login-screen #auth p{color:#d1d1d1;font-size:15px;line-height:1.5;margin:8px 0 18px}
+body.login-screen #auth label{color:#f5f5f5;font-size:14px;margin-top:12px}
+body.login-screen #auth input{background:rgba(0,0,0,.68);border:1px solid #ffffff32;color:#fff;border-radius:13px;min-height:53px;padding:13px 15px}
+body.login-screen #auth input::placeholder{color:#888}
+body.login-screen #auth .btn{min-height:51px;border-radius:13px;background:linear-gradient(110deg,#d6aa45,#f0c65e 55%,#c18b25);color:#17120a;font-weight:850}
+body.login-screen #auth .btn.secondary{background:rgba(0,0,0,.55);border:1px solid #d6aa4580;color:#fff}
+body.login-screen #auth .auth-forgot{display:block;width:100%;border:0;background:transparent;color:#e5bd59;padding:14px 8px 10px;font-weight:750}
+body.login-screen #auth #authMsg{color:#f0dba8}
+body.login-screen #auth .auth-divider{color:#aaa}
+@media(max-width:480px){body.login-screen #auth{margin:clamp(18px,6vh,55px) auto 24px;padding:21px 18px 19px;border-radius:20px}body.login-screen #auth .auth-brand img{width:58px;height:58px;flex-basis:58px}}
+
 </style>
 </head>
 <body>
 <div id="appLoading" class="app-loading" role="status"><div class="loading-spinner"></div><strong>Carregando aplicativo...</strong><span>Verificando sua sessão e sincronização</span></div>
 <section id="auth" class="auth card hidden">
-<h1>📊 Gestão de Clientes</h1><p>Entre na sua conta ou crie uma conta gratuita para começar.</p>
+<div class="auth-brand"><img src="./icons/app-logo.svg" alt="Ícone Gestão de Clientes"><h1>Gestão de Clientes</h1></div><p>Entre na sua conta ou crie uma conta gratuita para começar.</p>
 <div id="loginFields" style="margin-top:18px"><label>E-mail</label><input id="loginEmail" type="email" autocomplete="username" placeholder="seuemail@gmail.com"><label>Senha</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Sua senha"><button class="btn" style="width:100%;margin-top:14px" id="loginBtn">Entrar</button><button type="button" class="auth-forgot" id="forgotPasswordBtn">Esqueci minha senha</button></div>
 <button class="btn secondary" style="width:100%;margin-top:10px" id="showCreateBtn">Criar conta</button>
 <div id="createAccountOptions" class="hidden" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">
@@ -492,7 +512,8 @@ async function persist(){
     throw e;
   }finally{saving=false}
 }
-function showAuth(msg=''){ $('appLoading').classList.add('hidden');$('auth').classList.remove('hidden');$('app').classList.add('hidden');$('authMsg').textContent=msg; }
+let lastLoginLandscape=-1;
+ function showAuth(msg=''){const landscapes=['https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1600&q=85','https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=85','https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?auto=format&fit=crop&w=1600&q=85','https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=85'];let next=Math.floor(Math.random()*landscapes.length);if(landscapes.length>1&&next===lastLoginLandscape)next=(next+1)%landscapes.length;lastLoginLandscape=next;document.body.style.setProperty('--login-landscape','url("'+landscapes[next]+'")');document.body.classList.add('login-screen');$('appLoading').classList.add('hidden');$('auth').classList.remove('hidden');$('app').classList.add('hidden');$('authMsg').textContent=msg; }
 function renderProfile(){if(!currentUser)return;const name=(profileData.nickname||currentUser.displayName||currentUser.email?.split('@')[0]||'Usuário').trim();$('profileNickname').textContent=name;const avatar=$('profileAvatar');const saved=profileData.avatar||'';if(saved.startsWith('data:image/')){avatar.textContent='';avatar.style.backgroundImage='url("'+saved+'")';avatar.style.backgroundSize='cover';avatar.style.backgroundPosition='center';}else{avatar.style.backgroundImage='none';avatar.textContent=saved||((name[0]||'U').toUpperCase());}$('profileBtn').title='Apelido: '+name+' • Toque para abrir seu perfil';}
 
 function closeProfileMenu(backdrop){if(backdrop?.isConnected)backdrop.remove()}
@@ -583,7 +604,7 @@ async function chooseAvatar(){
  backdrop.onclick=e=>{if(e.target===backdrop)backdrop.remove()};document.addEventListener('keydown',function avatarEscape(e){if(e.key==='Escape'&&backdrop.isConnected){backdrop.remove();document.removeEventListener('keydown',avatarEscape)}});document.body.append(backdrop);close.focus();
 }
 async function chooseNickname(force=false){if(!currentUser)return;const current=profileData.nickname||currentUser.displayName||currentUser.email?.split('@')[0]||'';const value=await window.showNicknameDialog(current);if(value===null&&!force)return;const nickname=(value||'').trim().replace(/\\s+/g,' ').slice(0,24);if(nickname.length<2){alert('O apelido precisa ter pelo menos 2 caracteres.');return}try{await updateProfile(currentUser,{displayName:nickname});await saveProfileData({nickname});renderProfile()}catch(e){alert('Não foi possível salvar o apelido. Tente novamente.');}}
-function enter(){ $('tabs').classList.remove('open');$('appLoading').classList.add('hidden');$('auth').classList.add('hidden');$('app').classList.remove('hidden');loadTheme();renderProfile();renderAll(); }
+function enter(){document.body.classList.remove('login-screen');$('tabs').classList.remove('open');$('appLoading').classList.add('hidden');$('auth').classList.add('hidden');$('app').classList.remove('hidden');loadTheme();renderProfile();renderAll();}
 async function login(){const email=$('loginEmail').value.trim(),password=$('loginPassword').value;if(!email||!password){$('authMsg').textContent='Informe seu e-mail e sua senha.';return} $('loginBtn').disabled=true;$('authMsg').textContent='Conectando ao Firebase...';try{await withTimeout(signInWithEmailAndPassword(auth,email,password),15000,'Login');$('authMsg').textContent='Login confirmado. Carregando seus dados...';}catch(e){const code=e?.code||'';$('authMsg').textContent=e.message?.includes('demorou')?'O Firebase não respondeu em 15 segundos. Confira a internet e tente novamente.':code==='auth/invalid-credential'?'E-mail ou senha incorretos.':code==='auth/too-many-requests'?'Muitas tentativas. Aguarde um pouco e tente novamente.':code==='auth/network-request-failed'?'Falha de conexão com o Firebase. Troque de rede ou tente novamente.':'Falha no login ('+(code||'erro desconhecido')+'). Tente novamente.';}finally{$('loginBtn').disabled=false}}
 async function createEmailAccount(){
  const email=$('createEmail').value.trim().toLowerCase(),password=$('createPassword').value,confirm=$('createPasswordConfirm').value,button=$('createEmailAccountBtn');
