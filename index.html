@@ -120,6 +120,35 @@ main{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
 
 /* Painel financeiro moderno */
 .finance-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:5px 2px 14px}.finance-heading h2{font-size:22px;margin:4px 0}.finance-kicker{font-size:10px;font-weight:850;letter-spacing:1.1px;color:var(--muted)}.finance-icon{width:48px;height:48px;display:grid;place-items:center;border-radius:15px;background:#e7f6ee;color:#16845b;font-size:28px;font-weight:800}.finance-overview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px}.finance-metric{min-width:0;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--card);box-shadow:var(--shadow)}.finance-metric span{display:block;font-size:9px;font-weight:850;letter-spacing:.55px;color:var(--muted);margin-bottom:8px}.finance-metric strong{display:block;font-size:20px;overflow-wrap:anywhere;line-height:1.2}.finance-metric small{display:block;color:var(--muted);font-size:11px;margin-top:6px}.finance-metric.received strong{color:#16845b}.finance-metric.pending strong{color:#bd8524}.finance-metric.expenses strong{color:#d05a67}.finance-metric.balance strong{color:var(--ink)}.finance-section{padding:15px;margin-bottom:13px}.finance-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:3px}.finance-section-head h2{font-size:19px;margin:3px 0 0}.finance-section-icon{width:36px;height:36px;border-radius:11px;background:var(--bg);display:grid;place-items:center;color:var(--green);font-size:21px;font-weight:800}.finance-record{padding:13px;margin:11px 0;border:1px solid var(--line);border-radius:15px;background:linear-gradient(145deg,var(--card),var(--bg))}.finance-record-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.finance-record-main{min-width:0;display:flex;flex-direction:column;gap:4px}.finance-record-main strong{font-size:15px;overflow-wrap:anywhere}.finance-record-date{font-size:11px;color:var(--muted)}.finance-amount{font-size:17px;white-space:nowrap;color:var(--green)}.finance-record-meta{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:10px}.finance-status{font-size:10px;font-weight:850;letter-spacing:.35px;padding:5px 9px;border-radius:999px}.finance-status.paid{background:#e3f6eb;color:#16734a}.finance-status.pending{background:#fff2d6;color:#8a5a00}.finance-status.cost{background:#fdebed;color:#b64051}.finance-record-actions{display:flex;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}.finance-record-actions .btn{flex:1;font-size:12px;padding:9px}.finance-confirm{background:#16845b;color:white}.finance-proof-link{display:inline-block;margin-top:8px;color:var(--green);font-size:12px;font-weight:700;text-decoration:none}.finance-empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:25px 12px;color:var(--muted)}.finance-empty>span{font-size:30px;margin-bottom:8px}.finance-empty strong{color:var(--ink);font-size:14px}.finance-empty p{font-size:12px;margin:5px 0 0}.dark .finance-icon{background:#153526;color:#75e0a3}.dark .finance-status.paid{background:#153526;color:#75e0a3}.dark .finance-status.pending{background:#382b16;color:#f1c978}.dark .finance-status.cost{background:#3a2028;color:#ff9ba5}.dark .finance-record{background:linear-gradient(145deg,#171e2a,#111824);border-color:#303b4c}.dark .finance-confirm{background:#16845b;color:white}@media(max-width:380px){.finance-metric{padding:11px}.finance-metric strong{font-size:18px}.finance-record{padding:11px}}
+
+/* Painel moderno de perfil */
+.profile-menu-backdrop{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(5,9,16,.72);backdrop-filter:blur(8px);animation:profileFadeIn .18s ease}
+.profile-menu-panel{width:min(100%,440px);max-height:min(88dvh,680px);overflow:auto;padding:22px;background:var(--card);color:var(--ink);border:1px solid color-mix(in srgb,var(--gold) 38%,var(--line));border-radius:25px;box-shadow:0 24px 80px #0007,0 0 0 1px #ffffff0b;animation:profileRise .22s ease}
+.profile-menu-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.profile-menu-heading h2{margin:3px 0 0;font-size:23px;letter-spacing:-.5px}
+.profile-menu-eyebrow{font-size:10px;font-weight:850;letter-spacing:1.5px;color:var(--gold)}
+.profile-menu-close{width:38px;height:38px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--muted);font-size:25px;line-height:1}
+.profile-menu-identity{display:flex;align-items:center;gap:14px;margin:20px 0 13px;padding:16px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(135deg,var(--bg),var(--card))}
+.profile-menu-avatar{width:66px;height:66px;flex:0 0 66px;display:grid;place-items:center;border:3px solid color-mix(in srgb,var(--gold) 55%,var(--card));border-radius:50%;background-color:var(--gold);background-size:cover;background-position:center;color:#17130a;font-size:27px;font-weight:850;box-shadow:0 5px 18px #0002}
+.profile-menu-identity-text{min-width:0;display:flex;flex-direction:column;gap:5px}
+.profile-menu-identity-text strong{font-size:17px;overflow-wrap:anywhere}
+.profile-menu-identity-text span{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.profile-menu-intro{margin:0 0 14px;color:var(--muted);font-size:13px;line-height:1.5}
+.profile-menu-actions{display:grid;gap:9px}
+.profile-menu-action{width:100%;display:flex;align-items:center;gap:12px;padding:13px;border:1px solid var(--line);border-radius:15px;background:var(--bg);color:var(--ink);text-align:left;transition:border-color .16s,transform .16s,background .16s}
+.profile-menu-action:active{transform:scale(.985);border-color:var(--gold)}
+.profile-menu-action-icon{width:42px;height:42px;flex:0 0 42px;display:grid;place-items:center;border-radius:13px;background:#d6aa4520;color:var(--gold);font-size:20px}
+.profile-menu-action-copy{min-width:0;flex:1;display:flex;flex-direction:column;gap:3px}
+.profile-menu-action-copy strong{font-size:14px}
+.profile-menu-action-copy small{font-size:11px;color:var(--muted);font-weight:500}
+.profile-menu-arrow{font-size:25px;color:var(--gold);line-height:1}
+.profile-menu-footer{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.profile-menu-done{width:100%;padding:12px;border:1px solid var(--gold);border-radius:13px;background:var(--gold);color:#1b160b;font-weight:850}
+@keyframes profileFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes profileRise{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:420px){.profile-menu-backdrop{padding:12px}.profile-menu-panel{padding:18px;border-radius:22px}.profile-menu-identity{padding:13px}.profile-menu-avatar{width:58px;height:58px;flex-basis:58px}}
+@media(prefers-reduced-motion:reduce){.profile-menu-backdrop,.profile-menu-panel{animation:none}.profile-menu-action{transition:none}}
+
 </style>
 </head>
 <body>
@@ -215,7 +244,7 @@ main{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup, linkWithRedirect, updateProfile } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup, linkWithRedirect, updateProfile, sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import { getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp, collection, getDocs, deleteDoc, writeBatch } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
 (()=> {
@@ -360,6 +389,56 @@ async function persist(){
 }
 function showAuth(msg=''){ $('appLoading').classList.add('hidden');$('auth').classList.remove('hidden');$('app').classList.add('hidden');$('authMsg').textContent=msg; }
 function renderProfile(){if(!currentUser)return;const name=(profileData.nickname||currentUser.displayName||currentUser.email?.split('@')[0]||'Usuário').trim();$('profileNickname').textContent=name;const avatar=$('profileAvatar');const saved=profileData.avatar||'';if(saved.startsWith('data:image/')){avatar.textContent='';avatar.style.backgroundImage='url("'+saved+'")';avatar.style.backgroundSize='cover';avatar.style.backgroundPosition='center';}else{avatar.style.backgroundImage='none';avatar.textContent=saved||((name[0]||'U').toUpperCase());}$('profileBtn').title='Apelido: '+name+' • Toque para editar foto ou avatar';}
+
+function closeProfileMenu(backdrop){if(backdrop?.isConnected)backdrop.remove()}
+function openProfileMenu(){
+ if(!currentUser)return;
+ const backdrop=document.createElement('div');backdrop.className='profile-menu-backdrop';backdrop.setAttribute('role','dialog');backdrop.setAttribute('aria-modal','true');backdrop.setAttribute('aria-labelledby','profileMenuTitle');
+ const panel=document.createElement('section');panel.className='profile-menu-panel';
+ const head=document.createElement('div');head.className='profile-menu-head';
+ const heading=document.createElement('div');heading.className='profile-menu-heading';
+ const eyebrow=document.createElement('span');eyebrow.className='profile-menu-eyebrow';eyebrow.textContent='SUA CONTA';
+ const title=document.createElement('h2');title.id='profileMenuTitle';title.textContent='Meu perfil';
+ heading.append(eyebrow,title);
+ const close=document.createElement('button');close.type='button';close.className='profile-menu-close';close.textContent='×';close.setAttribute('aria-label','Fechar perfil');close.onclick=()=>closeProfileMenu(backdrop);
+ head.append(heading,close);
+ const identity=document.createElement('div');identity.className='profile-menu-identity';
+ const avatar=document.createElement('div');avatar.className='profile-menu-avatar';
+ const saved=profileData.avatar||'';const name=(profileData.nickname||currentUser.displayName||currentUser.email?.split('@')[0]||'Usuário').trim();
+ if(saved.startsWith('data:image/')){avatar.style.backgroundImage='url("'+saved+'")';avatar.textContent=''}else{avatar.textContent=saved||((name[0]||'U').toUpperCase())}
+ const identityText=document.createElement('div');identityText.className='profile-menu-identity-text';
+ const userName=document.createElement('strong');userName.textContent=name;
+ const email=document.createElement('span');email.textContent=currentUser.email||'E-mail não disponível';
+ identityText.append(userName,email);identity.append(avatar,identityText);
+ const intro=document.createElement('p');intro.className='profile-menu-intro';intro.textContent='Atualize suas informações e mantenha sua conta protegida.';
+ const actions=document.createElement('div');actions.className='profile-menu-actions';
+ const makeAction=(symbol,label,detail,handler)=>{
+  const button=document.createElement('button');button.type='button';button.className='profile-menu-action';
+  const icon=document.createElement('span');icon.className='profile-menu-action-icon';icon.textContent=symbol;
+  const copy=document.createElement('span');copy.className='profile-menu-action-copy';
+  const strong=document.createElement('strong');strong.textContent=label;
+  const small=document.createElement('small');small.textContent=detail;copy.append(strong,small);
+  const arrow=document.createElement('span');arrow.className='profile-menu-arrow';arrow.textContent='›';
+  button.append(icon,copy,arrow);button.onclick=handler;return button;
+ };
+ actions.append(
+  makeAction('📷','Foto ou avatar','Escolha uma imagem para seu perfil',()=>{closeProfileMenu(backdrop);chooseAvatar()}),
+  makeAction('✎','Nome de usuário','Edite como seu nome aparece',()=>{closeProfileMenu(backdrop);chooseNickname()}),
+  makeAction('🔒','Alterar senha','Receba um link seguro por e-mail',async()=>{
+   closeProfileMenu(backdrop);
+   if(!currentUser.email){await showAppDialog('Esta conta não possui um e-mail disponível para recuperação de senha.',{title:'E-mail indisponível'});return}
+   try{await sendPasswordResetEmail(auth,currentUser.email);await showAppDialog('Enviamos um link para redefinir a senha para '+currentUser.email+'. Confira também a caixa de spam.',{title:'E-mail de recuperação enviado',okText:'Entendi'})}
+   catch(error){const message=error?.code==='auth/too-many-requests'?'Muitas tentativas. Aguarde um pouco antes de solicitar outro link.':'Não foi possível enviar o link de recuperação. Confira sua conexão e tente novamente.';await showAppDialog(message,{title:'Não foi possível alterar a senha'})}
+  })
+ );
+ const footer=document.createElement('div');footer.className='profile-menu-footer';
+ const closeButton=document.createElement('button');closeButton.type='button';closeButton.className='profile-menu-done';closeButton.textContent='Fechar';closeButton.onclick=()=>closeProfileMenu(backdrop);footer.append(closeButton);
+ panel.append(head,identity,intro,actions,footer);backdrop.append(panel);
+ backdrop.addEventListener('click',event=>{if(event.target===backdrop)closeProfileMenu(backdrop)});
+ document.addEventListener('keydown',function escProfile(event){if(event.key==='Escape'&&backdrop.isConnected){closeProfileMenu(backdrop);document.removeEventListener('keydown',escProfile)}});
+ document.body.append(backdrop);close.focus();
+}
+
 async function saveProfileData(changes){if(!currentUser||!profileRef)throw new Error('Perfil não carregado');profileData={...profileData,...changes};await setDoc(profileRef,{nickname:profileData.nickname||'Usuário',avatar:profileData.avatar||''});renderProfile();}
 async function loadProfileData(){profileRef=doc(store,'usuarios',currentUser.uid,'perfil','principal');const snap=await getDoc(profileRef);if(snap.exists()){const data=snap.data();profileData={nickname:typeof data.nickname==='string'?data.nickname:'',avatar:typeof data.avatar==='string'?data.avatar:''};}else{profileData={nickname:(currentUser.displayName||currentUser.email?.split('@')[0]||'Usuário').trim(),avatar:localStorage.getItem('avatar_'+currentUser.uid)||''};await setDoc(profileRef,profileData);}renderProfile();}
 async function chooseAvatar(){if(!currentUser)return;const choices=['👤','😀','😎','🦁','🐯','🐼','🐸','🦊','🐻','🐵','⚽','🚀'];const backdrop=document.createElement('div');backdrop.className='app-dialog-backdrop show';const box=document.createElement('div');box.className='app-dialog';const title=document.createElement('h2');title.textContent='Personalizar avatar';const desc=document.createElement('p');desc.textContent='Escolha um avatar ou envie uma foto. Sua escolha ficará sincronizada na sua conta.';const grid=document.createElement('div');grid.className='avatar-choice-grid';choices.forEach(emoji=>{const btn=document.createElement('button');btn.type='button';btn.className='avatar-choice';btn.textContent=emoji;btn.onclick=async()=>{btn.disabled=true;try{await saveProfileData({avatar:emoji});backdrop.remove();}catch(e){btn.disabled=false;alert('Não foi possível sincronizar o avatar. Confira sua conexão.');}};grid.append(btn)});const file=document.createElement('input');file.type='file';file.accept='image/*';file.className='avatar-file';const upload=document.createElement('button');upload.type='button';upload.className='app-dialog-ok';upload.textContent='Enviar foto';upload.onclick=async()=>{const f=file.files?.[0];if(!f){file.click();return}if(!f.type.startsWith('image/')){alert('Escolha uma imagem.');return}try{const data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(f)});const img=await new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=reject;im.src=data});const canvas=document.createElement('canvas');const scale=Math.min(1,256/Math.max(img.width,img.height));canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);const compact=canvas.toDataURL('image/jpeg',0.72);if(compact.length>190000){alert('Escolha uma imagem menor.');return}await saveProfileData({avatar:compact});backdrop.remove();}catch(e){alert('Não foi possível carregar a foto. Tente outra imagem.')}};const cancel=document.createElement('button');cancel.type='button';cancel.className='app-dialog-cancel';cancel.textContent='Fechar';cancel.onclick=()=>backdrop.remove();const actions=document.createElement('div');actions.className='app-dialog-actions';actions.append(file,upload,cancel);box.append(title,desc,grid,actions);backdrop.append(box);backdrop.onclick=e=>{if(e.target===backdrop)backdrop.remove()};document.body.append(backdrop);}
@@ -371,7 +450,7 @@ $('showCreateBtn').onclick=()=>{$('createAccountOptions').classList.remove('hidd
 $('backToLoginBtn').onclick=()=>{$('createAccountOptions').classList.add('hidden');$('loginFields').classList.remove('hidden');$('showCreateBtn').classList.remove('hidden');$('authMsg').textContent='';};
 const googleProvider=new GoogleAuthProvider();googleProvider.setCustomParameters({prompt:'select_account'});
 $('googleLoginBtn').onclick=async()=>{const button=$('googleLoginBtn');button.disabled=true;$('authMsg').textContent='Abrindo a janela segura do Google...';try{await signInWithPopup(auth,googleProvider);$('authMsg').textContent='Google confirmado. Carregando sua conta...';}catch(e){const code=e?.code||'auth/unknown';const messages={'auth/popup-blocked':'O navegador bloqueou a janela do Google. Permita pop-ups para este site e tente novamente.','auth/popup-closed-by-user':'A janela do Google foi fechada antes de concluir.','auth/unauthorized-domain':'Este domínio não está autorizado no Firebase.','auth/operation-not-allowed':'O login Google não está ativado no Firebase.','auth/account-exists-with-different-credential':'Já existe uma conta com este e-mail usando outro método de acesso. Entre pelo método original.','auth/network-request-failed':'Falha de conexão. Verifique a internet e tente novamente.','auth/cancelled-popup-request':'Já existe uma janela de autenticação aberta.'};$('authMsg').textContent=messages[code]||'Não foi possível concluir o login Google ('+code+').';}finally{button.disabled=false}};
-$('profileBtn').onclick=()=>chooseAvatar();
+$('profileBtn').onclick=openProfileMenu;
 $('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
 const authFallback=setTimeout(()=>{if($('appLoading')&&!$('appLoading').classList.contains('hidden')&&$('app').classList.contains('hidden'))showAuth('A verificação demorou. Confira sua conexão e entre novamente.');},12000);
 onAuthStateChanged(auth,async user=>{clearTimeout(authFallback);if(user)$('appLoading').classList.remove('hidden');if(unsubscribeCloud){unsubscribeCloud();unsubscribeCloud=null}currentUser=user;if(!user){cloudRef=null;profileRef=null;profileData={nickname:'',avatar:''};db={clients:[],payments:[],costs:[]};showAuth();return}cloudRef=doc(store,'usuarios',user.uid,'dados','principal');setStatus('Carregando seu perfil...');try{await withTimeout(loadProfileData(),15000,'Carregamento do perfil');}catch(profileError){console.warn('Perfil indisponível; seguindo para os dados principais:',profileError);profileRef=doc(store,'usuarios',user.uid,'perfil','principal');profileData={nickname:(user.displayName||user.email?.split('@')[0]||'Usuário').trim(),avatar:localStorage.getItem('avatar_'+user.uid)||''};renderProfile();setStatus('Perfil temporariamente indisponível. Carregando clientes...');}try{setStatus('Carregando seus dados...');const snap=await withTimeout(getDoc(cloudRef),15000,'Leitura dos clientes');if(!snap.exists()){await setDoc(cloudRef,{clients:[],payments:[],costs:[],createdAt:serverTimestamp()})}const legacy=snap.exists()?snap.data():{clients:[],payments:[],costs:[]};const applyCloudData=data=>{db={clients:Array.isArray(data.clients)?data.clients:[],payments:Array.isArray(data.payments)?data.payments:[],costs:Array.isArray(data.costs)?data.costs:[]};db.clients=db.clients.map(c=>({...c,dueDate:c.dueDate||(c.due?`${today().slice(0,7)}-${String(Math.min(Number(c.due),new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate())).padStart(2,'0')}`:today())}));};applyCloudData(legacy);enter();setStatus('Dados carregados. Atualizações em segundo plano.');unsubscribeCloud=onSnapshot(cloudRef,s=>{if(!s.exists())return;applyCloudData(s.data());renderAll();setStatus('Dados sincronizados com a nuvem.')},err=>setStatus('Não foi possível atualizar em tempo real. Seus dados carregados continuam disponíveis.',true));withTimeout(migrateLegacyRecords(user.uid,legacy),20000,'Migração financeira').then(copied=>{if(copied)setStatus('Dados carregados; '+copied+' registros financeiros conferidos.')}).catch(migrationError=>setStatus('Dados carregados. Sincronização financeira pendente: '+(migrationError.message||'tente novamente depois.'),true));}catch(e){console.error('Falha ao carregar conta/dados:',e);const code=e?.code||'sem-código';const detail=String(e?.message||'Erro desconhecido').slice(0,220);setStatus('Falha ao carregar: '+code,true);showAuth('Falha no Firestore ('+code+'): '+detail)}});
