@@ -295,7 +295,11 @@ body.login-screen #auth .auth-divider{color:#aaa}
 /* WhatsApp: símbolo de conversa e telefone mais reconhecível */
 .client-icon-btn.whatsapp{color:#25D366!important;background:rgba(37,211,102,.055);border-color:rgba(37,211,102,.25)}
 .client-icon-btn.whatsapp svg{width:24px;height:24px;stroke-width:1.55;filter:none}
-.client-icon-btn.whatsapp svg{width:23px;height:23px;stroke-width:1.8;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;filter:none}</style>
+.client-icon-btn.whatsapp svg{width:23px;height:23px;stroke-width:1.8;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;filter:none}
+/* Campo WhatsApp sem seletor de país: ocupa toda a largura */
+.client-form-card .phone-input-wrap{grid-template-columns:minmax(0,1fr)!important}
+.client-form-card .phone-input-wrap input{grid-column:1;width:100%;min-width:0;padding:0 14px!important;min-height:53px;background:transparent!important;border:0!important;border-radius:14px!important;color:#f6f7fa!important}
+</style>
 </head>
 <body>
 <div id="appLoading" class="app-loading" role="status"><div class="loading-spinner"></div><strong>Carregando aplicativo...</strong><span>Verificando sua sessão e sincronização</span></div>
