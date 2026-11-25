@@ -357,6 +357,18 @@ body.login-screen #auth .btn{min-height:47px}
  body.login-screen{justify-content:flex-start}
  body.login-screen #auth{margin:10px auto!important}
 }
+
+/* Redução adicional de aproximadamente 25% no cartão de login */
+body.login-screen #auth{width:min(66vw,315px)!important;max-width:315px!important;padding:16px 15px 14px!important;border-radius:18px!important}
+body.login-screen #auth .auth-brand{gap:9px;margin-bottom:8px}
+body.login-screen #auth .auth-brand img{width:44px;height:44px;flex-basis:44px}
+body.login-screen #auth h1{font-size:clamp(17px,4vw,20px);letter-spacing:-.3px}
+body.login-screen #auth p{font-size:12px;line-height:1.4;margin:6px 0 10px}
+body.login-screen #auth label{font-size:11px;margin-top:8px}
+body.login-screen #auth input{min-height:40px;padding:8px 10px;font-size:12px;border-radius:10px}
+body.login-screen #auth .btn{min-height:39px;font-size:12px;border-radius:10px}
+body.login-screen #auth .auth-forgot{font-size:11px;padding:10px 6px 8px}
+@media(max-width:380px){body.login-screen #auth{width:min(76vw,315px)!important}}
 </style>
 </head>
 <body>
