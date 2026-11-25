@@ -444,7 +444,7 @@ body.login-screen #auth .auth-forgot{font-size:11px;padding:10px 6px 8px}
 <div class="card"><h2>Backup dos dados</h2><p class="muted">O arquivo de backup contém os dados dos clientes e pagamentos. Guarde-o em local privado e não envie a terceiros.</p><button id="exportBtn" class="btn" style="width:100%">Exportar backup JSON</button>
 <div class="hr"></div><h3>Comprovantes no Google Drive</h3><p class="muted">Conecte sua conta Google para guardar os comprovantes de pagamentos e renovações em seu Drive.</p><button id="connectDriveBtn" class="btn secondary" style="width:100%">Conectar Google Drive</button><p id="driveStatus" class="muted" role="status" style="margin-top:8px">Google Drive não conectado.</p>
 <div class="hr"></div><label>Restaurar backup (.json)</label><input id="importFile" type="file" accept=".json,application/json"><button id="importBtn" class="btn secondary" style="width:100%;margin-top:10px">Restaurar backup</button><p id="backupMsg" class="muted" role="status"></p></div>
-<div class="card"><h2>Migração de clientes</h2><p class="muted">Etapa de preparação: copia os clientes da lista antiga para documentos individuais na coleção clientes. A lista original não será apagada nem modificada.</p><button id="migrateClientsBtn" class="btn secondary" type="button" style="width:100%">Conferir e preparar migração</button><p id="clientMigrationStatus" class="muted" role="status" style="margin-top:10px">Aguardando conferência. As regras do Firestore precisam permitir a coleção clientes.</p></div><div class="card"><h2>Segurança</h2><p class="muted">O acesso aos dados é controlado pelas regras do Firestore para sua conta.</p><button id="securityProbeBtn" class="btn secondary" style="width:100%">Testar proteção entre contas</button><p id="securityProbeResult" class="muted" role="status" style="margin-top:10px">Entre com a segunda conta de teste antes de executar esta verificação.</p><div class="hr"></div><button id="lockBtn" class="btn secondary" style="width:100%">Sair da conta</button></div>
+<div class="card"><h2>Migração de clientes</h2><p class="muted">Etapa de preparação: copia os clientes da lista antiga para documentos individuais na coleção clientes. A lista original não será apagada nem modificada.</p><button id="migrateClientsBtn" class="btn secondary" type="button" style="width:100%">Conferir e preparar migração</button><p id="clientMigrationStatus" class="muted" role="status" style="margin-top:10px">Aguardando conferência. As regras do Firestore precisam permitir a coleção clientes.</p></div><div class="card"><h2>Segurança</h2><p class="muted">O acesso aos dados é controlado pelas regras do Firestore para sua conta.</p><button id="securityProbeBtn" class="btn secondary" style="width:100%">Testar proteção entre contas</button><p id="securityProbeResult" class="muted" role="status" style="margin-top:10px">Entre com a segunda conta de teste antes de executar esta verificação.</p><div class="hr"></div><button id="syncRulesDiagnosticBtn" class="btn secondary" type="button" style="width:100%">Diagnosticar sincronização (sem gravar)</button><p id="syncRulesDiagnosticResult" class="muted" role="status" style="margin-top:10px">Verifica os dados locais conforme as regras atuais. Não grava, apaga ou altera dados.</p><div class="hr"></div><button id="lockBtn" class="btn secondary" style="width:100%">Sair da conta</button></div>
 </section>
 <section id="tab-vencimentos" class="hidden"><div class="card"><h2>Próximos vencimentos</h2><p class="muted">Clientes com vencimento nos próximos 7 dias e clientes em atraso.</p><div id="dueList"></div></div></section>
 <section id="tab-meuPlano" class="hidden"><div class="card"><h2>Meu plano</h2><p class="muted">Veja seu plano atual e acompanhe os recursos da sua conta.</p><div class="item plan-current-card" style="border-left:4px solid var(--gold)"><div class="itemtop"><div><span class="pill green" id="planStatusPill">Plano atual</span><h2 id="planCurrentName" style="margin-top:10px">Free</h2><p class="muted" id="planCurrentDescription">Gratuito • sem cobrança recorrente</p></div><strong id="planCurrentPrice" style="font-size:22px">R$ 0,00</strong></div><div class="hr"></div><div class="itemtop"><strong>Clientes cadastrados</strong><strong id="planClientCount">0 de 20</strong></div><div id="planUsageTrack" style="height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:10px"><div id="planUsageBar" style="height:100%;width:0%;background:var(--gold);border-radius:99px"></div></div><p class="muted" id="planUsageText" style="margin-top:8px">Você pode cadastrar até 20 clientes no plano Free.</p></div><div class="item" id="premiumOfferCard"><span class="pill amber">Premium</span><h2 style="margin-top:10px">Mais recursos para sua gestão</h2><strong style="font-size:25px">R$ 9,90 <span class="muted">/ mês</span></strong><ul><li>Clientes ilimitados</li><li>Relatórios avançados</li><li>Histórico completo</li><li>Recursos avançados de backup</li></ul><p class="muted" id="premiumOfferDescription">Assinatura mensal. A cobrança pela Google Play será ativada quando a integração de pagamentos estiver pronta.</p><button class="btn" id="premiumInfoBtn" type="button" style="width:100%">Conhecer o Premium</button></div></div></section>
@@ -570,6 +570,48 @@ async function migrateLegacyRecords(userId,legacyData){
     if(prepared.some(item=>!savedIds.has(item.id)))throw new Error('A conferência de '+group.name+' não encontrou todos os registros.');
   }
   return copied;
+}
+function diagnoseSyncAgainstRules(){
+ const issues=[];
+ const add=(where,message)=>issues.push(where+': '+message);
+ const validText=(v,max)=>typeof v==='string'&&v.length<=max;
+ const validClient=(c,index)=>{
+  const where='Cliente '+(index+1)+(c?.name?' ('+String(c.name).slice(0,40)+')':'');
+  if(!c||typeof c!=='object'||Array.isArray(c)){add(where,'registro não é um objeto');return}
+  if(!c.id||typeof c.id!=='string'||c.id.length>128||!/^[A-Za-z0-9_-]+$/.test(c.id))add(where,'id inválido');
+  if(typeof c.name!=='string'||c.name.length<1||c.name.length>120)add(where,'name precisa ser texto de 1 a 120 caracteres');
+  if(typeof c.phone!=='string'||c.phone.length>30)add(where,'phone precisa ser texto com até 30 caracteres');
+  if(typeof c.price!=='number'||!(c.price>0))add(where,'price precisa ser número maior que zero');
+  if('dueDate' in c&&!(typeof c.dueDate==='string'&&/^\\d{4}-\\d{2}-\\d{2}$/.test(c.dueDate)))add(where,'dueDate fora do formato AAAA-MM-DD');
+  if('notes' in c&&!validText(c.notes,2000))add(where,'notes precisa ser texto com até 2000 caracteres');
+  for(const field of ['serviceType','serviceUser','servicePass'])if(field in c&&!validText(c[field],2000))add(where,field+' precisa ser texto com até 2000 caracteres');
+  if('lastRenewal' in c&&!validText(c.lastRenewal,10))add(where,'lastRenewal precisa ser texto com até 10 caracteres');
+ };
+ if(!Array.isArray(db.clients))add('Clientes','a lista não é um array');
+ else{
+  if(db.clients.length>20)add('Clientes','a regra atual permite no máximo 20; a lista tem '+db.clients.length);
+  const ids=new Set();
+  db.clients.forEach((c,i)=>{validClient(c,i);if(c&&typeof c.id==='string'){if(ids.has(c.id))add('Clientes','id repetido: '+c.id);ids.add(c.id)}});
+ }
+ const groups=[
+  {key:'payments',name:'Pagamentos',allowed:['id','amount','date','paidAt','status','method','clientId','clientName','desc','vendor','kind','proof','ref','proofFileId','proofFileName','proofMimeType']},
+  {key:'costs',name:'Custos',allowed:['id','amount','date','desc','vendor','kind','clientId','quantity']}
+ ];
+ for(const group of groups){
+  const records=Array.isArray(db[group.key])?db[group.key]:[];
+  const ids=new Set();
+  records.forEach((record,index)=>{
+   const where=group.name+' '+(index+1);
+   if(!record||typeof record!=='object'||Array.isArray(record)){add(where,'registro não é um objeto');return}
+   const id=stableFinancialId(record,index,group.key);
+   if(ids.has(id))add(where,'id repetido: '+id);ids.add(id);
+   if(!Number.isFinite(Number(record.amount))||Number(record.amount)<0)add(where,'amount precisa ser número maior ou igual a zero');
+   if(typeof record.date!=='string')add(where,'date precisa ser texto');
+   for(const key of Object.keys(record))if(!group.allowed.includes(key))add(where,'campo não permitido pelas regras: '+key);
+   if('quantity' in record&&(!Number.isInteger(record.quantity)||record.quantity < -100000||record.quantity > 100000))add(where,'quantity precisa ser inteiro entre -100000 e 100000');
+  });
+ }
+ return issues;
 }
 function stableFinancialId(record,index,key){
   const raw=typeof record.id==='string'?record.id.trim():'';
@@ -788,6 +830,21 @@ $('menuToggle').onclick=()=>$('tabs').classList.toggle('open');
 $('bottomMore').onclick=()=>$('tabs').classList.toggle('open');
 function renderPixKeySettings(){if($('pixKeyType'))$('pixKeyType').value=profileData.pixKeyType||'';if($('pixKeyInput'))$('pixKeyInput').value=profileData.pixKey||'';if($('pixSavedSummary'))$('pixSavedSummary').textContent=profileData.pixKey||'Nenhuma chave cadastrada';if($('pixSavedType'))$('pixSavedType').textContent=profileData.pixKey?(profileData.pixKeyType||'Tipo não informado'):'Adicione uma chave para facilitar os pagamentos.';if($('savePixKeyBtn'))$('savePixKeyBtn').textContent=profileData.pixKey?'Salvar alterações':'＋ Adicionar chave Pix';}
 $('savePixKeyBtn').onclick=async()=>{const type=$('pixKeyType').value;const key=$('pixKeyInput').value.trim();const status=$('pixKeyStatus');if(!type){status.textContent='Selecione o tipo da chave Pix.';return}if(!key){status.textContent='Digite sua chave Pix.';return}try{$('savePixKeyBtn').disabled=true;await saveProfileData({pixKey:key,pixKeyType:type});renderPixKeySettings();status.textContent='Chave Pix salva com sucesso! Ela será usada nas cobranças desta conta.';}catch(error){console.error('Erro ao salvar chave Pix:',error);status.textContent='Falha ao salvar ('+(error?.code||'erro')+'): '+(error?.message||'Verifique a conexão e as regras do Firestore.');}finally{$('savePixKeyBtn').disabled=false}};
+$('syncRulesDiagnosticBtn').onclick=()=>{
+ const output=$('syncRulesDiagnosticResult');
+ if(!currentUser){output.textContent='Entre na conta para executar o diagnóstico.';return}
+ output.textContent='Conferindo os dados locais sem enviar nada ao Firebase...';
+ try{
+  const issues=diagnoseSyncAgainstRules();
+  if(issues.length){
+   output.textContent='Foram encontrados '+issues.length+' possível(is) bloqueio(s): '+issues.slice(0,8).join(' • ')+(issues.length>8?' • ...':'');
+   output.style.color='var(--danger,#d9534f)';
+  }else{
+   output.textContent='A validação local não encontrou campos incompatíveis nas listas de clientes, pagamentos e custos. Isso não testa permissões do servidor; o próximo passo será isolar a gravação bloqueada.';
+   output.style.color='';
+  }
+ }catch(error){output.textContent='Não foi possível concluir a conferência local: '+(error?.message||error);output.style.color='var(--danger,#d9534f)'}
+};
 $('premiumInfoBtn').onclick=()=>showAppDialog('O Premium mensal custa R$ 9,90. A assinatura pela Google Play ainda está em preparação; nenhuma cobrança será feita por este botão.',{title:'Assinatura Premium em preparação',okText:'Entendi'});
 $('bottomNewClient').onclick=()=>{document.querySelector('[data-tab="clientes"]').click();closeClientForm();openClientForm('Cadastrar cliente')};
 $('navLogout').onclick=()=>$('lockBtn').click();
