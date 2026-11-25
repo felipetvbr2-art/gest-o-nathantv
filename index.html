@@ -299,6 +299,25 @@ body.login-screen #auth .auth-divider{color:#aaa}
 /* Campo WhatsApp sem seletor de país: ocupa toda a largura */
 .client-form-card .phone-input-wrap{grid-template-columns:minmax(0,1fr)!important}
 .client-form-card .phone-input-wrap input{grid-column:1;width:100%;min-width:0;padding:0 14px!important;min-height:53px;background:transparent!important;border:0!important;border-radius:14px!important;color:#f6f7fa!important}
+
+/* Ajuste suave de escala do formulário em celulares */
+@media(max-width:700px){
+  .client-form-overlay{padding:12px 12px calc(12px + env(safe-area-inset-bottom))!important}
+  .client-form-overlay>.client-form-card{width:96%!important;max-height:88dvh!important;padding:16px 14px 12px!important;border-radius:20px!important}
+  .client-form-card .itemtop{margin-bottom:8px!important;padding-bottom:9px!important}
+  .client-form-card h2{font-size:19px!important}
+  .client-form-card .client-form-heading p{font-size:12px!important;margin:5px 0}
+  .client-form-card label{font-size:12px!important;margin:8px 0 4px!important}
+  .client-form-card input,.client-form-card textarea{min-height:45px!important;padding:9px 11px!important;font-size:13px!important}
+  .client-form-card .client-input-icon input{padding-left:48px!important}
+  .client-form-card .contact-import-icon{min-height:45px!important}
+  .client-form-card .client-proof-field{min-height:66px!important}
+  .client-form-card .client-proof-field input[type=file]{min-height:60px!important;font-size:10px!important}
+  .client-form-card #cNotes{min-height:88px!important}
+  .client-form-card #packageSummary{font-size:12px!important;padding:11px 12px!important;margin-top:10px!important}
+  .client-form-actions{margin-top:12px!important}
+  .client-form-actions button{min-height:50px!important;font-size:13px!important}
+}
 </style>
 </head>
 <body>
