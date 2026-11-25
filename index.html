@@ -568,8 +568,9 @@ async function verifyFinancialChanges(checks){
 }
 async function persist(){
   if(!currentUser||!cloudRef)throw new Error('Faça login para salvar os dados.');
-  saving=true;setStatus('Preparando sincronização segura...');
+  saving=true;let syncStage='início';setStatus('Preparando sincronização segura...');
   try{
+    syncStage='leitura da lista de clientes';
     const target=collection(store,'usuarios',currentUser.uid,'clientes');
     const existing=await getDocs(target);
     const nextIds=new Set();
@@ -580,6 +581,7 @@ async function persist(){
     }
     const stale=existing.docs.filter(item=>!nextIds.has(item.id));
     const batch=writeBatch(store);
+    syncStage='leitura das coleções de pagamentos e custos';
     const financialPlan=await prepareFinancialChanges(batch);
     const operations=1+db.clients.length+stale.length+financialPlan.operationCount;
     if(operations>450)throw new Error('A sincronização excede o limite seguro de operações. Nenhuma alteração foi enviada.');
@@ -587,6 +589,7 @@ async function persist(){
     for(const client of db.clients)batch.set(doc(target,client.id),client);
     for(const item of stale)batch.delete(item.ref);
     setStatus('Enviando clientes e financeiro em uma única operação...');
+    syncStage='gravação conjunta de clientes, pagamentos e custos';
     await batch.commit();
     setStatus('Dados enviados. Conferindo pagamentos e custos...');
     try{
@@ -597,8 +600,11 @@ async function persist(){
       setStatus('Dados enviados ao Firebase. Não foi possível concluir a conferência automática; não repita a operação.');
     }
   }catch(e){
+    console.error('Etapa da sincronização que falhou:',syncStage,e);
+    const diagnostic=new Error('Etapa: '+syncStage+'. '+String(e?.message||e));
+    diagnostic.code=e?.code||'unknown';
     setStatus('Falha na sincronização. Os dados locais foram mantidos; confira as regras do Firebase antes de tentar novamente.',true);
-    throw e;
+    throw diagnostic;
   }finally{saving=false}
 }
 let lastLoginLandscape=-1;
