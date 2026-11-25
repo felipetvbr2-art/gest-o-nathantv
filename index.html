@@ -830,20 +830,34 @@ $('menuToggle').onclick=()=>$('tabs').classList.toggle('open');
 $('bottomMore').onclick=()=>$('tabs').classList.toggle('open');
 function renderPixKeySettings(){if($('pixKeyType'))$('pixKeyType').value=profileData.pixKeyType||'';if($('pixKeyInput'))$('pixKeyInput').value=profileData.pixKey||'';if($('pixSavedSummary'))$('pixSavedSummary').textContent=profileData.pixKey||'Nenhuma chave cadastrada';if($('pixSavedType'))$('pixSavedType').textContent=profileData.pixKey?(profileData.pixKeyType||'Tipo não informado'):'Adicione uma chave para facilitar os pagamentos.';if($('savePixKeyBtn'))$('savePixKeyBtn').textContent=profileData.pixKey?'Salvar alterações':'＋ Adicionar chave Pix';}
 $('savePixKeyBtn').onclick=async()=>{const type=$('pixKeyType').value;const key=$('pixKeyInput').value.trim();const status=$('pixKeyStatus');if(!type){status.textContent='Selecione o tipo da chave Pix.';return}if(!key){status.textContent='Digite sua chave Pix.';return}try{$('savePixKeyBtn').disabled=true;await saveProfileData({pixKey:key,pixKeyType:type});renderPixKeySettings();status.textContent='Chave Pix salva com sucesso! Ela será usada nas cobranças desta conta.';}catch(error){console.error('Erro ao salvar chave Pix:',error);status.textContent='Falha ao salvar ('+(error?.code||'erro')+'): '+(error?.message||'Verifique a conexão e as regras do Firestore.');}finally{$('savePixKeyBtn').disabled=false}};
-$('syncRulesDiagnosticBtn').onclick=()=>{
+$('syncRulesDiagnosticBtn').onclick=async()=>{
  const output=$('syncRulesDiagnosticResult');
  if(!currentUser){output.textContent='Entre na conta para executar o diagnóstico.';return}
- output.textContent='Conferindo os dados locais sem enviar nada ao Firebase...';
+ output.textContent='Validando os dados locais e testando as permissões de leitura do Firebase. Nenhum dado será gravado...';
+ output.style.color='';
  try{
   const issues=diagnoseSyncAgainstRules();
   if(issues.length){
-   output.textContent='Foram encontrados '+issues.length+' possível(is) bloqueio(s): '+issues.slice(0,8).join(' • ')+(issues.length>8?' • ...':'');
+   output.textContent='Validação local: '+issues.length+' possível(is) bloqueio(s): '+issues.slice(0,6).join(' • ')+(issues.length>6?' • ...':'');
    output.style.color='var(--danger,#d9534f)';
-  }else{
-   output.textContent='A validação local não encontrou campos incompatíveis nas listas de clientes, pagamentos e custos. Isso não testa permissões do servidor; o próximo passo será isolar a gravação bloqueada.';
-   output.style.color='';
+   return;
   }
- }catch(error){output.textContent='Não foi possível concluir a conferência local: '+(error?.message||error);output.style.color='var(--danger,#d9534f)'}
+  const uid=currentUser.uid;
+  const tests=[
+   ['Documento principal',()=>getDoc(cloudRef)],
+   ['Coleção de clientes',()=>getDocs(collection(store,'usuarios',uid,'clientes'))],
+   ['Subcoleção de pagamentos',()=>getDocs(collection(store,'usuarios',uid,'dados','principal','pagamentos'))],
+   ['Subcoleção de custos',()=>getDocs(collection(store,'usuarios',uid,'dados','principal','custos'))]
+  ];
+  const results=[];
+  for(const [name,run] of tests){
+   try{await run();results.push(name+': leitura permitida')}
+   catch(error){results.push(name+': BLOQUEADA ('+(error?.code||error?.message||'erro')+')')}
+  }
+  const blocked=results.filter(x=>x.includes('BLOQUEADA'));
+  output.textContent='Validação local: OK. Testes de leitura no servidor: '+results.join(' • ')+(blocked.length?' • Próximo passo: corrigir a permissão de leitura indicada.':' • Todas as leituras foram permitidas. A falha restante está provavelmente na autorização de gravação do lote; ainda não foi feito nenhum teste de gravação.');
+  output.style.color=blocked.length?'var(--danger,#d9534f)':'';
+ }catch(error){output.textContent='Não foi possível concluir o diagnóstico: '+(error?.code||error?.message||error);output.style.color='var(--danger,#d9534f)'}
 };
 $('premiumInfoBtn').onclick=()=>showAppDialog('O Premium mensal custa R$ 9,90. A assinatura pela Google Play ainda está em preparação; nenhuma cobrança será feita por este botão.',{title:'Assinatura Premium em preparação',okText:'Entendi'});
 $('bottomNewClient').onclick=()=>{document.querySelector('[data-tab="clientes"]').click();closeClientForm();openClientForm('Cadastrar cliente')};
