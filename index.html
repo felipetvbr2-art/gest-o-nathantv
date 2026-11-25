@@ -342,6 +342,21 @@ body:not(.dark) .client-form-card .client-proof-field input[type=file]{backgroun
 body:not(.dark) .client-form-card .muted{color:#667085!important}
 body:not(.dark) .client-form-card #packageSummary{background:#fff8e8!important;color:#795b16!important;border-color:#ead39a!important}
 body:not(.dark) .client-form-actions{background:#fff!important}
+
+/* Tela de acesso: cartão menor e centralizado na área útil */
+body.login-screen{min-height:100dvh;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;box-sizing:border-box;padding:14px 0;overflow-y:auto}
+body.login-screen #auth{width:min(88vw,420px)!important;max-width:420px!important;box-sizing:border-box;margin:0 auto!important;padding:20px 19px 18px!important;border-radius:21px!important}
+body.login-screen #auth .auth-brand{gap:11px;margin-bottom:10px}
+body.login-screen #auth .auth-brand img{width:56px;height:56px;flex-basis:56px}
+body.login-screen #auth h1{font-size:clamp(20px,4.8vw,25px)}
+body.login-screen #auth p{font-size:14px;line-height:1.45;margin:7px 0 14px}
+body.login-screen #auth label{font-size:13px;margin-top:10px}
+body.login-screen #auth input{min-height:48px;padding:11px 13px}
+body.login-screen #auth .btn{min-height:47px}
+@media(max-height:700px){
+ body.login-screen{justify-content:flex-start}
+ body.login-screen #auth{margin:10px auto!important}
+}
 </style>
 </head>
 <body>
