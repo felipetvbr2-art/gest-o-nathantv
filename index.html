@@ -408,7 +408,7 @@ body.login-screen #auth .auth-divider{color:#aaa}
 <div class="wa-panel">
 <div class="wa-head"><h2 id="waTitle" style="margin:0">Enviar mensagem pelo WhatsApp</h2><button class="wa-close" type="button" onclick="closeWhatsAppModal()" aria-label="Fechar">×</button></div>
 <div id="waClientInfo" class="wa-info"></div>
-<div class="wa-pix-settings"><span>Chave Pix do vendedor</span><strong id="waPixKeyPreview">Não cadastrada</strong><button type="button" class="btn secondary" onclick="editPixKeyFromWhatsApp()">＋ Cadastrar / alterar chave Pix</button></div>
+<div class="wa-pix-settings"><span>Chave Pix do vendedor</span><strong id="waPixKeyPreview">Não cadastrada</strong></div>
 <label for="waMessage">Mensagem de cobrança</label>
 <textarea id="waMessage"></textarea>
 <p class="muted">Confira a mensagem e a chave Pix antes de abrir o WhatsApp. Nada será enviado automaticamente.</p>
@@ -766,7 +766,6 @@ let activeWhatsAppClientId=null;
 function buildWhatsAppMessage(c){const due=dateBR(c.dueDate||'');const key=(profileData.pixKey||'').trim();return 'Olá, '+c.name+'! Tudo bem? Estou passando para lembrar do pagamento da sua mensalidade de '+money(c.price)+'. Vencimento: '+due+'.'+(key?'\n\nChave Pix para pagamento: '+key:'\n\nChave Pix do vendedor ainda não cadastrada. Entre em contato para solicitar os dados de pagamento.')+'\n\nApós realizar o Pix, por favor envie o comprovante por aqui. Obrigado!'}
 window.openWhatsAppModal=id=>{const c=db.clients.find(x=>x.id===id);if(!c)return;const phone=(c.phone||'').replace(/\D/g,'');if(!phone){alert('Este cliente não tem telefone cadastrado.');return}activeWhatsAppClientId=id;$('waClientInfo').innerHTML='<div><strong>Cliente:</strong> '+esc(c.name)+'</div><div><strong>WhatsApp:</strong> '+esc(c.phone||'Não cadastrado')+'</div><div><strong>Vencimento:</strong> '+dateBR(c.dueDate||'')+'</div><div><strong>Mensalidade:</strong> '+money(c.price)+'</div>';$('waPixKeyPreview').textContent=profileData.pixKey?(profileData.pixKeyType?profileData.pixKeyType+': ':'')+profileData.pixKey:'Não cadastrada';$('waMessage').value=buildWhatsAppMessage(c);$('whatsAppModal').classList.remove('hidden')};
 window.closeWhatsAppModal=()=>{$('whatsAppModal').classList.add('hidden');activeWhatsAppClientId=null};
-window.editPixKeyFromWhatsApp=()=>{document.querySelector('[data-tab="minhaPix"]').click();$('pixKeyInput').focus()};
 window.openWhatsAppFromModal=()=>{const c=db.clients.find(x=>x.id===activeWhatsAppClientId);if(!c)return;let phone=(c.phone||'').replace(/\D/g,'');if(!phone){alert('Este cliente não tem telefone cadastrado.');return}if(!phone.startsWith('55'))phone='55'+phone;const message=$('waMessage').value.trim();if(!message){alert('Digite uma mensagem antes de continuar.');return}window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(message),'_blank','noopener')};
 
 const GOOGLE_DRIVE_CLIENT_ID="493101764038-elh5ttqnq9gk93fvh70b53edtslt7823.apps.googleusercontent.com";
