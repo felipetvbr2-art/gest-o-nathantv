@@ -582,7 +582,7 @@ function diagnoseSyncAgainstRules(){
   if(typeof c.name!=='string'||c.name.length<1||c.name.length>120)add(where,'name precisa ser texto de 1 a 120 caracteres');
   if(typeof c.phone!=='string'||c.phone.length>30)add(where,'phone precisa ser texto com até 30 caracteres');
   if(typeof c.price!=='number'||!(c.price>0))add(where,'price precisa ser número maior que zero');
-  if('dueDate' in c&&!(typeof c.dueDate==='string'&&/^\\d{4}-\\d{2}-\\d{2}$/.test(c.dueDate)))add(where,'dueDate fora do formato AAAA-MM-DD');
+  if('dueDate' in c&&!(typeof c.dueDate==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(c.dueDate)))add(where,'dueDate fora do formato AAAA-MM-DD');
   if('notes' in c&&!validText(c.notes,2000))add(where,'notes precisa ser texto com até 2000 caracteres');
   for(const field of ['serviceType','serviceUser','servicePass'])if(field in c&&!validText(c[field],2000))add(where,field+' precisa ser texto com até 2000 caracteres');
   if('lastRenewal' in c&&!validText(c.lastRenewal,10))add(where,'lastRenewal precisa ser texto com até 10 caracteres');
