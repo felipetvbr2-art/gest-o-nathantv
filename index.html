@@ -535,6 +535,7 @@ body.login-screen #auth .auth-forgot{font-size:11px;padding:10px 6px 8px}
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup, linkWithRedirect, updateProfile, sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import { getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp, collection, getDocs, deleteDoc, writeBatch } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
+import { getMessaging, getToken, onMessage, isSupported } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-messaging.js';
 
 (()=> {
 const $=id=>document.getElementById(id);
@@ -548,6 +549,8 @@ const firebaseConfig={
   measurementId:"G-8S1VE6SQKY"
 };
 const firebaseApp=initializeApp(firebaseConfig);
+const WEB_PUSH_VAPID_KEY='BNlzmAzTV6v_87kjwn_oiOpq1EC0XyFCKQtxYlwshWXpxVfd6e9hf7RJFBCdTpNe98YlXnBYgZwMVXbrENIfDSY';
+let foregroundMessagingListener=false;
 const auth=getAuth(firebaseApp);
 const store=getFirestore(firebaseApp);
 const withTimeout=(promise,ms,label)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+' demorou mais que o esperado.')),ms))]);
@@ -737,6 +740,23 @@ let lastLoginLandscape=-1;
  function showAuth(msg=''){const landscapes=['https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1600&q=85','https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=85','https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?auto=format&fit=crop&w=1600&q=85','https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=85'];let next=Math.floor(Math.random()*landscapes.length);if(landscapes.length>1&&next===lastLoginLandscape)next=(next+1)%landscapes.length;lastLoginLandscape=next;document.body.style.setProperty('--login-landscape','url("'+landscapes[next]+'")');document.body.classList.add('login-screen');$('appLoading').classList.add('hidden');$('auth').classList.remove('hidden');$('app').classList.add('hidden');$('authMsg').textContent=msg; }
 function renderProfile(){if(!currentUser)return;const name=(profileData.nickname||currentUser.displayName||currentUser.email?.split('@')[0]||'Usuário').trim();$('profileNickname').textContent=name;const avatar=$('profileAvatar');const saved=profileData.avatar||'';if(saved.startsWith('data:image/')){avatar.textContent='';avatar.style.backgroundImage='url("'+saved+'")';avatar.style.backgroundSize='cover';avatar.style.backgroundPosition='center';}else{avatar.style.backgroundImage='none';avatar.textContent=saved||((name[0]||'U').toUpperCase());}$('profileBtn').title='Apelido: '+name+' • Toque para abrir seu perfil';}
 
+async function enableDueNotifications(){
+ if(!currentUser||!profileRef){await showAppDialog('Entre na sua conta para ativar os lembretes.',{title:'Notificações'});return}
+ if(!('Notification' in window)||!('serviceWorker' in navigator)){await showAppDialog('Este navegador não oferece suporte às notificações push necessárias.',{title:'Recurso indisponível'});return}
+ try{
+  if(!(await isSupported()))throw new Error('Este navegador não oferece suporte ao Firebase Cloud Messaging.');
+  let permission=Notification.permission;
+  if(permission==='default')permission=await Notification.requestPermission();
+  if(permission!=='granted'){await showAppDialog(permission==='denied'?'As notificações estão bloqueadas nas permissões do navegador. Libere as notificações para este site nas configurações do Chrome.':'A permissão para notificações não foi concedida.',{title:'Permissão necessária'});return}
+  const registration=await navigator.serviceWorker.ready;
+  const messaging=getMessaging(firebaseApp);
+  const token=await getToken(messaging,{vapidKey:WEB_PUSH_VAPID_KEY,serviceWorkerRegistration:registration});
+  if(!token)throw new Error('O Firebase não retornou um token para este dispositivo.');
+  await setDoc(profileRef,{fcmToken:token,notificationsEnabled:true,fcmTokenUpdatedAt:serverTimestamp()},{merge:true});
+  if(!foregroundMessagingListener){onMessage(messaging,payload=>{const title=payload.notification?.title||'Gestão Nathan TV';const body=payload.notification?.body||'Você tem clientes com vencimento amanhã.';showAppDialog(body,{title,okText:'Entendi'}).catch(()=>{});});foregroundMessagingListener=true;}
+  await showAppDialog('Notificações ativadas neste dispositivo. Você receberá um aviso às 08:00 do dia anterior ao vencimento, quando houver clientes vencendo.',{title:'Lembretes ativados',okText:'Ótimo!'});
+ }catch(error){console.error('Falha ao ativar notificações:',error);await showAppDialog('Não foi possível ativar as notificações. '+String(error?.message||error).slice(0,220),{title:'Falha na ativação'});}
+}
 function closeProfileMenu(backdrop){if(backdrop?.isConnected)backdrop.remove()}
 function openProfileMenu(){
  if(!currentUser)return;
@@ -771,6 +791,7 @@ function openProfileMenu(){
  actions.append(
   makeAction('📷','Foto ou avatar','Escolha uma imagem para seu perfil',()=>{closeProfileMenu(backdrop);chooseAvatar()}),
   makeAction('✎','Nome de usuário','Edite como seu nome aparece',()=>{closeProfileMenu(backdrop);chooseNickname()}),
+  makeAction('🔔','Ativar notificações de vencimento','Receba alertas um dia antes, às 08:00',()=>{closeProfileMenu(backdrop);enableDueNotifications()}),
   makeAction('🔑','Chave Pix','Cadastre a chave usada nas cobranças pelo WhatsApp',()=>{closeProfileMenu(backdrop);document.querySelector('[data-tab="minhaPix"]')?.click()}),
   makeAction('🔒','Alterar senha','Receba um link seguro por e-mail',async()=>{
    closeProfileMenu(backdrop);
