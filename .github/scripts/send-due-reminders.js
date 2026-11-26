@@ -70,11 +70,22 @@ async function main() {
         continue;
       }
 
-      const clientsSnap = await userRef.collection("clientes").get();
-      const dueClients = clientsSnap.docs.filter(clientDoc => {
-        const client = clientDoc.data() || {};
-        return typeof client.dueDate === "string" && client.dueDate === dueDate;
-      });
+      // A aplicação salva a lista principal em usuarios/{uid}/dados/principal
+      // no campo "clients". Mantemos a subcoleção "clientes" como fallback
+      // para contas antigas que ainda não possuem o documento principal.
+      const dataSnap = await userRef.collection("dados").doc("principal").get();
+      let clients = [];
+      if (dataSnap.exists) {
+        const accountData = dataSnap.data() || {};
+        clients = Array.isArray(accountData.clients) ? accountData.clients : [];
+      } else {
+        const legacyClientsSnap = await userRef.collection("clientes").get();
+        clients = legacyClientsSnap.docs.map(doc => doc.data() || {});
+      }
+
+      const dueClients = clients.filter(client =>
+        typeof client.dueDate === "string" && client.dueDate === dueDate
+      );
 
       if (dueClients.length === 0) {
         console.log(`Nenhum cliente com vencimento ${dueDate} para ${user.uid}.`);
