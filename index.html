@@ -958,6 +958,7 @@ $('navLogout').onclick=()=>$('lockBtn').click();
 $('themeToggle').addEventListener('click',()=>{const dark=!document.body.classList.contains('dark');document.body.classList.toggle('dark',dark);$('themeToggle').textContent=dark?'☀️':'🌙';if(currentUser){try{localStorage.setItem('nathan-theme-'+currentUser.uid,dark?'dark':'light')}catch(e){}}});
 function loadTheme(){let dark=false;try{dark=!!currentUser&&localStorage.getItem('nathan-theme-'+currentUser.uid)==='dark'}catch(e){}document.body.classList.toggle('dark',dark);$('themeToggle').textContent=dark?'☀️':'🌙'}
 function renderAll(){renderSummary();renderFinancialChart();renderClients();renderPayments();renderCosts();renderPlan()}
+if($('financeMonth'))$('financeMonth').value=today().slice(0,7);
 $('financeMonth')?.addEventListener('change',()=>{renderPayments();renderCosts()});
 function renderFinancialChart(){
  const host=$('financialTrendChart');if(!host)return;
