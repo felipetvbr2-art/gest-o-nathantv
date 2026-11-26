@@ -473,7 +473,7 @@ body.login-screen #auth .auth-forgot{font-size:11px;padding:10px 6px 8px}
 <div class="finance-metric balance"><span>SALDO DO MÊS</span><strong id="financeBalance">R$ 0,00</strong><small>Recebido menos custos</small></div>
 </div>
 <div class="card finance-section" id="paymentsFinanceSection"><div class="finance-section-head"><div><span class="finance-kicker">ENTRADAS</span><h2>Pagamentos</h2></div><div class="finance-head-actions"><span class="finance-section-icon">↙</span><button type="button" class="finance-collapse-btn" id="togglePaymentsSection" aria-expanded="false" aria-controls="paymentSectionContent"><span>＋</span> Abrir</button></div></div><div id="paymentSectionContent" class="hidden"><p class="muted">Recebimentos registrados nos cadastros e renovações.</p><div id="paymentList"></div></div></div>
-<div class="card finance-section"><div class="finance-section-head"><div><span class="finance-kicker">SAÍDAS</span><h2>Despesas e renovações</h2></div><span class="finance-section-icon">↗</span></div><p class="muted">Custos registrados na sua conta.</p><div id="costList"></div></div>
+<div class="card finance-section" id="costsFinanceSection"><div class="finance-section-head"><div><span class="finance-kicker">SAÍDAS</span><h2>Despesas e renovações</h2></div><div class="finance-head-actions"><span class="finance-section-icon">↗</span><button type="button" class="finance-collapse-btn" id="toggleCostsSection" aria-expanded="true" aria-controls="costSectionContent"><span>−</span> Fechar</button></div></div><div id="costSectionContent"><p class="muted">Custos registrados na sua conta.</p><div id="costList"></div></div></div>
 </section>
 <section id="tab-backup" class="hidden">
 <div class="card">
@@ -961,6 +961,7 @@ function renderAll(){renderSummary();renderFinancialChart();renderClients();rend
 if($('financeMonth'))$('financeMonth').value=today().slice(0,7);
 $('financeMonth')?.addEventListener('change',()=>{renderPayments();renderCosts()});
 $('togglePaymentsSection')?.addEventListener('click',()=>{const content=$('paymentSectionContent');const button=$('togglePaymentsSection');const open=content.classList.contains('hidden');content.classList.toggle('hidden',!open);button.setAttribute('aria-expanded',String(open));button.innerHTML=open?'<span>−</span> Fechar':'<span>＋</span> Abrir'});
+$('toggleCostsSection')?.addEventListener('click',()=>{const content=$('costSectionContent');const button=$('toggleCostsSection');const open=content.classList.contains('hidden');content.classList.toggle('hidden',!open);button.setAttribute('aria-expanded',String(open));button.innerHTML=open?'<span>−</span> Fechar':'<span>＋</span> Abrir'});
 function renderFinancialChart(){
  const host=$('financialTrendChart');if(!host)return;
  const now=new Date();const rows=[];
