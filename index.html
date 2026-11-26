@@ -555,8 +555,8 @@ let db={clients:[],payments:[],costs:[]}, currentUser=null, cloudRef=null, profi
 const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
 $('cDueDate').value=today();
 const money=n=>Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-const parseMoneyInput=value=>{const digits=String(value??'').replace(/\\D/g,'');return digits?Number(digits)/100:0};
-const formatMoneyInput=value=>{const digits=String(value??'').replace(/\\D/g,'');if(!digits)return '';return (Number(digits)/100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})};
+const parseMoneyInput=value=>{const digits=String(value??'').replace(/\D/g,'');return digits?Number(digits)/100:0};
+const formatMoneyInput=value=>{const digits=String(value??'').replace(/\D/g,'');if(!digits)return '';return (Number(digits)/100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})};
 ['cAmountCharged','cPackageCost'].forEach(id=>$(id)?.addEventListener('input',e=>{const el=e.currentTarget;const formatted=formatMoneyInput(el.value);el.value=formatted;updatePackageSummary();}));
 const monthKey=d=>(d||'').slice(0,7);
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
