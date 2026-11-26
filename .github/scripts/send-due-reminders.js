@@ -21,22 +21,25 @@ async function main() {
   if (!raw) throw new Error("Configure o segredo FIREBASE_SERVICE_ACCOUNT_JSON no GitHub.");
   const serviceAccount = JSON.parse(raw);
   admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+  console.log(`Projeto Firebase configurado: ${serviceAccount.project_id || "não informado"}`);
 
   const db = admin.firestore();
   const messaging = admin.messaging();
   const dueDate = tomorrowInSaoPaulo();
   const users = await db.collection("usuarios").get();
+  console.log(`Usuários encontrados na coleção usuarios: ${users.size}`);
   let sent = 0;
   let skipped = 0;
 
   for (const userDoc of users.docs) {
     const profileRef = userDoc.ref.collection("perfil").doc("principal");
     const profileSnap = await profileRef.get();
-    if (!profileSnap.exists) { skipped++; continue; }
+    if (!profileSnap.exists) { console.log("Ignorado: perfil principal não encontrado."); skipped++; continue; }
 
     const profile = profileSnap.data() || {};
     const token = profile.fcmToken;
     if (!token || profile.notificationsEnabled !== true || profile.lastDueReminderDate === dueDate) {
+      console.log(`Ignorado: token=${Boolean(token)}, notificaçõesAtivadas=${profile.notificationsEnabled === true}, jáEnviadoHoje=${profile.lastDueReminderDate === dueDate}.`);
       skipped++;
       continue;
     }
@@ -47,7 +50,8 @@ async function main() {
       return typeof client.dueDate === "string" && client.dueDate === dueDate;
     });
 
-    if (dueClients.length === 0) { skipped++; continue; }
+    if (dueClients.length === 0) { console.log(`Nenhum cliente com vencimento ${dueDate} para este usuário.`); skipped++; continue; }
+    console.log(`Encontrados ${dueClients.length} cliente(s) com vencimento ${dueDate}.`);
 
     const count = dueClients.length;
     const body = count === 1
