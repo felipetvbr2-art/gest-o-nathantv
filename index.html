@@ -768,7 +768,7 @@ function openProfileMenu(){
  actions.append(
   makeAction('📷','Foto ou avatar','Escolha uma imagem para seu perfil',()=>{closeProfileMenu(backdrop);chooseAvatar()}),
   makeAction('✎','Nome de usuário','Edite como seu nome aparece',()=>{closeProfileMenu(backdrop);chooseNickname()}),
-  makeAction('🔑','Chave Pix','Cadastre a chave usada nas cobranças pelo WhatsApp',async()=>{closeProfileMenu(backdrop);await editPixKeyFromWhatsApp()}),
+  makeAction('🔑','Chave Pix','Cadastre a chave usada nas cobranças pelo WhatsApp',()=>{closeProfileMenu(backdrop);document.querySelector('[data-tab="minhaPix"]')?.click()}),
   makeAction('🔒','Alterar senha','Receba um link seguro por e-mail',async()=>{
    closeProfileMenu(backdrop);
    if(!currentUser.email){await showAppDialog('Esta conta não possui um e-mail disponível para recuperação de senha.',{title:'E-mail indisponível'});return}
