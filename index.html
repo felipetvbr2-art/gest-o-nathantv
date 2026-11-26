@@ -522,17 +522,11 @@ const money=n=>Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'B
 const monthKey=d=>(d||'').slice(0,7);
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 async function loadAccountPlan(user){
- isAdminPremium=false;accountPlan='free';
- if(!user)return;
- try{
-  const adminSnap=await withTimeout(getDoc(doc(store,'admins',user.uid)),8000,'Verificação administrativa');
-  if(adminSnap.exists()){
-   const adminData=adminSnap.data();
-   if(adminData.active===true&&adminData.role==='admin'){isAdminPremium=true;accountPlan='owner-premium'}
-  }
- }catch(error){console.warn('Não foi possível confirmar o perfil administrativo; mantendo plano Free.',error)}
+ // Todos os usuários usam o plano Free. Não consultar admins para conceder Premium.
+ isAdminPremium=false;
+ accountPlan='free';
 }
-function isPremium(){return accountPlan==='owner-premium'||accountPlan==='premium'}
+function isPremium(){return false}
 function setStatus(message,isError=false){const el=$('syncStatus');if(el){el.textContent=(isError?'● ':'● ')+message;el.style.color=isError?'#ff8585':'#8dffb7'}}
 async function migrateLegacyRecords(userId,legacyData){
   const groups=[{key:'payments',name:'pagamentos'},{key:'costs',name:'custos'}];
