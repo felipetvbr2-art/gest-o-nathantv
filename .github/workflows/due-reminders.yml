@@ -1,0 +1,30 @@
+name: Lembretes de vencimento
+
+on:
+  schedule:
+    # 08:00 no horário de Brasília (UTC-3).
+    - cron: "0 11 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  send-due-reminders:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o projeto
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Instalar Firebase Admin
+        run: npm install --no-save firebase-admin@^13.0.0
+
+      - name: Enviar notificações de vencimento
+        env:
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: node .github/scripts/send-due-reminders.js
