@@ -441,10 +441,46 @@ body.login-screen #auth .auth-forgot{font-size:11px;padding:10px 6px 8px}
 <div class="card finance-section"><div class="finance-section-head"><div><span class="finance-kicker">SAÍDAS</span><h2>Despesas e renovações</h2></div><span class="finance-section-icon">↗</span></div><p class="muted">Custos registrados na sua conta.</p><div id="costList"></div></div>
 </section>
 <section id="tab-backup" class="hidden">
-<div class="card"><h2>Backup dos dados</h2><p class="muted">O arquivo de backup contém os dados dos clientes e pagamentos. Guarde-o em local privado e não envie a terceiros.</p><button id="exportBtn" class="btn" style="width:100%">Exportar backup JSON</button>
-<div class="hr"></div><h3>Comprovantes no Google Drive</h3><p class="muted">Conecte sua conta Google para guardar os comprovantes de pagamentos e renovações em seu Drive.</p><button id="connectDriveBtn" class="btn secondary" style="width:100%">Conectar Google Drive</button><p id="driveStatus" class="muted" role="status" style="margin-top:8px">Google Drive não conectado.</p>
-<div class="hr"></div><label>Restaurar backup (.json)</label><input id="importFile" type="file" accept=".json,application/json"><button id="importBtn" class="btn secondary" style="width:100%;margin-top:10px">Restaurar backup</button><p id="backupMsg" class="muted" role="status"></p></div>
-<div class="card"><h2>Migração de clientes</h2><p class="muted">Etapa de preparação: copia os clientes da lista antiga para documentos individuais na coleção clientes. A lista original não será apagada nem modificada.</p><button id="migrateClientsBtn" class="btn secondary" type="button" style="width:100%">Conferir e preparar migração</button><p id="clientMigrationStatus" class="muted" role="status" style="margin-top:10px">Aguardando conferência. As regras do Firestore precisam permitir a coleção clientes.</p></div><div class="card"><h2>Segurança</h2><p class="muted">O acesso aos dados é controlado pelas regras do Firestore para sua conta.</p><button id="securityProbeBtn" class="btn secondary" style="width:100%">Testar proteção entre contas</button><p id="securityProbeResult" class="muted" role="status" style="margin-top:10px">Entre com a segunda conta de teste antes de executar esta verificação.</p><div class="hr"></div><button id="syncRulesDiagnosticBtn" class="btn secondary" type="button" style="width:100%">Diagnosticar sincronização (sem gravar)</button><p id="syncRulesDiagnosticResult" class="muted" role="status" style="margin-top:10px">Verifica os dados locais conforme as regras atuais. Não grava, apaga ou altera dados.</p><div class="hr"></div><button id="lockBtn" class="btn secondary" style="width:100%">Sair da conta</button></div>
+<div class="card">
+<h2>Seus backups</h2>
+<p class="muted">Guarde uma cópia dos seus dados. Assim você pode recuperá-los se trocar de celular ou precisar entrar novamente na conta.</p>
+<button id="exportBtn" class="btn" style="width:100%">⬇ Fazer backup agora</button>
+<p class="muted" style="margin-top:8px">Salve o arquivo em um lugar seguro, como no Google Drive.</p>
+<div id="backupMsg" class="muted" role="status" style="margin-top:10px"></div>
+<div class="hr"></div>
+<h3>Recuperar meus dados</h3>
+<p class="muted">Escolha um arquivo de backup que você salvou anteriormente.</p>
+<label for="importFile">Selecionar arquivo de backup</label>
+<input id="importFile" type="file" accept=".json,application/json">
+<button id="importBtn" class="btn secondary" style="width:100%;margin-top:10px">Restaurar meus dados</button>
+</div>
+<div class="card">
+<h2>Guardar comprovantes no Google Drive</h2>
+<p class="muted">Opcional: conecte sua conta Google para guardar comprovantes de pagamentos e renovações.</p>
+<button id="connectDriveBtn" class="btn secondary" style="width:100%">Conectar Google Drive</button>
+<p id="driveStatus" class="muted" role="status" style="margin-top:8px">Google Drive não conectado.</p>
+</div>
+<details class="card" style="padding:16px">
+<summary style="cursor:pointer;font-weight:700">Opções avançadas de suporte</summary>
+<p class="muted">Estas opções são usadas para manutenção e testes. Se não souber para que servem, não precisa abrir.</p>
+<div class="hr"></div>
+<h3>Preparar dados dos clientes</h3>
+<p class="muted">Ferramenta técnica de manutenção. Use somente quando receber orientação.</p>
+<button id="migrateClientsBtn" class="btn secondary" type="button" style="width:100%">Verificar dados dos clientes</button>
+<p id="clientMigrationStatus" class="muted" role="status" style="margin-top:10px">Aguardando verificação.</p>
+<div class="hr"></div>
+<h3>Testes de segurança</h3>
+<button id="securityProbeBtn" class="btn secondary" style="width:100%">Testar proteção entre contas</button>
+<p id="securityProbeResult" class="muted" role="status" style="margin-top:10px">Use somente durante testes com uma segunda conta.</p>
+<div class="hr"></div>
+<button id="syncRulesDiagnosticBtn" class="btn secondary" type="button" style="width:100%">Verificar sincronização</button>
+<p id="syncRulesDiagnosticResult" class="muted" role="status" style="margin-top:10px">Este teste não grava nem apaga dados.</p>
+</details>
+<div class="card">
+<h2>Conta</h2>
+<p class="muted">Quando terminar de usar o aplicativo, você pode sair da sua conta.</p>
+<button id="lockBtn" class="btn secondary" style="width:100%">Sair da conta</button>
+</div>
 </section>
 <section id="tab-vencimentos" class="hidden"><div class="card"><h2>Próximos vencimentos</h2><p class="muted">Clientes com vencimento nos próximos 7 dias e clientes em atraso.</p><div id="dueList"></div></div></section>
 <section id="tab-meuPlano" class="hidden"><div class="card"><h2>Meu plano</h2><p class="muted">Veja seu plano atual e acompanhe os recursos da sua conta.</p><div class="item plan-current-card" style="border-left:4px solid var(--gold)"><div class="itemtop"><div><span class="pill green" id="planStatusPill">Plano atual</span><h2 id="planCurrentName" style="margin-top:10px">Free</h2><p class="muted" id="planCurrentDescription">Gratuito • sem cobrança recorrente</p></div><strong id="planCurrentPrice" style="font-size:22px">R$ 0,00</strong></div><div class="hr"></div><div class="itemtop"><strong>Clientes cadastrados</strong><strong id="planClientCount">0 de 20</strong></div><div id="planUsageTrack" style="height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:10px"><div id="planUsageBar" style="height:100%;width:0%;background:var(--gold);border-radius:99px"></div></div><p class="muted" id="planUsageText" style="margin-top:8px">Você pode cadastrar até 20 clientes no plano Free.</p></div><div class="item" id="premiumOfferCard"><span class="pill amber">Premium</span><h2 style="margin-top:10px">Mais recursos para sua gestão</h2><strong style="font-size:25px">R$ 9,90 <span class="muted">/ mês</span></strong><ul><li>Clientes ilimitados</li><li>Relatórios avançados</li><li>Histórico completo</li><li>Recursos avançados de backup</li></ul><p class="muted" id="premiumOfferDescription">Assinatura mensal. A cobrança pela Google Play será ativada quando a integração de pagamentos estiver pronta.</p><button class="btn" id="premiumInfoBtn" type="button" style="width:100%">Conhecer o Premium</button></div></div></section>
