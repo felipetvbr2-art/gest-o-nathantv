@@ -437,7 +437,7 @@ body.login-screen #auth .auth-forgot{font-size:11px;padding:10px 6px 8px}
 <div class="metric"><small>Em aberto / vencido</small><strong id="mPending">R$ 0,00</strong></div>
 </div>
 <div class="card" style="margin-top:12px"><h2>Vencimentos</h2><div id="dueSummary" class="muted">Nenhum cliente cadastrado.</div></div>
-<div class="card"><h2>Resultado estimado do mês</h2><div class="grid"><div class="metric"><small>Recebido</small><strong id="mProfitIn">R$ 0,00</strong></div><div class="metric"><small>Custos e renovações</small><strong id="mCreditCost">R$ 0,00</strong></div><div class="metric"><small>Saldo estimado</small><strong id="mProfit">R$ 0,00</strong></div></div><p class="muted">Cálculo simples: pagamentos recebidos no mês menos despesas registradas no mês.</p></div>
+<div class="card"><h2>Resultado estimado do mês</h2><div class="grid"><div class="metric"><small>Recebido</small><strong id="mProfitIn">R$ 0,00</strong></div><div class="metric"><small>Custos registrados</small><strong id="mCreditCost">R$ 0,00</strong></div><div class="metric"><small>Saldo estimado</small><strong id="mProfit">R$ 0,00</strong></div></div><p class="muted">Cálculo simples: pagamentos recebidos no mês menos despesas registradas no mês.</p></div>
 <div class="card finance-trend-card"><div class="finance-trend-heading"><div><span class="finance-kicker">ACOMPANHAMENTO</span><h2>Evolução financeira</h2><p class="muted">Recebimentos e custos dos últimos 6 meses.</p></div><span class="finance-trend-icon" aria-hidden="true">↗</span></div><div class="finance-legend"><span><i class="legend-dot received"></i>Recebido</span><span><i class="legend-dot spent"></i>Custos</span></div><div id="financialTrendChart" class="finance-chart" role="img" aria-label="Gráfico de recebimentos e custos dos últimos seis meses"></div><div class="finance-chart-foot" id="financialTrendSummary"></div></div>
 </section>
 <section id="tab-clientes" class="hidden">
@@ -613,12 +613,14 @@ const formatMoneyInput=value=>{const digits=String(value??'').replace(/\D/g,'');
 ['cAmountCharged','cPackageCost'].forEach(id=>$(id)?.addEventListener('input',e=>{const el=e.currentTarget;const formatted=formatMoneyInput(el.value);el.value=formatted;updatePackageSummary();}));
 const monthKey=d=>(d||'').slice(0,7);
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const OWNER_EMAIL='felipetvbr2@gmail.com';
 async function loadAccountPlan(user){
- // Todos os usuários usam o plano Free. Não consultar admins para conceder Premium.
- isAdminPremium=false;
- accountPlan='free';
+ // A conta proprietária recebe Premium vitalício. As demais contas permanecem no Free
+ // até que a assinatura Premium seja ativada pela integração oficial de pagamentos.
+ isAdminPremium=String(user?.email||'').trim().toLowerCase()===OWNER_EMAIL;
+ accountPlan=isAdminPremium?'premium':'free';
 }
-function isPremium(){return false}
+function isPremium(){return isAdminPremium||accountPlan==='premium'}
 function setStatus(message,isError=false){const el=$('syncStatus');if(el){el.textContent=(isError?'● ':'● ')+message;el.style.color=isError?'#ff8585':'#8dffb7'}}
 async function migrateLegacyRecords(userId,legacyData){
   const groups=[{key:'payments',name:'pagamentos'},{key:'costs',name:'custos'}];
