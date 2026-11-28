@@ -954,42 +954,50 @@ $('savePixKeyBtn').onclick=async()=>{const type=$('pixKeyType').value;const key=
 $('syncRulesDiagnosticBtn').onclick=async()=>{
  const output=$('syncRulesDiagnosticResult');
  if(!currentUser){output.textContent='Entre na conta para executar o diagnóstico.';return}
- output.textContent='Validando os dados locais e testando as permissões de leitura do Firebase. Nenhum dado será gravado...';
+ const uid=currentUser.uid;
+ output.textContent='Validando os dados e testando gravações temporárias no Firebase...';
  output.style.color='';
+ const results=[];
+ const probeId='__gntv_probe_'+Date.now();
+ async function probe(name,ref,data){
+  let created=false;
+  try{
+   const createBatch=writeBatch(store);
+   createBatch.set(ref,data);
+   await createBatch.commit();
+   created=true;
+   const deleteBatch=writeBatch(store);
+   deleteBatch.delete(ref);
+   await deleteBatch.commit();
+   results.push(name+': gravação e remoção permitidas');
+  }catch(error){
+   results.push(name+': FALHOU ('+(error?.code||error?.message||'erro')+')'+(created?' — o registro temporário foi criado; a remoção falhou.':''));
+  }
+ }
  try{
   const issues=diagnoseSyncAgainstRules();
   if(issues.length){
    output.textContent='Validação local: '+issues.length+' possível(is) bloqueio(s): '+issues.slice(0,6).join(' • ')+(issues.length>6?' • ...':'');
-   output.style.color='var(--danger,#d9534f)';
-   return;
+   output.style.color='var(--danger,#d9534f)';return;
   }
-  const uid=currentUser.uid;
-  const results=[];
-  let principalKeys=[];
+  const principalData={clients:db.clients,payments:db.payments,costs:db.costs};
   try{
-   const principalSnap=await getDoc(cloudRef);
-   results.push('Documento principal: leitura permitida');
-   if(principalSnap.exists()){
-    principalKeys=Object.keys(principalSnap.data()||{});
-    const allowed=['clients','payments','costs','updatedAt','createdAt'];
-    const extra=principalKeys.filter(key=>!allowed.includes(key));
-    results.push(extra.length?'Campos extras no documento principal: '+extra.join(', '):'Campos do documento principal: compatíveis com a lista permitida');
-   }else results.push('Documento principal: ainda não existe');
-  }catch(error){results.push('Documento principal: BLOQUEADA ('+(error?.code||error?.message||'erro')+')')}
-  const tests=[
-   ['Coleção de clientes',()=>getDocs(collection(store,'usuarios',uid,'clientes'))],
-   ['Subcoleção de pagamentos',()=>getDocs(collection(store,'usuarios',uid,'dados','principal','pagamentos'))],
-   ['Subcoleção de custos',()=>getDocs(collection(store,'usuarios',uid,'dados','principal','custos'))]
-  ];
-  for(const [name,run] of tests){
-   try{await run();results.push(name+': leitura permitida')}
-   catch(error){results.push(name+': BLOQUEADA ('+(error?.code||error?.message||'erro')+')')}
-  }
-  const blocked=results.filter(x=>x.includes('BLOQUEADA'));
-  const extras=results.some(x=>x.startsWith('Campos extras no documento principal:'));
-  output.textContent='Validação local: OK. Diagnóstico do Firebase: '+results.join(' • ')+(blocked.length?' • Há uma leitura bloqueada; precisamos corrigir essa permissão.':extras?' • Foram encontrados campos extras que podem estar causando a rejeição da gravação.':' • Todas as leituras passaram. Próximo passo: testar a gravação de forma controlada, sem alterar os clientes reais.');
-  output.style.color=(blocked.length||extras)?'var(--danger,#d9534f)':'';
- }catch(error){output.textContent='Não foi possível concluir o diagnóstico: '+(error?.code||error?.message||error);output.style.color='var(--danger,#d9534f)'}
+   const b=writeBatch(store);b.set(cloudRef,principalData,{merge:true});await b.commit();
+   results.push('Documento principal: gravação permitida');
+  }catch(error){results.push('Documento principal: FALHOU ('+(error?.code||error?.message||'erro')+')')}
+  const clientRef=doc(store,'usuarios',uid,'clientes',probeId);
+  await probe('Criação de cliente',clientRef,{id:probeId,name:'Teste técnico temporário',phone:'00000000000',price:1,dueDate:today()});
+  const paymentRef=doc(store,'usuarios',uid,'dados','principal','pagamentos',probeId);
+  await probe('Criação de pagamento',paymentRef,{id:probeId,amount:1,date:today(),desc:'Teste técnico temporário'});
+  const costRef=doc(store,'usuarios',uid,'dados','principal','custos',probeId);
+  await probe('Criação de custo',costRef,{id:probeId,amount:1,date:today(),desc:'Teste técnico temporário'});
+  const failed=results.filter(x=>x.includes('FALHOU'));
+  output.textContent='Validação local: OK. Testes controlados: '+results.join(' • ')+(failed.length?' • Envie este resultado para identificarmos a regra que está bloqueando.':' • Todas as gravações e remoções de teste passaram. O bloqueio pode estar nos dados específicos do lote real.');
+  output.style.color=failed.length?'var(--danger,#d9534f)':'';
+ }catch(error){
+  output.textContent='Não foi possível concluir o teste: '+(error?.code||error?.message||error);
+  output.style.color='var(--danger,#d9534f)';
+ }
 };
 $('premiumInfoBtn').onclick=()=>showAppDialog('O Premium mensal custa R$ 9,90. A assinatura pela Google Play ainda está em preparação; nenhuma cobrança será feita por este botão.',{title:'Assinatura Premium em preparação',okText:'Entendi'});
 $('bottomNewClient').onclick=()=>{document.querySelector('[data-tab="clientes"]').click();closeClientForm();openClientForm('Cadastrar cliente')};
