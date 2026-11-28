@@ -964,20 +964,31 @@ $('syncRulesDiagnosticBtn').onclick=async()=>{
    return;
   }
   const uid=currentUser.uid;
+  const results=[];
+  let principalKeys=[];
+  try{
+   const principalSnap=await getDoc(cloudRef);
+   results.push('Documento principal: leitura permitida');
+   if(principalSnap.exists()){
+    principalKeys=Object.keys(principalSnap.data()||{});
+    const allowed=['clients','payments','costs','updatedAt','createdAt'];
+    const extra=principalKeys.filter(key=>!allowed.includes(key));
+    results.push(extra.length?'Campos extras no documento principal: '+extra.join(', '):'Campos do documento principal: compatíveis com a lista permitida');
+   }else results.push('Documento principal: ainda não existe');
+  }catch(error){results.push('Documento principal: BLOQUEADA ('+(error?.code||error?.message||'erro')+')')}
   const tests=[
-   ['Documento principal',()=>getDoc(cloudRef)],
    ['Coleção de clientes',()=>getDocs(collection(store,'usuarios',uid,'clientes'))],
    ['Subcoleção de pagamentos',()=>getDocs(collection(store,'usuarios',uid,'dados','principal','pagamentos'))],
    ['Subcoleção de custos',()=>getDocs(collection(store,'usuarios',uid,'dados','principal','custos'))]
   ];
-  const results=[];
   for(const [name,run] of tests){
    try{await run();results.push(name+': leitura permitida')}
    catch(error){results.push(name+': BLOQUEADA ('+(error?.code||error?.message||'erro')+')')}
   }
   const blocked=results.filter(x=>x.includes('BLOQUEADA'));
-  output.textContent='Validação local: OK. Testes de leitura no servidor: '+results.join(' • ')+(blocked.length?' • Próximo passo: corrigir a permissão de leitura indicada.':' • Todas as leituras foram permitidas. A falha restante está provavelmente na autorização de gravação do lote; ainda não foi feito nenhum teste de gravação.');
-  output.style.color=blocked.length?'var(--danger,#d9534f)':'';
+  const extras=results.some(x=>x.startsWith('Campos extras no documento principal:'));
+  output.textContent='Validação local: OK. Diagnóstico do Firebase: '+results.join(' • ')+(blocked.length?' • Há uma leitura bloqueada; precisamos corrigir essa permissão.':extras?' • Foram encontrados campos extras que podem estar causando a rejeição da gravação.':' • Todas as leituras passaram. Próximo passo: testar a gravação de forma controlada, sem alterar os clientes reais.');
+  output.style.color=(blocked.length||extras)?'var(--danger,#d9534f)':'';
  }catch(error){output.textContent='Não foi possível concluir o diagnóstico: '+(error?.code||error?.message||error);output.style.color='var(--danger,#d9534f)'}
 };
 $('premiumInfoBtn').onclick=()=>showAppDialog('O Premium mensal custa R$ 9,90. A assinatura pela Google Play ainda está em preparação; nenhuma cobrança será feita por este botão.',{title:'Assinatura Premium em preparação',okText:'Entendi'});
