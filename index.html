@@ -954,49 +954,31 @@ $('savePixKeyBtn').onclick=async()=>{const type=$('pixKeyType').value;const key=
 $('syncRulesDiagnosticBtn').onclick=async()=>{
  const output=$('syncRulesDiagnosticResult');
  if(!currentUser){output.textContent='Entre na conta para executar o diagnóstico.';return}
- const uid=currentUser.uid;
- output.textContent='Validando os dados e testando gravações temporárias no Firebase...';
+ output.textContent='Conferindo os dados e reproduzindo a sincronização conjunta...';
  output.style.color='';
- const results=[];
- const probeId='__gntv_probe_'+Date.now();
- async function probe(name,ref,data){
-  let created=false;
-  try{
-   const createBatch=writeBatch(store);
-   createBatch.set(ref,data);
-   await createBatch.commit();
-   created=true;
-   const deleteBatch=writeBatch(store);
-   deleteBatch.delete(ref);
-   await deleteBatch.commit();
-   results.push(name+': gravação e remoção permitidas');
-  }catch(error){
-   results.push(name+': FALHOU ('+(error?.code||error?.message||'erro')+')'+(created?' — o registro temporário foi criado; a remoção falhou.':''));
-  }
- }
  try{
   const issues=diagnoseSyncAgainstRules();
   if(issues.length){
-   output.textContent='Validação local: '+issues.length+' possível(is) bloqueio(s): '+issues.slice(0,6).join(' • ')+(issues.length>6?' • ...':'');
+   output.textContent='Validação local: '+issues.length+' possível(is) bloqueio(s): '+issues.slice(0,8).join(' • ')+(issues.length>8?' • ...':'');
    output.style.color='var(--danger,#d9534f)';return;
   }
-  const principalData={clients:db.clients,payments:db.payments,costs:db.costs};
-  try{
-   const b=writeBatch(store);b.set(cloudRef,principalData,{merge:true});await b.commit();
-   results.push('Documento principal: gravação permitida');
-  }catch(error){results.push('Documento principal: FALHOU ('+(error?.code||error?.message||'erro')+')')}
-  const clientRef=doc(store,'usuarios',uid,'clientes',probeId);
-  await probe('Criação de cliente',clientRef,{id:probeId,name:'Teste técnico temporário',phone:'00000000000',price:1,dueDate:today()});
-  const paymentRef=doc(store,'usuarios',uid,'dados','principal','pagamentos',probeId);
-  await probe('Criação de pagamento',paymentRef,{id:probeId,amount:1,date:today(),desc:'Teste técnico temporário'});
-  const costRef=doc(store,'usuarios',uid,'dados','principal','custos',probeId);
-  await probe('Criação de custo',costRef,{id:probeId,amount:1,date:today(),desc:'Teste técnico temporário'});
-  const failed=results.filter(x=>x.includes('FALHOU'));
-  output.textContent='Validação local: OK. Testes controlados: '+results.join(' • ')+(failed.length?' • Envie este resultado para identificarmos a regra que está bloqueando.':' • Todas as gravações e remoções de teste passaram. O bloqueio pode estar nos dados específicos do lote real.');
-  output.style.color=failed.length?'var(--danger,#d9534f)':'';
+  const target=collection(store,'usuarios',currentUser.uid,'clientes');
+  const existing=await getDocs(target);
+  const existingIds=new Set(existing.docs.map(item=>item.id));
+  const batch=writeBatch(store);
+  const financialPlan=await prepareFinancialChanges(batch);
+  batch.set(cloudRef,{clients:db.clients,payments:db.payments,costs:db.costs},{merge:true});
+  for(const client of db.clients)batch.set(doc(target,client.id),client);
+  const operations=1+db.clients.length+financialPlan.operationCount;
+  if(operations>450)throw new Error('A sincronização teria '+operations+' operações; limite de segurança: 450.');
+  await batch.commit();
+  output.textContent='Sincronização conjunta: PERMITIDA. Documento principal, '+db.clients.length+' cliente(s), '+financialPlan.checks.reduce((n,g)=>n+g.prepared.length,0)+' registro(s) financeiro(s) foram gravados no mesmo lote. Nenhum registro foi excluído. '+(existingIds.size!==db.clients.length?'Há diferença entre a quantidade de clientes na nuvem e no aplicativo; ela será analisada separadamente.':'');
+  output.style.color='var(--success,#16a34a)';
+  setStatus('Sincronização conjunta conferida; dados existentes foram preservados.');
  }catch(error){
-  output.textContent='Não foi possível concluir o teste: '+(error?.code||error?.message||error);
+  output.textContent='Sincronização conjunta: FALHOU. Código: '+(error?.code||'sem código')+'. Detalhe: '+String(error?.message||error).slice(0,700)+'. Nenhuma exclusão foi solicitada neste teste.';
   output.style.color='var(--danger,#d9534f)';
+  console.error('Diagnóstico de lote conjunto:',error);
  }
 };
 $('premiumInfoBtn').onclick=()=>showAppDialog('O Premium mensal custa R$ 9,90. A assinatura pela Google Play ainda está em preparação; nenhuma cobrança será feita por este botão.',{title:'Assinatura Premium em preparação',okText:'Entendi'});
