@@ -982,7 +982,7 @@ $('syncRulesDiagnosticBtn').onclick=async()=>{
   const existingIds=new Set(existing.docs.map(item=>item.id));
   const batch=writeBatch(store);
   const financialPlan=await prepareFinancialChanges(batch);
-  batch.set(cloudRef,{clients:db.clients,payments:db.payments,costs:db.costs},{merge:true});
+  batch.set(cloudRef,{clients:db.clients,payments:db.payments,costs:db.costs,updatedAt:serverTimestamp()},{merge:true});
   for(const client of db.clients)batch.set(doc(target,client.id),client);
   const operations=1+db.clients.length+financialPlan.operationCount;
   if(operations>450)throw new Error('A sincronização teria '+operations+' operações; limite de segurança: 450.');
